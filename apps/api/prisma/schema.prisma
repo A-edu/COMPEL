@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Entity {
+  id              String   @id @default(cuid())
+  name            String   @unique
+  slug            String   @unique
+  dataOfficeEmail String
+  createdAt       DateTime @default(now())
+
+  users               User[]
+  requestsAsRequester DataSharingRequest[] @relation("RequestingEntity")
+  requestsAsProvider  DataSharingRequest[] @relation("ProvidingEntity")
+}
+
+enum UserRole {
+  DPO
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  entityId  String
+  entity    Entity   @relation(fields: [entityId], references: [id])
+  isActive  Boolean  @default(true)
+  role      UserRole @default(DPO)
+  createdAt DateTime @default(now())
+
+  otpChallenges     OtpChallenge[]
+  sessions          Session[]
+  authEvents        AuthEvent[]
+  submittedRequests DataSharingRequest[] @relation("SubmittedBy")
+  uploadedDocuments Document[]
+  providerResponses ProviderResponse[]
+}
+
+model OtpChallenge {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  codeHash   String
+  expiresAt  DateTime
+  attempts   Int       @default(0)
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  tokenHash  String   @unique
+  lastSeenAt DateTime
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+enum AuthEventType {
+  OTP_REQUESTED
+  LOGIN_SUCCEEDED
+  LOGIN_FAILED
+  LOGOUT
+  SESSION_EXPIRED
+}
+
+model AuthEvent {
+  id        String        @id @default(cuid())
+  userId    String?
+  user      User?         @relation(fields: [userId], references: [id])
+  email     String
+  type      AuthEventType
+  ip        String?
+  createdAt DateTime      @default(now())
+}
+
+enum RequestStatus {
+  AWAITING_PROVIDER_RESPONSE
+  PROVIDER_RESPONDED
+}
+
+model DataSharingRequest {
+  id                 String        @id @default(cuid())
+  reference          String        @unique
+  title              String
+  requestingEntityId String
+  requestingEntity   Entity        @relation("RequestingEntity", fields: [requestingEntityId], references: [id])
+  providingEntityId  String
+  providingEntity    Entity        @relation("ProvidingEntity", fields: [providingEntityId], references: [id])
+  submittedById      String
+  submittedBy        User          @relation("SubmittedBy", fields: [submittedById], references: [id])
+  status             RequestStatus @default(AWAITING_PROVIDER_RESPONSE)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  documents        Document[]
+  providerResponse ProviderResponse?
+}
+
+enum DocumentKind {
+  REQUEST_FORM
+  SUPPORTING
+  ROPA
+}
+
+model Document {
+  id           String             @id @default(cuid())
+  requestId    String
+  request      DataSharingRequest @relation(fields: [requestId], references: [id])
+  kind         DocumentKind
+  storageKey   String
+  originalName String
+  mimeType     String
+  sizeBytes    Int
+  uploadedById String
+  uploadedBy   User               @relation(fields: [uploadedById], references: [id])
+  createdAt    DateTime           @default(now())
+
+  providerResponse ProviderResponse?
+}
+
+enum Position {
+  ENDORSED
+  OBJECTED
+}
+
+model ProviderResponse {
+  id              String             @id @default(cuid())
+  requestId       String             @unique
+  request         DataSharingRequest @relation(fields: [requestId], references: [id])
+  ropaDocumentId  String             @unique
+  ropaDocument    Document           @relation(fields: [ropaDocumentId], references: [id])
+  position        Position
+  objectionReason String?
+  respondedById   String
+  respondedBy     User               @relation(fields: [respondedById], references: [id])
+  createdAt       DateTime           @default(now())
+}
