@@ -4,7 +4,6 @@
 
 COMPEL is a graduation project (King Saud University, Software Engineering). A requesting entity submits a data-sharing request to a providing entity; the providing entity responds with its Record of Processing Activities (RoPA) entry and a position on the request. Later sprints add AI agents that extract fields from the submitted documents and check them against the Personal Data Protection Law (PDPL).
 
-> **This is a demo, not a production system.** All entity addresses are on the reserved `.example` domain, all email goes to a fake test inbox, and all seeded documents are synthetic. Nothing in this app contacts real people or real government entities.
 
 ## Status
 
