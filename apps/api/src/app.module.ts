@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { HealthController } from './health/health.controller.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { StorageModule } from './storage/storage.module.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -14,6 +15,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
       envFilePath: join(__dirname, '..', '..', '..', '.env'),
     }),
     PrismaModule,
+    StorageModule.register(),
   ],
   controllers: [HealthController],
   providers: [],

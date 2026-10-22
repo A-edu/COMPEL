@@ -1,6 +1,7 @@
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { tmpdir } from 'node:os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -26,4 +27,8 @@ export default function setup() {
   });
 
   process.env.DATABASE_URL = testUrl;
+
+  // e2e tests must never touch Replit App Storage (AGENTS.md -> Testing).
+  process.env.STORAGE_DRIVER = 'local';
+  process.env.UPLOAD_DIR = join(tmpdir(), 'compel-e2e-uploads');
 }
