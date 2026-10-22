@@ -119,7 +119,7 @@ API_PORT=3001
 
 ## Commands
 
-All scripts below exist from the §5.1 scaffold. `db:migrate`/`db:deploy`/`db:seed`/`db:reset` are wired to `apps/api`'s Prisma CLI scripts but only become functional once §5.2 (schema) and §5.4 (seed script) are built.
+All scripts below exist and are functional as of §5.4. `db:seed` requires a built `apps/api/dist` (it runs the compiled `dist/seed/seed.js`, not the `.ts` source directly — NestJS's decorator syntax isn't supported by Node's native TypeScript stripping) and refuses to run unless `DEMO_MODE=true`.
 
 - `npm run dev`: start API and web together, in development mode
 - `npm run build`: build both apps

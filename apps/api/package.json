@@ -20,7 +20,7 @@
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
-    "db:seed": "node --experimental-strip-types prisma/seed/seed.ts",
+    "db:seed": "node dist/seed/seed.js",
     "db:reset": "prisma migrate reset"
   },
   "dependencies": {
