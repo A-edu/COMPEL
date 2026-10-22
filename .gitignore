@@ -1,3 +1,28 @@
 
 .claude-home/
 /claude
+.claude/
+
+# dependencies
+node_modules/
+
+# env
+.env
+.env.*.local
+
+# build output
+apps/api/dist/
+apps/web/.next/
+apps/web/out/
+*.tsbuildinfo
+apps/web/next-env.d.ts
+
+# uploads (local storage driver, tests)
+uploads/
+
+# test coverage
+coverage/
+
+# misc
+.DS_Store
+*.log

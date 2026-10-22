@@ -49,7 +49,7 @@ Use these terms exactly, in code and UI.
   - `local`: writes to `UPLOAD_DIR` (gitignored). Used by tests only.
   - Store files under generated keys, never the user's filename. Accept PDF and DOCX only, checked by content type and extension, up to `MAX_UPLOAD_MB`.
 - **API modules:** `auth`, `entities`, `requests`, `documents`, `mail`, `storage`, `prisma`. Controllers stay thin; logic lives in services. Validate every request body with DTOs.
-- **NestJS compiles to CommonJS.** Some newer npm packages are ESM-only and fail with `ERR_REQUIRE_ESM`. If that happens, stop and report it instead of rewriting the build setup.
+- **NestJS runs as ESM.** `@nestjs/core`, `@nestjs/common`, `@nestjs/platform-express`, `@nestjs/testing` and `@nestjs/config` ship ESM-only from Nest 12 onward, so `apps/api/package.json` sets `"type": "module"`: relative imports use explicit `.js` extensions, `main.ts` uses a top-level `await bootstrap()`, and tests run on Vitest rather than Jest because of this (see Testing). If a *different* dependency turns out to be CommonJS-only and breaks under ESM, stop and report it instead of rewriting the build setup.
 
 ## Authentication invariants
 
@@ -119,7 +119,7 @@ API_PORT=3001
 
 ## Commands
 
-Planned. The scaffold must create root scripts with exactly these names, then this section must be updated to say they exist.
+All scripts below exist from the §5.1 scaffold. `db:migrate`/`db:deploy`/`db:seed`/`db:reset` are wired to `apps/api`'s Prisma CLI scripts but only become functional once §5.2 (schema) and §5.4 (seed script) are built.
 
 - `npm run dev`: start API and web together, in development mode
 - `npm run build`: build both apps
@@ -133,7 +133,7 @@ Planned. The scaffold must create root scripts with exactly these names, then th
 
 ## Testing
 
-- API: Jest (Nest default) for services; Supertest e2e for endpoints against a separate test database.
+- API: Vitest (Nest default, since Nest 12's core packages are ESM-only — see Architecture) for services; Supertest e2e for endpoints against a separate test database.
 - Each spec section lists the tests that define "done" for it. A section is not done until they pass.
 - E2e tests use `TEST_DATABASE_URL` (a separate Postgres schema in the development database) and the `local` storage driver. They must refuse to run if `TEST_DATABASE_URL` equals `DATABASE_URL`, and never touch the production database or App Storage.
 - Tests read OTP codes from a mocked mail transport.

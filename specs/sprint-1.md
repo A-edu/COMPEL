@@ -6,7 +6,7 @@ What to build in Sprint 1. Standing rules (access rules, auth invariants, email 
 
 ## Progress
 
-- [ ] §5.1 Monorepo scaffold
+- [x] §5.1 Monorepo scaffold
 - [ ] §5.2 Database and Prisma schema
 - [ ] §5.3 File storage
 - [ ] §5.4 Seed script

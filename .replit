@@ -1,6 +1,16 @@
 modules = ["nodejs-24"]
+run = "npm run dev"
+
 [nix]
 channel = "stable-25_05"
 
 [agent]
 expertMode = true
+
+[[ports]]
+localPort = 3000
+externalPort = 80
+
+[[ports]]
+localPort = 3999
+externalPort = 3000
