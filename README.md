@@ -4,7 +4,7 @@
 
 COMPEL is a graduation project (King Saud University, Software Engineering). A requesting entity submits a data-sharing request to a providing entity; the providing entity responds with its Record of Processing Activities (RoPA) entry and a position on the request. Later sprints add AI agents that extract fields from the submitted documents and check them against the Personal Data Protection Law (PDPL).
 
-> **This is a demo, not a production system.** All entity addresses are on the reserved `.example` domain, all email goes to a fake test inbox, and all seeded documents are synthetic. Nothing in this app contacts real people or real government entities.
+> **This is a demo, not a production system.** All entity addresses are on the reserved `.test` domain, all email goes to a fake test inbox, and all seeded documents are synthetic. Nothing in this app contacts real people or real government entities.
 
 ## Status
 
@@ -73,6 +73,8 @@ CLAUDE.md       Claude Code entry point (imports AGENTS.md)
    - `OTP_HASH_SECRET` — any long random string
    - `SMTP_USER` and `SMTP_PASS` — the team's shared Ethereal credentials
 
+   - `TEST_DATABASE_URL` — the same connection string with a separate `schema=` parameter, for tests
+
    On Replit, put these in **Secrets** instead of a `.env` file.
 3. **Create the database and demo data**
    ```bash
@@ -101,13 +103,19 @@ To act as two entities at once, use a regular browser window and a private one, 
 
 | Command | What it does |
 |---|---|
-| `npm run dev` | Start the API and web app together |
+| `npm run dev` | Start the API and web app together, in development mode |
 | `npm run build` | Build both apps |
+| `npm start` | Start the built apps (used by the published app) |
 | `npm run lint` | Lint both apps |
 | `npm test` | Unit and API end-to-end tests |
-| `npm run db:migrate` | Apply Prisma migrations |
-| `npm run db:seed` | Load entities, DPO accounts and demo requests (refuses to run in production) |
-| `npm run db:reset` | **Destructive:** drop and recreate the database |
+| `npm run db:migrate` | Create and apply Prisma migrations (workspace) |
+| `npm run db:deploy` | Apply existing migrations (published app) |
+| `npm run db:seed` | Load entities, DPO accounts and demo requests; safe to re-run (requires `DEMO_MODE=true`) |
+| `npm run db:reset` | **Destructive:** drop and recreate the workspace database |
+
+## Published app
+
+The published Replit app is the official demo and is submitted with this repository at the end of each sprint. It has its own production database and stores files in Replit App Storage. On every start it applies migrations and re-runs the seed, which never deletes data. Deployment settings are in §5.6 of the spec.
 
 ## Contributing
 
