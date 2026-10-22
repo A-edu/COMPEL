@@ -1,96 +1,119 @@
 # COMPEL
 
-**Multi-agent PDPL compliance verification for inter-governmental data-sharing requests**
+**PDPL compliance verification for data-sharing between Saudi government entities.**
 
-SWE 444 Software Construction Laboratory, Section 94390
-King Saud University, College of Computer and Information Sciences, Department of Software Engineering
-Instructor: Dr. Abdulaziz Alrashidi | Fall 2026
+COMPEL is a graduation project (King Saud University, Software Engineering). A requesting entity submits a data-sharing request to a providing entity; the providing entity responds with its Record of Processing Activities (RoPA) entry and a position on the request. Later sprints add AI agents that extract fields from the submitted documents and check them against the Personal Data Protection Law (PDPL).
 
-## What is COMPEL?
+> **This is a demo, not a production system.** All entity addresses are on the reserved `.example` domain, all email goes to a fake test inbox, and all seeded documents are synthetic. Nothing in this app contacts real people or real government entities.
 
-Saudi Arabia's Personal Data Protection Law (PDPL) has been fully enforceable since 14 September 2024. When one government entity shares personal data with another, a compliance officer has to confirm the sharing is lawful. Today they do it by hand: they read each document, compare it against PDPL articles, and write a justification. It is slow, it does not scale, and two officers can reach different conclusions on the same request.
+## Status
 
-COMPEL is a web-based review console, built on an API, that does the first pass of that review. It reads the documents submitted for a request, checks them against the PDPL and its Implementing Regulation, and either clears the request or sends it to a human officer with the evidence already collected.
+**Sprint 1 — in progress.** The workspace is being scaffolded. See the Progress checklist at the top of [`docs/specs/sprint-1.md`](docs/specs/sprint-1.md) for what exists today.
 
-The system reviews documentation only. It never accesses the underlying personal data.
+Sprint 1 delivers:
+
+- **Login** by email and a 6-digit one-time code, with sessions that expire after inactivity
+- **Submitting a request** to another entity, with documents, and receiving a unique reference
+- **Responding as the provider**: uploading the RoPA entry and endorsing or objecting to the request
+- **Entity isolation**: each user sees only requests their entity is a party to
 
 ## How it works
 
-The requesting entity submits a data-sharing request form. The providing entity submits a Record of Processing Activities (RoPA) entry and its position on the request (endorse or object). Three single-purpose agents then process them:
+There is one kind of user in Sprint 1: a **DPO** (data protection officer) belonging to one entity. Whether an entity is the requester or the provider is decided per request, so the same DPO sends some requests and receives others.
 
-| Agent | Job |
+| Screen | What happens there |
 |---|---|
-| **Extract** | Pulls out the legally relevant fields (purpose, legal basis, data categories, retention period) once, so later checks reuse them. |
-| **Compare** | Runs field-level checks against specific PDPL clauses, cross-document consistency checks, and a purpose compatibility check between the requesting entity's purpose and the original collection purpose. |
-| **Decide** | Auto-clears a request only if every check passes and the providing entity endorsed it. Otherwise it flags the request for human review and writes a report that traces each finding to its clause. |
-
-Two principles shape the design:
-
-- **A human has the final say.** The system never rejects a request on its own. Anything ambiguous, inconsistent or incompatible goes to a compliance officer.
-- **Everything is traceable.** Every conclusion points to a PDPL clause, and every report and decision is stored in an audit trail.
-
-## Users
-
-- **Requesting entity DPOs** submit data-sharing requests and supporting documents.
-- **Providing entity DPOs** submit the RoPA entry and record their position.
-- **Compliance/security officers** review flagged and pending requests and record the final approve or reject decision.
-
-Each user type signs in with an OTP, and each entity can only see its own requests and documents.
+| `/login` | Enter work email, then the 6-digit code from the inbox |
+| `/requests` | **Sent** and **Received** tabs |
+| `/requests/new` | Choose the providing entity, give a title, upload the request form and supporting documents |
+| `/requests/[id]` | Request details; on a received request, the provider submits the RoPA entry and position |
 
 ## Tech stack
 
-| Category | Tools |
+| Area | Choice |
 |---|---|
-| Front end | React 19, Next.js, TypeScript 5, Tailwind CSS 4 |
-| Back end | Node.js 24, NestJS 12, TypeScript 5 |
-| Database | PostgreSQL 18 |
-| Testing | Vitest 3 (unit and integration), Playwright (end-to-end), k6 (load) |
-| Hosting | Replit / Vercel |
-| Version control | Git, GitHub |
-
-## Roadmap
-
-| Sprint | Dates | Focus |
-|---|---|---|
-| 0 | 20 Sep to 5 Oct 2026 | Planning: backlog, environment, architecture, roadmap |
-| 1 | 6 Oct to 19 Oct 2026 | Secure intake and extraction: repository and environment setup, OTP login for all user types, data isolation, request and RoPA submission, field extraction |
-| 2 | 20 Oct to 2 Nov 2026 | Verification, decision and review: compliance, consistency and purpose checks, auto-clear or flag outcome, reports, reviewer queue and manual decision, notifications |
-
-Target release: November 2026.
+| Monorepo | npm workspaces: `apps/api`, `apps/web` |
+| API | NestJS (TypeScript), Prisma, PostgreSQL |
+| Web | Next.js (App Router), Tailwind CSS, shadcn/ui |
+| Auth | Email OTP with server-side sessions (no passwords, no JWTs) |
+| Email | Nodemailer over SMTP to [Ethereal](https://ethereal.email), a test inbox that delivers nothing |
+| Design | Black and white; Geist and Geist Mono; React Bits background on the login screen |
+| Environment | Replit, with Claude Code |
 
 ## Repository layout
 
-The layout will be finalised in Sprint 1. The planned structure is:
-
 ```
-.
-├── frontend/     # Next.js review console and entity screens
-├── backend/      # NestJS API, agents, checks and audit writes
-├── docs/         # Sprint reports and design files
-└── README.md
+apps/
+  api/          NestJS API, Prisma schema and seed
+  web/          Next.js app
+docs/
+  specs/
+    sprint-1.md What to build in Sprint 1 (sections are referenced by number)
+AGENTS.md       Standing rules for coding agents and contributors
+CLAUDE.md       Claude Code entry point (imports AGENTS.md)
+.env.example    Every environment variable, with defaults
 ```
 
 ## Getting started
 
-Setup instructions will be added once the environment is in place during Sprint 1. They will cover prerequisites (Node.js 24, PostgreSQL 18), environment variables, and how to run the app and the tests.
+> The scripts below are **planned** and are created by the scaffold (§5.1 of the spec). Until then they will not run.
 
-## Project links
+**Prerequisites:** Node.js LTS, a PostgreSQL database, and an Ethereal account.
 
-- Trello board: https://trello.com/b/xApugHVo/sprint-0-pdpl-compliance-board
-## Team
+1. **Install dependencies**
+   ```bash
+   npm install
+   ```
+2. **Configure the environment**
+   ```bash
+   cp .env.example .env
+   ```
+   Then set at least:
+   - `DATABASE_URL` — your PostgreSQL connection string
+   - `OTP_HASH_SECRET` — any long random string
+   - `SMTP_USER` and `SMTP_PASS` — the team's shared Ethereal credentials
 
-| Name | Student ID |
+   On Replit, put these in **Secrets** instead of a `.env` file.
+3. **Create the database and demo data**
+   ```bash
+   npm run db:migrate
+   npm run db:seed
+   ```
+4. **Start the app**
+   ```bash
+   npm run dev
+   ```
+   The web app serves everything, including the API under `/api`.
+
+### Logging in
+
+Every seeded entity has one DPO account:
+
+```
+dpo@<entity-slug>.test
+```
+
+For example, `dpo@moh.test` for the Ministry of Health. After entering the email, open the shared Ethereal inbox to read the code. If SMTP isn't configured in development, the code is printed in the API console instead.
+
+To act as two entities at once, use a regular browser window and a private one, since they keep separate sessions.
+
+## Scripts
+
+| Command | What it does |
 |---|---|
-| Abdulaziz Alfuraih | 445101582 |
-| Naif Alsmari | 445102991 |
-| Abdulmajeed Alnashwan | 445102167 |
-| Khalid Alhaidary | 445101067 |
+| `npm run dev` | Start the API and web app together |
+| `npm run build` | Build both apps |
+| `npm run lint` | Lint both apps |
+| `npm test` | Unit and API end-to-end tests |
+| `npm run db:migrate` | Apply Prisma migrations |
+| `npm run db:seed` | Load entities, DPO accounts and demo requests (refuses to run in production) |
+| `npm run db:reset` | **Destructive:** drop and recreate the database |
 
-## References
+## Contributing
 
-- Saudi Data and Artificial Intelligence Authority. (2023). *Personal Data Protection Law*. https://sdaia.gov.sa/en/SDAIA/about/Documents/PersonalDataProtectionLaw.pdf
-- Saudi Data and Artificial Intelligence Authority. (2023). *Implementing regulation of the Personal Data Protection Law*. https://sdaia.gov.sa/en/SDAIA/about/Documents/ExecutiveRegulationsEn.pdf
+- Read [`AGENTS.md`](AGENTS.md) first. It holds the rules that apply in every sprint: access rules, auth security, email safety, design system and how agents should work.
+- Work from the sprint spec. Tasks and handovers refer to its sections by number, such as "implement §9". Each section ends with the tests that define "done".
+- Work on a feature branch and merge to `main` through a reviewed pull request.
+- If a decision changes, update the spec (and its change log, §13) **before** writing the code for it.
 
-## License
 
-Academic coursework for SWE 444 at King Saud University. Not for production use.
