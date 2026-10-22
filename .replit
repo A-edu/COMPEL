@@ -17,3 +17,8 @@ externalPort = 3000
 
 [objectStorage]
 defaultBucketID = "replit-objstore-1cb7406d-4bbe-44f7-ad18-30fd16010123"
+
+[deployment]
+deploymentTarget = "autoscale"
+build = ["sh", "-c", "npm ci && npm run build"]
+run = ["sh", "-c", "npm run db:deploy && npm run db:seed && npm start"]
