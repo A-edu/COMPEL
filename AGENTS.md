@@ -8,6 +8,8 @@ COMPEL verifies data-sharing requests between Saudi government entities against 
 
 This is a graduation project (KSU, Software Engineering). The app is a realistic demo, not a production system: it must never contact real people or real government addresses.
 
+**The published Replit app is the official demo** and is submitted with the repository link at the end of each sprint. Every environment, including the published one, holds demo data only. "Production" in this repository means the published Replit deployment, not a real government system.
+
 ## Specs: what to build
 
 - What to build lives in one spec per sprint: `docs/specs/sprint-<n>.md`. **The current sprint is `docs/specs/sprint-1.md`.**
@@ -41,8 +43,11 @@ Use these terms exactly, in code and UI.
   - `apps/api`: NestJS (default Express adapter), TypeScript, Prisma, PostgreSQL.
   - `apps/web`: Next.js (App Router), TypeScript, Tailwind CSS, shadcn/ui.
 - **One origin.** Next.js rewrites `/api/*` to the NestJS server. The browser only talks to the Next.js origin, so the session cookie is first-party. Do not set up CORS for cookies; use the rewrite.
-- **Database:** PostgreSQL via `DATABASE_URL` only. Prisma is the only way the API touches the database.
-- **File storage:** behind a `StorageService` interface. The current implementation writes to `UPLOAD_DIR` (gitignored). Store files under generated names, never the user's filename. Accept PDF and DOCX only, checked by content type and extension, up to `MAX_UPLOAD_MB`.
+- **Database:** PostgreSQL via `DATABASE_URL` only. Prisma is the only way the API touches the database. Replit gives the workspace a development database and the published app a separate production database; both are reached through `DATABASE_URL`. Schema changes reach production only through Prisma migrations (`prisma migrate deploy`), never by hand.
+- **File storage:** behind a `StorageService` interface with two drivers, chosen by `STORAGE_DRIVER`:
+  - `replit`: Replit App Storage. Used in the workspace and the published app, because a deployment's filesystem does not persist across redeploys. The workspace and published app share one bucket, so every key is prefixed with `STORAGE_PREFIX` (`dev` or `prod`).
+  - `local`: writes to `UPLOAD_DIR` (gitignored). Used by tests only.
+  - Store files under generated keys, never the user's filename. Accept PDF and DOCX only, checked by content type and extension, up to `MAX_UPLOAD_MB`.
 - **API modules:** `auth`, `entities`, `requests`, `documents`, `mail`, `storage`, `prisma`. Controllers stay thin; logic lives in services. Validate every request body with DTOs.
 - **NestJS compiles to CommonJS.** Some newer npm packages are ESM-only and fail with `ERR_REQUIRE_ESM`. If that happens, stop and report it instead of rewriting the build setup.
 
@@ -64,14 +69,14 @@ Email OTP with server-side sessions. Endpoints and screens are in the sprint spe
 ## Email
 
 - Send through Nodemailer over SMTP. **No email service provider (Resend, SendGrid, etc.).**
-- Development and demo use **Ethereal**, a fake SMTP inbox that accepts every message and delivers none. Credentials come from `SMTP_*`; the team shares one Ethereal account.
-- **Safety switch:** when `NODE_ENV` is not `production` and `MAIL_REDIRECT_TO` is set, every outgoing email goes to that address regardless of recipient.
-- If SMTP is not configured, log the OTP to the API console in development only, and refuse to start in production.
+- The workspace and the published app both use **Ethereal**, a fake SMTP inbox that accepts every message and delivers none. The team shares one Ethereal account; set its `SMTP_*` values in the workspace Secrets and in the deployment's Secrets.
+- **Safety switch:** whenever `MAIL_REDIRECT_TO` is set, in any environment, every outgoing email goes to that address regardless of recipient.
+- If SMTP is not configured, log the OTP to the API console in development only, and refuse to start when `NODE_ENV=production`.
 - All seeded addresses use the reserved `.example` domain. **Never** put a real email address (especially `.gov.sa`) in code, seed data, fixtures or tests.
 
 ## Seed data rules
 
-- The seed script must **refuse to run when `NODE_ENV=production`**.
+- The seed script must **refuse to run unless `DEMO_MODE=true`**. It runs in the workspace and on every start of the published app, so it must be idempotent: running it again never duplicates or deletes data.
 - Real Saudi government entity names are allowed; their addresses must be on `.example`. Flag any official name you are unsure of rather than guessing.
 - Seeded documents are placeholder files clearly marked **"SYNTHETIC — DEMO DATA"**.
 - Seed contents for the current sprint are defined in its spec.
@@ -83,6 +88,7 @@ Email OTP with server-side sessions. Endpoints and screens are in the sprint spe
 - **Colour exception:** red, amber and green only for status and errors, used small and only where they carry meaning.
 - **Components:** shadcn/ui first. Do not hand-build what shadcn provides.
 - **Motion:** animated backgrounds only on the login screen. Respect `prefers-reduced-motion` everywhere.
+- **Minimal inner screens:** every screen after login shows only what the user needs to act. No dates, counts, IDs or metadata unless the spec lists them. When in doubt, leave it out.
 
 ## Environment variables
 
@@ -90,7 +96,9 @@ Keep `.env.example` complete and in sync. Never commit `.env`.
 
 ```
 NODE_ENV=development
+DEMO_MODE=true
 DATABASE_URL=
+TEST_DATABASE_URL=
 OTP_HASH_SECRET=
 OTP_TTL_MINUTES=5
 OTP_MAX_ATTEMPTS=5
@@ -102,6 +110,8 @@ SMTP_USER=
 SMTP_PASS=
 MAIL_FROM="COMPEL <no-reply@compel.example>"
 MAIL_REDIRECT_TO=
+STORAGE_DRIVER=replit
+STORAGE_PREFIX=dev
 UPLOAD_DIR=./uploads
 MAX_UPLOAD_MB=10
 API_PORT=3001
@@ -111,25 +121,29 @@ API_PORT=3001
 
 Planned. The scaffold must create root scripts with exactly these names, then this section must be updated to say they exist.
 
-- `npm run dev`: start API and web together
-- `npm run build`
+- `npm run dev`: start API and web together, in development mode
+- `npm run build`: build both apps
+- `npm start`: start the built API and web together (used by the published app)
 - `npm run lint`
 - `npm test`: unit and API e2e tests
-- `npm run db:migrate`: `prisma migrate dev`
+- `npm run db:migrate`: `prisma migrate dev` (workspace only)
+- `npm run db:deploy`: `prisma migrate deploy` (published app)
 - `npm run db:seed`
-- `npm run db:reset`: destructive, see working rules
+- `npm run db:reset`: destructive, workspace only, see working rules
 
 ## Testing
 
 - API: Jest (Nest default) for services; Supertest e2e for endpoints against a separate test database.
 - Each spec section lists the tests that define "done" for it. A section is not done until they pass.
+- E2e tests use `TEST_DATABASE_URL` (a separate Postgres schema in the development database) and the `local` storage driver. They must refuse to run if `TEST_DATABASE_URL` equals `DATABASE_URL`, and never touch the production database or App Storage.
 - Tests read OTP codes from a mocked mail transport.
 - Do not run Playwright or other browser automation inside Replit.
 
 ## Working rules for agents
 
 - Work on a feature branch, never directly on `main`. Keep commits focused.
-- **Ask before:** installing or upgrading any dependency, running `db:reset` or any migration that drops data, pushing to a remote, or changing auth or access-rule behaviour.
+- **Ask before:** installing or upgrading any dependency, running `db:reset` or any migration that drops data, pushing to a remote, changing the deployment configuration, or changing auth or access-rule behaviour.
+- Migrations must be additive where possible. A migration that drops or renames a column or table will run against the published app's data on its next start; flag it explicitly.
 - **Run without asking:** lint, tests, build, type checks, `db:migrate` for additive changes.
 - Schema changes go in their own commit and must be mentioned explicitly in your summary.
 - Never weaken or delete a test to make it pass. If a test seems wrong, say so and explain why.
