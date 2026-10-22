@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { HealthController } from './health/health.controller.js';
+import { PrismaModule } from './prisma/prisma.module.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -12,6 +13,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
       isGlobal: true,
       envFilePath: join(__dirname, '..', '..', '..', '.env'),
     }),
+    PrismaModule,
   ],
   controllers: [HealthController],
   providers: [],
