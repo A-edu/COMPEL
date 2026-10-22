@@ -149,7 +149,7 @@ For the requester, `providerResponse` is always omitted (§2.2).
 ### §5.3 File storage
 - `StorageService` interface: `put(key, buffer, contentType)`, `get(key)` (stream), `exists(key)`, `delete(key)`.
 - Drivers as in AGENTS.md → Architecture: `replit` (Replit App Storage, keys prefixed with `STORAGE_PREFIX`) and `local` (tests). Selected by `STORAGE_DRIVER` at startup; an unknown value stops the API from starting.
-- **Done when:** a unit test round-trips a file through the `local` driver; a one-off check in the workspace round-trips a file through the `replit` driver under the `dev/` prefix and deletes it.
+- **Done when:** a unit test round-trips a file through the `local` driver; a one-off check in the workspace round-trips a file through the `replit` driver under the configured prefix and deletes that one file.
 
 ### §5.4 Seed script
 - Reads the entity list from `apps/api/prisma/seed/entities.json`: `[{ "name": "...", "slug": "..." }]`. Until §5.5 is done, this file holds only a starter list of the four demo entities:
@@ -171,7 +171,7 @@ For the requester, `providerResponse` is always omitted (§2.2).
 | `hrsd` → `moh` | Occupational health records for labour inspections | Provider responded (endorsed) |
 
   This lets the `moh` DPO show a sent request, a received request, and a completed one.
-- Each demo request gets a placeholder request-form PDF whose pages say "SYNTHETIC — DEMO DATA"; the responded one also gets a placeholder RoPA PDF. Files go through `StorageService`.
+- Each demo request gets a placeholder request-form PDF whose pages say "SYNTHETIC — DEMO DATA"; the responded one also gets a placeholder RoPA PDF. Files go through `StorageService` under fixed keys (e.g. `seed/<slug>-<slug>/request-form.pdf`), so the workspace and published app share one copy.
 - **Idempotent:** entities and users are upserted by slug and email; demo requests are created only if no request with the same title exists between the same two entities; files are uploaded only if their key doesn't exist. Seeding never deletes anything, including requests created during a demo.
 - Refuses to run unless `DEMO_MODE=true`.
 - **Done when:** `npm run db:seed` on a freshly migrated database creates all entities, users and demo requests with their files; a second run changes nothing; adding an entity to `entities.json` and re-running adds only that entity and its DPO.
@@ -190,7 +190,7 @@ The published Replit app is the demo that is submitted (§2.8).
 - **Deployment type:** Autoscale. It scales to zero when idle, so open the URL a minute before presenting.
 - **Build command:** `npm ci && npm run build`.
 - **Run command:** `npm run db:deploy && npm run db:seed && npm start`. Migrations and the idempotent seed run on every start, so a redeploy always brings the production database up to date.
-- **Deployment Secrets:** `NODE_ENV=production`, `DEMO_MODE=true`, `STORAGE_DRIVER=replit`, `STORAGE_PREFIX=prod`, `OTP_HASH_SECRET` (different from the workspace's), the shared Ethereal `SMTP_*` values, and the remaining variables from `.env.example`. `DATABASE_URL` is provided by Replit for the production database.
+- **Deployment Secrets:** `NODE_ENV=production`, `DEMO_MODE=true`, `STORAGE_DRIVER=replit`, `STORAGE_PREFIX=demo` (shared with the workspace in Sprint 1), `OTP_HASH_SECRET` (different from the workspace's), the shared Ethereal `SMTP_*` values, and the remaining variables from `.env.example`. `DATABASE_URL` is provided by Replit for the production database.
 - **To verify on the first publish:** whether Replit's publish step offers to apply development schema changes to production on its own. Prisma migrations must be the only thing that changes the production schema; if Replit proposes its own changes, decline them and record what happened in §13.
 - **Done when:** the published URL serves the app; `/api/health` returns "ok" through it; the production database contains the seeded entities and demo requests; a redeploy keeps any request created on the published app.
 
@@ -200,7 +200,7 @@ The published Replit app is the demo that is submitted (§2.8).
 - Implement the auth endpoints in §4 and the session guard, following AGENTS.md → Authentication invariants and Email.
 - Mail module: Nodemailer over SMTP, Ethereal config, `MAIL_REDIRECT_TO` switch, dev console fallback. OTP email subject "Your COMPEL login code"; body contains the code, its validity in minutes, and nothing else.
 - A **temporary, unstyled** `/login` page (email field → code field) so everyone can log in before §6.2 exists. §6.2 replaces it.
-- Next.js middleware: redirect to `/login` when there is no `compel_session` cookie, except on `/login` itself.
+- Next.js `proxy.ts` (the Next.js 16 name for middleware): redirect to `/login` when there is no `compel_session` cookie, except on `/login` itself.
 - **Done when** these API tests pass:
   - an unknown email gets exactly the same response as a known one
   - a correct code logs in and sets the cookie; `GET /auth/me` then returns the user and entity
@@ -330,4 +330,5 @@ Log in just before presenting, so the 15-minute idle timeout doesn't log anyone 
 | Date | Section | Change |
 |---|---|---|
 | 2026-10-22 | All | First version |
-| 2026-10-22 | §2, §5, §7–§10, §12 | Demo on the published app (§5.3 storage, §5.6 publishing); entity list split out to §5.5; seed gated on `DEMO_MODE`; inner screens reduced to the essentials. §5 renumbered once, before any handover referenced it. |
+| 2026-10-22 | §6.1 | Middleware renamed to `proxy.ts`, per Next.js 16. |
+| 2026-10-23 | §5.3, §5.4, §5.6 | Workspace and published app share one storage prefix, `demo`, for Sprint 1. Seed files use fixed keys. No bulk deletes. || 2026-10-22 | §2, §5, §7–§10, §12 | Demo on the published app (§5.3 storage, §5.6 publishing); entity list split out to §5.5; seed gated on `DEMO_MODE`; inner screens reduced to the essentials. §5 renumbered once, before any handover referenced it. |
