@@ -7,6 +7,7 @@ import {
   createFixtures,
   createTestApp,
   envNumber,
+  loginWithCode,
   type MockMailTransport,
   type ResettableThrottlerStorage,
   sessionCookie,
@@ -36,15 +37,8 @@ describe('Auth (e2e)', () => {
     return codeFrom(await mail.waitForMessage(before));
   }
 
-  async function login(email = fixtures.user.email) {
-    const code = await requestCode(email);
-    const res = await api()
-      .post('/api/auth/otp/verify')
-      .send({ email, code })
-      .expect(200);
-    const cookie = sessionCookie(res.headers['set-cookie']);
-    if (!cookie) throw new Error('No session cookie.');
-    return { res, code, cookie };
+  function login(email = fixtures.user.email) {
+    return loginWithCode(app, mail, email);
   }
 
   function wrongCode(code: string): string {
