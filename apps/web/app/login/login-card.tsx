@@ -10,21 +10,31 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   InputOTP,
   InputOTPGroup,
+  InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { Spinner } from "@/components/ui/spinner";
+import { cn } from "@/lib/utils";
 import { safeNextPath } from "@/lib/safe-next";
 
 const RESEND_SECONDS = 60;
 const CODE_LENGTH = 6;
 const EMAIL_FORMAT = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FALLBACK_ERROR = "Something went wrong. Please try again.";
+
+// Quiet text links: Change email, Resend code.
+const TEXT_LINK =
+  "h-auto rounded-sm p-0 text-sm font-normal text-white/60 underline-offset-4 hover:text-white hover:underline focus-visible:text-white focus-visible:ring-2 focus-visible:ring-white/30 disabled:opacity-100 disabled:text-white/35";
+
+// Slot styling adapted from Watermelon UI input-otp-7 (MIT), https://ui.watermelon.sh
+const OTP_SLOT =
+  "size-11 bg-muted/50 font-mono text-lg tabular-nums shadow-[inset_0px_1px_0px_0px_rgba(255,255,255,1),inset_0px_-1px_0px_0px_rgba(0,0,0,0.05)] dark:shadow-[inset_0px_1px_0px_0px_rgba(255,255,255,0.25),inset_0px_-1px_0px_0px_rgba(0,0,0,0.7)] data-[active=true]:border-white/50 data-[active=true]:ring-2 data-[active=true]:ring-white/20 motion-safe:data-[active=true]:scale-105";
 
 type Result = { status: number; message?: string };
 
@@ -71,14 +81,16 @@ export function LoginCard({
   }
 
   return (
-    <Card className="relative z-10 w-full max-w-sm">
-      <CardHeader>
-        <h1 className="text-2xl font-semibold tracking-tight">COMPEL</h1>
-        <p className="text-sm text-muted-foreground">
-          PDPL compliance verification
+    // Entrance is CSS (tw-animate-css), so the card is visible before
+    // hydration and stays still under reduced motion.
+    <Card className="relative z-10 w-full max-w-[400px] gap-0 rounded-2xl bg-[#111111] py-(--card-spacing) shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_24px_64px_-12px_rgba(0,0,0,0.9)] ring-white/10 [--card-spacing:--spacing(6)] sm:[--card-spacing:--spacing(8)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 motion-safe:ease-out">
+      <div className="px-(--card-spacing)">
+        <p className="text-sm font-semibold tracking-tight text-white/80">
+          COMPEL
         </p>
-      </CardHeader>
-      <CardContent>
+        <h1 className="mt-6 text-2xl font-semibold tracking-tight text-white">
+          Sign in
+        </h1>
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={step}
@@ -108,8 +120,31 @@ export function LoginCard({
             )}
           </motion.div>
         </AnimatePresence>
-      </CardContent>
+      </div>
     </Card>
+  );
+}
+
+function PrimaryButton({
+  busy,
+  children,
+}: {
+  busy: boolean;
+  children: React.ReactNode;
+}) {
+  // The spinner sits over the hidden label, so the button keeps its size.
+  return (
+    <Button
+      type="submit"
+      disabled={busy}
+      aria-busy={busy || undefined}
+      className="relative h-11 w-full rounded-lg bg-white text-sm font-medium text-black hover:bg-white/90 focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#111111] active:bg-white/80 disabled:opacity-60"
+    >
+      <span className={cn(busy && "invisible")}>{children}</span>
+      {busy && (
+        <Spinner aria-hidden="true" className="absolute inset-0 m-auto" />
+      )}
+    </Button>
   );
 }
 
@@ -158,21 +193,30 @@ function EmailStep({
   }
 
   return (
-    <form onSubmit={submit} noValidate className="flex flex-col gap-4">
+    <form onSubmit={submit} noValidate className="flex flex-col">
+      <p className="mt-2 text-sm leading-relaxed text-white/60">
+        Use your entity&apos;s DPO email. We&apos;ll send you a 6-digit code.
+      </p>
       {expired && (
-        <p className="text-sm text-muted-foreground">
+        <p
+          role="status"
+          className="mt-6 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white/70"
+        >
           Your session expired, please log in again.
         </p>
       )}
-      <Field data-invalid={error ? true : undefined}>
-        <FieldLabel htmlFor="email">Work email</FieldLabel>
+      <Field data-invalid={error ? true : undefined} className="mt-6 gap-2">
+        <FieldLabel htmlFor="email" className="text-sm font-medium text-white">
+          Work email
+        </FieldLabel>
         <Input
           ref={inputRef}
           id="email"
           type="email"
           autoComplete="email"
           spellCheck={false}
-          className="font-mono"
+          placeholder="name@entity.example"
+          className="h-11 rounded-lg border-white/10 bg-white/[0.03] px-3 font-mono text-base text-white placeholder:text-white/30 focus-visible:border-white/40 focus-visible:ring-2 focus-visible:ring-white/25 sm:text-sm dark:bg-white/[0.03]"
           value={email}
           onChange={(event) => onEmailChange(event.target.value)}
           aria-invalid={error ? true : undefined}
@@ -181,10 +225,9 @@ function EmailStep({
         />
         <FieldError id="email-error">{error}</FieldError>
       </Field>
-      <Button type="submit" className="w-full" disabled={sending}>
-        {sending && <Spinner aria-hidden="true" />}
-        Send code
-      </Button>
+      <div className="mt-6">
+        <PrimaryButton busy={sending}>Send code</PrimaryButton>
+      </div>
     </form>
   );
 }
@@ -257,15 +300,26 @@ function OtpStep({
     inputRef.current?.focus();
   }
 
+  const slot = (index: number) => (
+    <InputOTPSlot
+      key={index}
+      index={index}
+      className={OTP_SLOT}
+      aria-invalid={invalid ? true : undefined}
+    />
+  );
+
   return (
-    <div className="flex flex-col gap-4">
-      <div className="text-sm">
-        <p className="text-muted-foreground">Code sent to</p>
-        <p className="truncate font-mono">{email}</p>
+    <div className="flex flex-col">
+      <div className="mt-2 text-sm leading-relaxed text-white/60">
+        <p>
+          Code sent to{" "}
+          <span className="font-mono break-all text-white">{email}</span>
+        </p>
         <Button
           type="button"
           variant="link"
-          className="h-auto px-0"
+          className={cn(TEXT_LINK, "mt-1")}
           onClick={onChangeEmail}
           disabled={verifying}
         >
@@ -273,7 +327,7 @@ function OtpStep({
         </Button>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="mt-6 flex items-center gap-3">
         <div ref={slotsScope}>
           <InputOTP
             ref={inputRef}
@@ -291,25 +345,24 @@ function OtpStep({
             onComplete={verify}
             disabled={verifying}
           >
-            <InputOTPGroup>
-              {Array.from({ length: CODE_LENGTH }, (_, index) => (
-                <InputOTPSlot
-                  key={index}
-                  index={index}
-                  className="size-10 font-mono text-base"
-                  aria-invalid={invalid ? true : undefined}
-                />
-              ))}
+            <InputOTPGroup className="shadow-xs">
+              {[0, 1, 2].map(slot)}
+            </InputOTPGroup>
+            <InputOTPSeparator className="px-1.5 text-white/40" />
+            <InputOTPGroup className="shadow-xs">
+              {[3, 4, 5].map(slot)}
             </InputOTPGroup>
           </InputOTP>
         </div>
-        {verifying && <Spinner aria-label="Verifying" />}
+        {verifying && (
+          <Spinner aria-label="Verifying" className="text-white/60" />
+        )}
       </div>
 
       <p
         id="otp-message"
         aria-live="polite"
-        className="min-h-5 text-sm text-destructive"
+        className="mt-3 min-h-5 text-sm text-destructive"
       >
         {message}
       </p>
@@ -317,7 +370,7 @@ function OtpStep({
       <Button
         type="button"
         variant="link"
-        className="h-auto self-start px-0"
+        className={cn(TEXT_LINK, "mt-3 self-start")}
         onClick={resend}
         disabled={secondsLeft > 0 || verifying}
       >
