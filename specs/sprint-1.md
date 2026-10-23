@@ -16,7 +16,7 @@ What to build in Sprint 1. Standing rules (access rules, auth invariants, email 
 - [X] §6.2 Login screen design
 - [x] §7 App shell
 - [x] §8 Requests list
-- [ ] §9 Submit a request
+- [x] §9 Submit a request
 - [ ] §10 Request detail and provider response
 - [ ] §11 Entity isolation tests
 
