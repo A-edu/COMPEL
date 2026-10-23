@@ -223,7 +223,7 @@ The published Replit app is the demo that is submitted (§2.8).
 - Load it client-side only after the card renders (e.g. `next/dynamic` with `ssr: false`), so the form never waits on WebGL. Until it loads, the plain `#0a0a0a` page shows.
 - It has no npm dependencies and already freezes its animation under `prefers-reduced-motion`; no extra handling is needed.
 
-**Card contents.** "COMPEL" wordmark (Geist, semibold), then the heading **Sign in**. On the email step, below the heading: "Use your entity's DPO email. We'll send you a 6-digit code." On the OTP step, that line is replaced by "Code sent to" + the email (see OTP step). The heading stays on both steps.
+**Card contents.** The heading **Sign in** (no wordmark). On the email step, below the heading: "Use your entity's DPO email. We'll send you a 6-digit code." On the OTP step, that line is replaced by "Code sent to" + the email (see OTP step). The heading stays on both steps.
 
 **Email step**
 - Label "Work email", shadcn `Input`, button **Send code**.
@@ -348,3 +348,4 @@ Log in just before presenting, so the 15-minute idle timeout doesn't log anyone 
 | 2026-10-23 | §7 | Demo badge removed from the header; the app never reaches a production audience. |
 | 2026-10-23 | §6.1 | Rate limits read from the existing rate-limit variables. Tests may backdate timestamps instead of waiting for real time to pass. |
 | 2026-10-23 | §6.2 | Tagline replaced by a "Sign in" heading and guidance line; email placeholder `name@entity.example`; OTP slots styled after Watermelon UI `input-otp-7` (MIT); design latitude added; Threads visibility added to Done when. |
+| 2026-10-23 | §6.2 | Wordmark removed from the login screen on all widths. On phones (below 640 px) the card is docked near the bottom with side and bottom gaps; from 640 px it stays centred. |
