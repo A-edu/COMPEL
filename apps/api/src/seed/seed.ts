@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import type { Prisma } from '@prisma/client';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -143,7 +144,7 @@ async function run(): Promise<void> {
         );
       }
 
-      await prisma.$transaction(async (tx) => {
+      await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const request = await tx.dataSharingRequest.create({
           data: {
             reference: reference(year, index + 1),
