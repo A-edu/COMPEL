@@ -4,6 +4,7 @@ import { StatusBadge } from "@/components/app/status-badge";
 import { surface } from "@/components/app/surface";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DocumentLink } from "./document-link";
+import { ResponseForm } from "./response-form";
 import type { Position, ProviderResponse, RequestDetail } from "./types";
 
 const POSITION_LABEL: Record<Position, string> = {
@@ -14,7 +15,13 @@ const POSITION_LABEL: Record<Position, string> = {
 // §10: what both parties see, plus the provider's response panel. The grid
 // stays two columns for the requester too, so the left card's width does
 // not depend on the role; below lg the columns stack.
-export function RequestDetailView({ request }: { request: RequestDetail }) {
+export function RequestDetailView({
+  request,
+  onResponded,
+}: {
+  request: RequestDetail;
+  onResponded: () => void;
+}) {
   const isRequester = request.myRole === "REQUESTER";
   const otherEntity = isRequester
     ? request.providingEntity
@@ -66,8 +73,9 @@ export function RequestDetailView({ request }: { request: RequestDetail }) {
             </CardContent>
           </Card>
         )}
-        {/* Provider before responding (providerResponse === null): the
-            "Your response" panel goes here (§10, Task 3 PR 2). */}
+        {request.providerResponse === null && (
+          <ResponseForm requestId={request.id} onSubmitted={onResponded} />
+        )}
       </div>
     </div>
   );
