@@ -4,11 +4,9 @@
 
 COMPEL is a graduation project (King Saud University, Software Engineering). A requesting entity submits a data-sharing request to a providing entity; the providing entity responds with its Record of Processing Activities (RoPA) entry and a position on the request. Later sprints add AI agents that extract fields from the submitted documents and check them against the Personal Data Protection Law (PDPL).
 
-> **This is a demo, not a production system.** All entity addresses are on the reserved `.test` domain, all email goes to a fake test inbox, and all seeded documents are synthetic. Nothing in this app contacts real people or real government entities.
-
 ## Status
 
-**Sprint 1 — in progress.** The workspace is being scaffolded. See the Progress checklist at the top of [`docs/specs/sprint-1.md`](docs/specs/sprint-1.md) for what exists today.
+**Sprint 1 — in progress.** The workspace is being scaffolded. See the Progress checklist at the top of [`specs/sprint-1.md`](specs/sprint-1.md) for what exists today.
 
 Sprint 1 delivers:
 
@@ -46,9 +44,8 @@ There is one kind of user in Sprint 1: a **DPO** (data protection officer) belon
 apps/
   api/          NestJS API, Prisma schema and seed
   web/          Next.js app
-docs/
-  specs/
-    sprint-1.md What to build in Sprint 1 (sections are referenced by number)
+specs/
+  sprint-1.md   What to build in Sprint 1 (sections are referenced by number)
 AGENTS.md       Standing rules for coding agents and contributors
 CLAUDE.md       Claude Code entry point (imports AGENTS.md)
 .env.example    Every environment variable, with defaults
@@ -92,10 +89,10 @@ CLAUDE.md       Claude Code entry point (imports AGENTS.md)
 Every seeded entity has one DPO account:
 
 ```
-dpo@<entity-slug>.test
+dpo@<entity-slug>.example
 ```
 
-For example, `dpo@moh.test` for the Ministry of Health. After entering the email, open the shared Ethereal inbox to read the code. If SMTP isn't configured in development, the code is printed in the API console instead.
+For example, `dpo@moh.example` for the Ministry of Health. After entering the email, open the shared Ethereal inbox to read the code. If SMTP isn't configured in development, the code is printed in the API console instead.
 
 To act as two entities at once, use a regular browser window and a private one, since they keep separate sessions.
 

@@ -45,7 +45,7 @@ Use these terms exactly, in code and UI.
 - **One origin.** Next.js rewrites `/api/*` to the NestJS server. The browser only talks to the Next.js origin, so the session cookie is first-party. Do not set up CORS for cookies; use the rewrite.
 - **Database:** PostgreSQL via `DATABASE_URL` only. Prisma is the only way the API touches the database. Replit gives the workspace a development database and the published app a separate production database; both are reached through `DATABASE_URL`. Schema changes reach production only through Prisma migrations (`prisma migrate deploy`), never by hand.
 - **File storage:** behind a `StorageService` interface with two drivers, chosen by `STORAGE_DRIVER`:
-  - `replit`: Replit App Storage. Used in the workspace and the published app, because a deployment's filesystem does not persist across redeploys. The workspace and published app share one bucket and the same `STORAGE_PREFIX` (`demo`) in every environment, since both only ever hold demo data.
+  - `replit`: Replit App Storage. Used in the workspace and the published app, because a deployment's filesystem does not persist across redeploys. The workspace and published app share one bucket and, for now, one prefix: every key starts with `STORAGE_PREFIX`, set to `demo` in both. Real uploaded documents get generated, unique keys, so the two environments never collide there; seed data is the deliberate exception — it uses fixed keys (e.g. `seed/<slug>-<slug>/request-form.pdf`) so the workspace and published app share one copy instead of each uploading a redundant one. **Never delete files in bulk or by prefix**, since that would remove the published app's documents too.
   - `local`: writes to `UPLOAD_DIR` (gitignored). Used by tests only.
   - Store files under generated keys, never the user's filename. Accept PDF and DOCX only, checked by content type and extension, up to `MAX_UPLOAD_MB`.
 - **API modules:** `auth`, `entities`, `requests`, `documents`, `mail`, `storage`, `prisma`. Controllers stay thin; logic lives in services. Validate every request body with DTOs.
@@ -64,7 +64,7 @@ Email OTP with server-side sessions. Endpoints and screens are in the sprint spe
 - Record login successes, failures, logouts and expiries in `AuthEvent`.
 - Never store or log codes or tokens in plain text, except the dev-only console fallback under Email.
 - **Never add a fixed code, master code or login bypass**, in any environment, including for tests.
-- Next.js middleware only redirects to `/login` when no session cookie exists. It is a convenience, not security; the API decides who is logged in.
+- The Next.js `proxy.ts` (called middleware before Next.js 16) only redirects to `/login` when no session cookie exists. It is a convenience, not security; the API decides who is logged in.
 
 ## Email
 
