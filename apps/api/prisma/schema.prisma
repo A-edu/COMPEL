@@ -143,3 +143,14 @@ model ProviderResponse {
   respondedBy     User               @relation(fields: [respondedById], references: [id])
   createdAt       DateTime           @default(now())
 }
+
+// The last sequence number issued per year for request references
+// (CMP-YYYY-NNNNNN, spec §3 -> Reference generation). Incremented inside the
+// transaction that creates the request; the row lock serialises concurrent
+// submissions.
+model ReferenceCounter {
+  year      Int      @id
+  lastValue Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
