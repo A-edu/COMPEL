@@ -6,6 +6,7 @@ import { dirname, join } from 'node:path';
 import { AuthModule } from './auth/auth.module.js';
 import { otpThrottleOptions } from './auth/otp-throttle.config.js';
 import { validateEnv } from './config/env.validation.js';
+import { EntitiesModule } from './entities/entities.module.js';
 import { HealthController } from './health/health.controller.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { RequestsModule } from './requests/requests.module.js';
@@ -27,6 +28,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
     PrismaModule,
     StorageModule.register(),
     AuthModule,
+    EntitiesModule,
     RequestsModule,
   ],
   controllers: [HealthController],

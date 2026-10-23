@@ -5,6 +5,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { AppModule } from '../app.module.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { allocateReference } from '../requests/reference.js';
 import { STORAGE_SERVICE, type StorageService } from '../storage/storage.interface.js';
 import { buildPlaceholderPdf } from './placeholder-pdf.js';
 
@@ -23,8 +24,8 @@ interface DemoRequest {
   responded: boolean;
 }
 
-// §9 (out of scope here) must account for these reserved references when it
-// builds the real per-year reference counter.
+// References come from the same per-year counter as real submissions, so
+// the two never collide.
 const DEMO_REQUESTS: DemoRequest[] = [
   {
     slug: 'moh-zatca',
@@ -48,10 +49,6 @@ const DEMO_REQUESTS: DemoRequest[] = [
     responded: true,
   },
 ];
-
-function reference(year: number, sequence: number): string {
-  return `CMP-${year}-${sequence.toString().padStart(6, '0')}`;
-}
 
 async function uploadIfMissing(
   storage: StorageService,
@@ -105,9 +102,7 @@ async function run(): Promise<void> {
       console.log(`entity: ${slug} (${name})`);
     }
 
-    const year = new Date().getFullYear();
-
-    for (const [index, demo] of DEMO_REQUESTS.entries()) {
+    for (const demo of DEMO_REQUESTS) {
       const requestingEntityId = entityIdBySlug.get(demo.fromSlug);
       const providingEntityId = entityIdBySlug.get(demo.toSlug);
       const submittedById = dpoIdBySlug.get(demo.fromSlug);
@@ -147,7 +142,7 @@ async function run(): Promise<void> {
       await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const request = await tx.dataSharingRequest.create({
           data: {
-            reference: reference(year, index + 1),
+            reference: await allocateReference(tx),
             title: demo.title,
             requestingEntityId,
             providingEntityId,
