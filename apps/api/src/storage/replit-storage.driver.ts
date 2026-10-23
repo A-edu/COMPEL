@@ -10,7 +10,7 @@ export class ReplitStorageDriver implements StorageService {
   private readonly prefix: string;
 
   constructor(configService: ConfigService) {
-    this.prefix = configService.get<string>('STORAGE_PREFIX') ?? 'dev';
+    this.prefix = configService.get<string>('STORAGE_PREFIX') ?? 'demo';
   }
 
   private key(key: string): string {

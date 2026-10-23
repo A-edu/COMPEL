@@ -45,7 +45,7 @@ Use these terms exactly, in code and UI.
 - **One origin.** Next.js rewrites `/api/*` to the NestJS server. The browser only talks to the Next.js origin, so the session cookie is first-party. Do not set up CORS for cookies; use the rewrite.
 - **Database:** PostgreSQL via `DATABASE_URL` only. Prisma is the only way the API touches the database. Replit gives the workspace a development database and the published app a separate production database; both are reached through `DATABASE_URL`. Schema changes reach production only through Prisma migrations (`prisma migrate deploy`), never by hand.
 - **File storage:** behind a `StorageService` interface with two drivers, chosen by `STORAGE_DRIVER`:
-  - `replit`: Replit App Storage. Used in the workspace and the published app, because a deployment's filesystem does not persist across redeploys. The workspace and published app share one bucket, so every key is prefixed with `STORAGE_PREFIX` (`dev` or `prod`).
+  - `replit`: Replit App Storage. Used in the workspace and the published app, because a deployment's filesystem does not persist across redeploys. The workspace and published app share one bucket and the same `STORAGE_PREFIX` (`demo`) in every environment, since both only ever hold demo data.
   - `local`: writes to `UPLOAD_DIR` (gitignored). Used by tests only.
   - Store files under generated keys, never the user's filename. Accept PDF and DOCX only, checked by content type and extension, up to `MAX_UPLOAD_MB`.
 - **API modules:** `auth`, `entities`, `requests`, `documents`, `mail`, `storage`, `prisma`. Controllers stay thin; logic lives in services. Validate every request body with DTOs.
@@ -111,7 +111,7 @@ SMTP_PASS=
 MAIL_FROM="COMPEL <no-reply@compel.example>"
 MAIL_REDIRECT_TO=
 STORAGE_DRIVER=replit
-STORAGE_PREFIX=dev
+STORAGE_PREFIX=demo
 UPLOAD_DIR=./uploads
 MAX_UPLOAD_MB=10
 API_PORT=3001

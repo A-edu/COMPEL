@@ -190,7 +190,7 @@ The published Replit app is the demo that is submitted (§2.8).
 - **Deployment type:** Autoscale. It scales to zero when idle, so open the URL a minute before presenting.
 - **Build command:** `npm ci && npm run build`.
 - **Run command:** `npm run db:deploy && npm run db:seed && npm start`. Migrations and the idempotent seed run on every start, so a redeploy always brings the production database up to date.
-- **Deployment Secrets:** `NODE_ENV=production`, `DEMO_MODE=true`, `STORAGE_DRIVER=replit`, `STORAGE_PREFIX=prod`, `OTP_HASH_SECRET` (different from the workspace's), the shared Ethereal `SMTP_*` values, and the remaining variables from `.env.example`. `DATABASE_URL` is provided by Replit for the production database.
+- **Deployment Secrets:** `NODE_ENV=production`, `DEMO_MODE=true`, `STORAGE_DRIVER=replit`, `STORAGE_PREFIX=demo`, `OTP_HASH_SECRET` (different from the workspace's), the shared Ethereal `SMTP_*` values, and the remaining variables from `.env.example`. `DATABASE_URL` is provided by Replit for the production database.
 - **To verify on the first publish:** whether Replit's publish step offers to apply development schema changes to production on its own. Prisma migrations must be the only thing that changes the production schema; if Replit proposes its own changes, decline them and record what happened in §13.
 - **Done when:** the published URL serves the app; `/api/health` returns "ok" through it; the production database contains the seeded entities and demo requests; a redeploy keeps any request created on the published app.
 
@@ -331,3 +331,4 @@ Log in just before presenting, so the 15-minute idle timeout doesn't log anyone 
 |---|---|---|
 | 2026-10-22 | All | First version |
 | 2026-10-22 | §2, §5, §7–§10, §12 | Demo on the published app (§5.3 storage, §5.6 publishing); entity list split out to §5.5; seed gated on `DEMO_MODE`; inner screens reduced to the essentials. §5 renumbered once, before any handover referenced it. |
+| 2026-10-23 | §5.6, AGENTS.md | `STORAGE_PREFIX` is `demo` in both the workspace and the published app (was `dev`/`prod`), since both environments only ever hold demo data. |
