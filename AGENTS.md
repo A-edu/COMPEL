@@ -90,6 +90,17 @@ Email OTP with server-side sessions. Endpoints and screens are in the sprint spe
 - **Motion:** animated backgrounds only on the login screen. Respect `prefers-reduced-motion` everywhere.
 - **Minimal inner screens:** every screen after login shows only what the user needs to act. No dates, counts, IDs or metadata unless the spec lists them. When in doubt, leave it out.
 
+**Inner screens** (every page inside `app/(app)/`). Build pages from the shared pieces in `components/app/`; don't restyle them per page.
+- **Canvas and surfaces:** the page is a soft off-white canvas; content sits in white cards (shadcn `Card`) with a hairline ring, a soft shadow and a 12 px radius. This is the login card's language, translated to light. Never put content directly on the canvas except the page header.
+- **Width:** one container, `max-w-5xl` with `px-4 sm:px-6`, shared by the header and every page so their left and right edges line up.
+- **Page header:** `PageHeader` with a title (24 px semibold, tight tracking), an optional line beneath (a `Reference` or a muted sentence) and an optional actions slot on the right.
+- **Primary action:** black button, white text (`Button` default). Secondary: `outline`. Tertiary or cancel: `ghost`. One primary action per screen.
+- **Lists:** rows inside one card, separated by hairlines, the whole row a link with hover fill and an inset focus ring, and a muted chevron on the right.
+- **Forms:** one card in a centred column (`max-w-2xl mx-auto`, the page header inside it); fields stacked with 24 px gaps; a card footer separated by a hairline, with **Cancel** (ghost) then the primary button, right-aligned.
+- **Status and errors:** `StatusBadge` only for status (neutral white badge, colour only in its dot); red only for validation and error text. No other colour.
+- **States:** loading uses `Skeleton` shaped like the content it replaces; empty and error states are centred inside the card, never a bare line of text on the canvas.
+- **Motion:** at most a 150 ms fade on page content and standard hover and focus transitions; nothing under `prefers-reduced-motion`.
+
 ## Environment variables
 
 Keep `.env.example` complete and in sync. Never commit `.env`.

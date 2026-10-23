@@ -251,12 +251,15 @@ The published Replit app is the demo that is submitted (§2.8).
 ## §7 App shell
 Applies to every page except `/login`. Light theme. Keep it minimal (§2.9).
 
-- **Header:** "COMPEL" wordmark (links to `/requests`), the user's entity name, and **Log out**. Nothing else.
+- **Header:** the COMPEL mark and wordmark (links to `/requests`), the user's entity (a small chip: initials plus name), and **Log out**. Nothing else.
 - **Status badge** (shared component): `AWAITING_PROVIDER_RESPONSE` → amber, label "Awaiting response"; `PROVIDER_RESPONDED` → green, label "Responded".
 - **Reference** (shared component): Geist Mono, small, muted.
 - **Toasts:** shadcn Sonner, for success and error messages only.
 - **Session handling:** any 401 from the API redirects to `/login?reason=expired&next=<current path>`.
 - **Loading and errors:** skeletons while loading; a plain error state with **Try again** if a request fails.
+
+**Design latitude.** As in §6.2: copy, behaviour and constraints are fixed; the implementer decides visual details within AGENTS.md → Design system → Inner screens, and produces a finished screen, not component defaults.
+
 - **Done when:** every inner page uses the shell; log out returns to `/login`; an expired session redirects with the message.
 
 ## §8 Requests list (`/requests`)
@@ -351,3 +354,4 @@ Log in just before presenting, so the 15-minute idle timeout doesn't log anyone 
 | 2026-10-23 | §6.2 | Wordmark removed from the login screen on all widths. On phones (below 640 px) the card is docked near the bottom with side and bottom gaps; from 640 px it stays centred. |
 | 2026-10-23 | §5.1, §6 | `/` redirects to `/login`; the §5.1 health-check home page is retired (`/api/health` is unchanged). |
 | 2026-10-23 | §8 | Done-when reworded to match the §5.4 seed: `moh` has one sent request (awaiting) and one received request (responded). |
+| 2026-10-23 | §7, AGENTS.md | Inner-screen design system added (canvas and cards, `max-w-5xl` container, page header, lists, forms, states). Header gets a mark beside the wordmark and an entity chip. Design latitude added. |

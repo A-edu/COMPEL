@@ -3,6 +3,7 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import { ThrottlerStorage, ThrottlerStorageService } from '@nestjs/throttler';
 import { PrismaClient } from '@prisma/client';
 import { randomBytes } from 'node:crypto';
+import request from 'supertest';
 import { AppModule } from '../src/app.module.js';
 import { configureApp } from '../src/app.setup.js';
 import {
@@ -136,6 +137,44 @@ export function sessionCookie(setCookie: string[] | string | undefined) {
     token: decodeURIComponent(pair.slice('compel_session='.length)),
     attributes: attributes.map((a) => a.toLowerCase()),
   };
+}
+
+// Logs `email` in through the real OTP flow, reading the code from the mocked
+// transport. Returns the verify response, the code and the parsed cookie.
+export async function loginWithCode(
+  app: NestExpressApplication,
+  mail: MockMailTransport,
+  email: string,
+) {
+  const before = mail.sent.length;
+  await request(app.getHttpServer())
+    .post('/api/auth/otp/request')
+    .send({ email })
+    .expect(200);
+  const code = codeFrom(await mail.waitForMessage(before));
+  const res = await request(app.getHttpServer())
+    .post('/api/auth/otp/verify')
+    .send({ email, code })
+    .expect(200);
+  const cookie = sessionCookie(res.headers['set-cookie']);
+  if (!cookie) throw new Error('No session cookie.');
+  return { res, code, cookie };
+}
+
+// Logs `email` in and returns the Cookie header value for later requests:
+//
+//   const cookie = await loginAs(app, mail, a.dpo.email);
+//   await request(app.getHttpServer()).get('/api/auth/me').set('Cookie', cookie);
+//
+// Each login counts towards the OTP rate limits; call throttler.reset() in
+// beforeEach when a file logs in many times.
+export async function loginAs(
+  app: NestExpressApplication,
+  mail: MockMailTransport,
+  email: string,
+): Promise<string> {
+  const { cookie } = await loginWithCode(app, mail, email);
+  return `compel_session=${cookie.token}`;
 }
 
 export function envNumber(name: string): number {

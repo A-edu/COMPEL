@@ -5,7 +5,12 @@ import { ReplitStorageDriver } from './replit-storage.driver.js';
 
 @Module({})
 export class StorageModule {
+  private static registered?: DynamicModule;
+
+  // Memoized: AppModule and DocumentsModule both import it, and Nest tells
+  // dynamic modules apart by reference, so this keeps one driver instance.
   static register(): DynamicModule {
+    if (StorageModule.registered) return StorageModule.registered;
     const driver = process.env.STORAGE_DRIVER;
 
     let useClass: typeof LocalStorageDriver | typeof ReplitStorageDriver;
@@ -19,10 +24,11 @@ export class StorageModule {
       );
     }
 
-    return {
+    StorageModule.registered = {
       module: StorageModule,
       providers: [{ provide: STORAGE_SERVICE, useClass }],
       exports: [STORAGE_SERVICE],
     };
+    return StorageModule.registered;
   }
 }

@@ -3,10 +3,11 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { LocalStorageDriver } from './local-storage.driver.js';
+import type { StorageService } from './storage.interface.js';
 
 describe('LocalStorageDriver', () => {
   let uploadDir: string;
-  let driver: LocalStorageDriver;
+  let driver: StorageService;
 
   beforeEach(async () => {
     uploadDir = await mkdtemp(join(tmpdir(), 'compel-storage-test-'));
