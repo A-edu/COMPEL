@@ -10,7 +10,7 @@ What to build in Sprint 1. Standing rules (access rules, auth invariants, email 
 - [X] §5.2 Database and Prisma schema
 - [X] §5.3 File storage
 - [X] §5.4 Seed script
-- [ ] §5.5 Entity list
+- [x] §5.5 Entity list
 - [X] §5.6 Publishing
 - [X] §6.1 Auth API and temporary login form
 - [X] §6.2 Login screen design
