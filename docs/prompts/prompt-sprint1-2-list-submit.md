@@ -50,7 +50,7 @@ Branch `feat/requests-list`, after Task 1's PR is merged.
 - `/requests` exactly as §8, replacing Task 1's placeholder: **Sent** and **Received** tabs, active tab in the URL (`?tab=received`, default Sent); rows show only the title with the reference beneath it (`Reference`), the other entity's name and the status badge (`StatusBadge`); whole row clickable to `/requests/[id]`; **New request** top right to `/requests/new`; empty states "No requests sent yet." (with a **New request** button) and "No requests received yet.". No dates, counts or other columns.
 - E2e tests with at least three entities: the counterpart is the provider in `sent` and the requester in `received`; newest first; other entities' requests never appear; invalid direction returns 400.
 
-**Done when** the seeded `moh` DPO sees one sent request, one awaiting and one responded received request, and no other entity's requests. Tick §8. Stop with the AGENTS.md summary. ⏸
+**Done when** the seeded `moh` DPO sees one sent request (to `zatca`, awaiting response) and one received request (from `hrsd`, responded), and no other entity's requests. Tick §8. Stop with the AGENTS.md summary. ⏸
 
 ---
 

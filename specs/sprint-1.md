@@ -265,7 +265,7 @@ Applies to every page except `/login`. Light theme. Keep it minimal (§2.9).
 - Newest first. Whole row clickable → `/requests/[id]`.
 - **New request** button (top right) → `/requests/new`.
 - Empty states: Sent: "No requests sent yet." with a **New request** button. Received: "No requests received yet."
-- **Done when:** the seeded `moh` DPO sees one sent request, one awaiting and one responded received request, and no other entity's requests.
+- **Done when:** the seeded `moh` DPO sees one sent request (to `zatca`, awaiting response) and one received request (from `hrsd`, responded), and no other entity's requests.
 
 ## §9 Submit a request (US-02, `/requests/new`)
 
@@ -350,3 +350,4 @@ Log in just before presenting, so the 15-minute idle timeout doesn't log anyone 
 | 2026-10-23 | §6.2 | Tagline replaced by a "Sign in" heading and guidance line; email placeholder `name@entity.example`; OTP slots styled after Watermelon UI `input-otp-7` (MIT); design latitude added; Threads visibility added to Done when. |
 | 2026-10-23 | §6.2 | Wordmark removed from the login screen on all widths. On phones (below 640 px) the card is docked near the bottom with side and bottom gaps; from 640 px it stays centred. |
 | 2026-10-23 | §5.1, §6 | `/` redirects to `/login`; the §5.1 health-check home page is retired (`/api/health` is unchanged). |
+| 2026-10-23 | §8 | Done-when reworded to match the §5.4 seed: `moh` has one sent request (awaiting) and one received request (responded). |
