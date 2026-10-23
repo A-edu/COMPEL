@@ -4,10 +4,9 @@
 
 COMPEL is a graduation project (King Saud University, Software Engineering). A requesting entity submits a data-sharing request to a providing entity; the providing entity responds with its Record of Processing Activities (RoPA) entry and a position on the request. Later sprints add AI agents that extract fields from the submitted documents and check them against the Personal Data Protection Law (PDPL).
 
-
 ## Status
 
-**Sprint 1 — in progress.** The workspace is being scaffolded. See the Progress checklist at the top of [`docs/specs/sprint-1.md`](docs/specs/sprint-1.md) for what exists today.
+**Sprint 1 — in progress.** The workspace is being scaffolded. See the Progress checklist at the top of [`specs/sprint-1.md`](specs/sprint-1.md) for what exists today.
 
 Sprint 1 delivers:
 
@@ -45,9 +44,8 @@ There is one kind of user in Sprint 1: a **DPO** (data protection officer) belon
 apps/
   api/          NestJS API, Prisma schema and seed
   web/          Next.js app
-docs/
-  specs/
-    sprint-1.md What to build in Sprint 1 (sections are referenced by number)
+specs/
+  sprint-1.md   What to build in Sprint 1 (sections are referenced by number)
 AGENTS.md       Standing rules for coding agents and contributors
 CLAUDE.md       Claude Code entry point (imports AGENTS.md)
 .env.example    Every environment variable, with defaults

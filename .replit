@@ -1,6 +1,24 @@
 modules = ["nodejs-24"]
+run = "npm run dev"
+
 [nix]
 channel = "stable-25_05"
 
 [agent]
 expertMode = true
+
+[[ports]]
+localPort = 3000
+externalPort = 80
+
+[[ports]]
+localPort = 3999
+externalPort = 3000
+
+[objectStorage]
+defaultBucketID = "replit-objstore-1cb7406d-4bbe-44f7-ad18-30fd16010123"
+
+[deployment]
+deploymentTarget = "autoscale"
+build = ["sh", "-c", "npm ci && npm run build"]
+run = ["sh", "-c", "npm run db:deploy && npm run db:seed && npm start"]

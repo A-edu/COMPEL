@@ -45,11 +45,11 @@ Use these terms exactly, in code and UI.
 - **One origin.** Next.js rewrites `/api/*` to the NestJS server. The browser only talks to the Next.js origin, so the session cookie is first-party. Do not set up CORS for cookies; use the rewrite.
 - **Database:** PostgreSQL via `DATABASE_URL` only. Prisma is the only way the API touches the database. Replit gives the workspace a development database and the published app a separate production database; both are reached through `DATABASE_URL`. Schema changes reach production only through Prisma migrations (`prisma migrate deploy`), never by hand.
 - **File storage:** behind a `StorageService` interface with two drivers, chosen by `STORAGE_DRIVER`:
-  - `replit`: Replit App Storage. Used in the workspace and the published app, because a deployment's filesystem does not persist across redeploys. The workspace and published app share one bucket and, for now, one prefix: every key starts with `STORAGE_PREFIX`, set to `demo` in both. File keys are random and unique, so the two environments never collide. **Never delete files in bulk or by prefix**, since that would remove the published app's documents too.
+  - `replit`: Replit App Storage. Used in the workspace and the published app, because a deployment's filesystem does not persist across redeploys. The workspace and published app share one bucket and, for now, one prefix: every key starts with `STORAGE_PREFIX`, set to `demo` in both. Real uploaded documents get generated, unique keys, so the two environments never collide there; seed data is the deliberate exception — it uses fixed keys (e.g. `seed/<slug>-<slug>/request-form.pdf`) so the workspace and published app share one copy instead of each uploading a redundant one. **Never delete files in bulk or by prefix**, since that would remove the published app's documents too.
   - `local`: writes to `UPLOAD_DIR` (gitignored). Used by tests only.
   - Store files under generated keys, never the user's filename. Accept PDF and DOCX only, checked by content type and extension, up to `MAX_UPLOAD_MB`.
 - **API modules:** `auth`, `entities`, `requests`, `documents`, `mail`, `storage`, `prisma`. Controllers stay thin; logic lives in services. Validate every request body with DTOs.
-- **NestJS compiles to CommonJS.** Some newer npm packages are ESM-only and fail with `ERR_REQUIRE_ESM`. If that happens, stop and report it instead of rewriting the build setup.
+- **NestJS runs as ESM.** `@nestjs/core`, `@nestjs/common`, `@nestjs/platform-express`, `@nestjs/testing` and `@nestjs/config` ship ESM-only from Nest 12 onward, so `apps/api/package.json` sets `"type": "module"`: relative imports use explicit `.js` extensions, `main.ts` uses a top-level `await bootstrap()`, and tests run on Vitest rather than Jest because of this (see Testing). If a *different* dependency turns out to be CommonJS-only and breaks under ESM, stop and report it instead of rewriting the build setup.
 
 ## Authentication invariants
 
@@ -119,7 +119,7 @@ API_PORT=3001
 
 ## Commands
 
-Planned. The scaffold must create root scripts with exactly these names, then this section must be updated to say they exist.
+All scripts below exist and are functional as of §5.4. `db:seed` requires a built `apps/api/dist` (it runs the compiled `dist/seed/seed.js`, not the `.ts` source directly — NestJS's decorator syntax isn't supported by Node's native TypeScript stripping) and refuses to run unless `DEMO_MODE=true`.
 
 - `npm run dev`: start API and web together, in development mode
 - `npm run build`: build both apps
@@ -133,7 +133,7 @@ Planned. The scaffold must create root scripts with exactly these names, then th
 
 ## Testing
 
-- API: Jest (Nest default) for services; Supertest e2e for endpoints against a separate test database.
+- API: Vitest (Nest default, since Nest 12's core packages are ESM-only — see Architecture) for services; Supertest e2e for endpoints against a separate test database.
 - Each spec section lists the tests that define "done" for it. A section is not done until they pass.
 - E2e tests use `TEST_DATABASE_URL` (a separate Postgres schema in the development database) and the `local` storage driver. They must refuse to run if `TEST_DATABASE_URL` equals `DATABASE_URL`, and never touch the production database or App Storage.
 - Tests read OTP codes from a mocked mail transport.
