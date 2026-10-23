@@ -223,10 +223,11 @@ The published Replit app is the demo that is submitted (§2.8).
 - Load it client-side only after the card renders (e.g. `next/dynamic` with `ssr: false`), so the form never waits on WebGL. Until it loads, the plain `#0a0a0a` page shows.
 - It has no npm dependencies and already freezes its animation under `prefers-reduced-motion`; no extra handling is needed.
 
-**Card contents.** "COMPEL" wordmark (Geist, semibold) and the line "PDPL compliance verification".
+**Card contents.** "COMPEL" wordmark (Geist, semibold), then the heading **Sign in**. On the email step, below the heading: "Use your entity's DPO email. We'll send you a 6-digit code." On the OTP step, that line is replaced by "Code sent to" + the email (see OTP step). The heading stays on both steps.
 
 **Email step**
 - Label "Work email", shadcn `Input`, button **Send code**.
+- Placeholder `name@entity.example`.
 - Client-side check for a valid email format before sending.
 - While sending: button shows a spinner and is disabled.
 - On 200: transition in place to the OTP step (Motion `AnimatePresence`, about 250 ms; instant under reduced motion).
@@ -235,6 +236,7 @@ The published Replit app is the demo that is submitted (§2.8).
 **OTP step**
 - Text "Code sent to" + the email in Geist Mono, and a **Change email** link back to the email step.
 - shadcn `Input OTP`, 6 slots, Geist Mono, `inputmode="numeric"`, `autocomplete="one-time-code"`, paste fills all slots, auto-submits on the 6th digit.
+- Slot styling is adapted from Watermelon UI `input-otp-7` (MIT): two groups of three slots with a dash separator, raised slots with an inset highlight, and a ring and slight scale on the active slot (no scale under reduced motion). Slots are at least 44 px square.
 - While verifying: slots disabled, small spinner.
 - On 401: shake the slots once (skipped under reduced motion), clear them, show "Invalid or expired code." below.
 - **Resend code** link, disabled for 60 seconds after each send with a visible countdown.
@@ -242,7 +244,9 @@ The published Replit app is the demo that is submitted (§2.8).
 
 **Session expired.** When redirected with `?reason=expired`, show "Your session expired, please log in again." above the email field.
 
-**Done when:** the full flow works at desktop and phone widths, keyboard-only, and with reduced motion on; the temporary form from §6.1 is gone.
+**Design latitude.** Copy, behaviour, components and constraints in this section and in AGENTS.md → Design system are fixed. Within them, the implementer decides the visual details (spacing, sizes, surfaces, borders, shadows, hover, focus and pressed states, and a subtle card entrance) and should produce a finished, production-quality screen, not component defaults.
+
+**Done when:** the full flow works at desktop and phone widths, keyboard-only, and with reduced motion on; the temporary form from §6.1 is gone; the Threads background is visible behind the card.
 
 ## §7 App shell
 Applies to every page except `/login`. Light theme. Keep it minimal (§2.9).
@@ -343,3 +347,4 @@ Log in just before presenting, so the 15-minute idle timeout doesn't log anyone 
 | 2026-10-23 | §5.6 | First publish verified: Replit did not offer to apply schema changes to production. Prisma migrations remain the only path. |
 | 2026-10-23 | §7 | Demo badge removed from the header; the app never reaches a production audience. |
 | 2026-10-23 | §6.1 | Rate limits read from the existing rate-limit variables. Tests may backdate timestamps instead of waiting for real time to pass. |
+| 2026-10-23 | §6.2 | Tagline replaced by a "Sign in" heading and guidance line; email placeholder `name@entity.example`; OTP slots styled after Watermelon UI `input-otp-7` (MIT); design latitude added; Threads visibility added to Done when. |
