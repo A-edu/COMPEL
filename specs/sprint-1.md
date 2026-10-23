@@ -349,3 +349,4 @@ Log in just before presenting, so the 15-minute idle timeout doesn't log anyone 
 | 2026-10-23 | §6.1 | Rate limits read from the existing rate-limit variables. Tests may backdate timestamps instead of waiting for real time to pass. |
 | 2026-10-23 | §6.2 | Tagline replaced by a "Sign in" heading and guidance line; email placeholder `name@entity.example`; OTP slots styled after Watermelon UI `input-otp-7` (MIT); design latitude added; Threads visibility added to Done when. |
 | 2026-10-23 | §6.2 | Wordmark removed from the login screen on all widths. On phones (below 640 px) the card is docked near the bottom with side and bottom gaps; from 640 px it stays centred. |
+| 2026-10-23 | §5.1, §6 | `/` redirects to `/login`; the §5.1 health-check home page is retired (`/api/health` is unchanged). |
