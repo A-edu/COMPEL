@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { ErrorState } from "@/components/error-state";
+import { ErrorState } from "@/components/app/error-state";
+import { surfaceFlush } from "@/components/app/surface";
+import { Card } from "@/components/ui/card";
 
 export default function AppError({
   error,
@@ -14,5 +16,9 @@ export default function AppError({
     console.error(error);
   }, [error]);
 
-  return <ErrorState onRetry={retry} />;
+  return (
+    <Card className={surfaceFlush}>
+      <ErrorState onRetry={retry} />
+    </Card>
+  );
 }

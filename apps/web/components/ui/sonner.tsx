@@ -1,10 +1,11 @@
 "use client"
 
 import { Toaster as Sonner, type ToasterProps } from "sonner"
-import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
+import { CircleCheckIcon, OctagonXIcon } from "lucide-react"
 
 // Inner screens are always light (AGENTS.md -> Design system), so the theme is
-// fixed rather than read from next-themes.
+// fixed rather than read from next-themes. Toasts are for success and error
+// only (§7) and are styled like the inner-screen cards.
 const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
@@ -14,30 +15,22 @@ const Toaster = ({ ...props }: ToasterProps) => {
         success: (
           <CircleCheckIcon className="size-4" />
         ),
-        info: (
-          <InfoIcon className="size-4" />
-        ),
-        warning: (
-          <TriangleAlertIcon className="size-4" />
-        ),
         error: (
-          <OctagonXIcon className="size-4" />
-        ),
-        loading: (
-          <Loader2Icon className="size-4 animate-spin" />
+          <OctagonXIcon className="size-4 text-destructive" />
         ),
       }}
       style={
         {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)",
-          "--border-radius": "var(--radius)",
+          "--normal-bg": "var(--card)",
+          "--normal-text": "var(--card-foreground)",
+          "--normal-border": "rgb(0 0 0 / 0.06)",
+          "--border-radius": "0.75rem",
         } as React.CSSProperties
       }
       toastOptions={{
         classNames: {
-          toast: "cn-toast",
+          toast:
+            "cn-toast text-sm! shadow-[0_1px_2px_0_rgb(0_0_0/0.04),0_4px_16px_-4px_rgb(0_0_0/0.08)]!",
         },
       }}
       {...props}
