@@ -92,7 +92,16 @@ Every seeded entity has one DPO account:
 dpo@<entity-slug>.example
 ```
 
-For example, `dpo@moh.example` for the Ministry of Health. After entering the email, open the shared Ethereal inbox to read the code. If SMTP isn't configured in development, the code is printed in the API console instead.
+The four demo entities, which own the seeded demo requests:
+
+| Login email | Entity | Demo requests |
+|---|---|---|
+| `dpo@moh.example` | Ministry of Health | Sent one to `zatca` (awaiting); received one from `hrsd` (responded) |
+| `dpo@zatca.example` | Zakat, Tax and Customs Authority | Received one from `moh` (awaiting); sent one to `gosi` (awaiting) |
+| `dpo@gosi.example` | General Organization for Social Insurance | Received one from `zatca` (awaiting) |
+| `dpo@hrsd.example` | Ministry of Human Resources and Social Development | Sent one to `moh` (responded) |
+
+Any other entity in `apps/api/prisma/seed/entities.json` follows the same pattern. After entering the email, open the shared Ethereal inbox to read the code. If SMTP isn't configured in development, the code is printed in the API console instead.
 
 To act as two entities at once, use a regular browser window and a private one, since they keep separate sessions.
 
