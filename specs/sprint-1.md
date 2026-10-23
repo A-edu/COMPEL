@@ -11,7 +11,7 @@ What to build in Sprint 1. Standing rules (access rules, auth invariants, email 
 - [x] §5.3 File storage
 - [x] §5.4 Seed script
 - [ ] §5.5 Entity list
-- [ ] §5.6 Publishing
+- [x] §5.6 Publishing
 - [ ] §6.1 Auth API and temporary login form
 - [ ] §6.2 Login screen design
 - [ ] §7 App shell
@@ -332,3 +332,4 @@ Log in just before presenting, so the 15-minute idle timeout doesn't log anyone 
 | 2026-10-22 | All | First version |
 | 2026-10-22 | §2, §5, §7–§10, §12 | Demo on the published app (§5.3 storage, §5.6 publishing); entity list split out to §5.5; seed gated on `DEMO_MODE`; inner screens reduced to the essentials. §5 renumbered once, before any handover referenced it. |
 | 2026-10-23 | §5.6, AGENTS.md | `STORAGE_PREFIX` is `demo` in both the workspace and the published app (was `dev`/`prod`), since both environments only ever hold demo data. |
+| 2026-10-23 | §5.6 | First publish to usecompel.replit.app. No schema-diff or auto-migration prompt appeared during publish, so nothing needed to be declined. `/api/health` returns "ok" through the published URL; the production database has the 4 seeded entities and 3 demo requests. "A redeploy keeps any request created on the published app" is verified only as far as possible — there's no way to create a request through the app yet (§9); full verification deferred until then. |
