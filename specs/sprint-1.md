@@ -201,15 +201,16 @@ The published Replit app is the demo that is submitted (§2.8).
 - Mail module: Nodemailer over SMTP, Ethereal config, `MAIL_REDIRECT_TO` switch, dev console fallback. OTP email subject "Your COMPEL login code"; body contains the code, its validity in minutes, and nothing else.
 - A **temporary, unstyled** `/login` page (email field → code field) so everyone can log in before §6.2 exists. §6.2 replaces it.
 - Next.js `proxy.ts` (the Next.js 16 name for middleware): redirect to `/login` when there is no `compel_session` cookie, except on `/login` itself.
+- Rate limits on `otp/request` and `otp/verify` come from the rate-limit variables already set in Secrets and listed in `.env.example`.
 - **Done when** these API tests pass:
   - an unknown email gets exactly the same response as a known one
   - a correct code logs in and sets the cookie; `GET /auth/me` then returns the user and entity
   - a wrong code returns 401 "Invalid or expired code."
-  - an expired code is rejected
+  - an expired code is rejected (backdate `expiresAt` in the test database)
   - after `OTP_MAX_ATTEMPTS` wrong attempts, the correct code is rejected
   - a used code cannot be reused
   - requesting a new code invalidates the previous one
-  - an idle session returns 401 (use a short `SESSION_IDLE_MINUTES` in tests)
+  - an idle session returns 401 (simulate time by backdating `lastSeenAt` in the test database, or use a short `SESSION_IDLE_MINUTES`)
   - logout makes the session unusable
   - code requests beyond the limit return 429
 
@@ -246,7 +247,7 @@ The published Replit app is the demo that is submitted (§2.8).
 ## §7 App shell
 Applies to every page except `/login`. Light theme. Keep it minimal (§2.9).
 
-- **Header:** "COMPEL" wordmark (links to `/requests`) with a small **Demo** badge, the user's entity name, and **Log out**. Nothing else.
+- **Header:** "COMPEL" wordmark (links to `/requests`), the user's entity name, and **Log out**. Nothing else.
 - **Status badge** (shared component): `AWAITING_PROVIDER_RESPONSE` → amber, label "Awaiting response"; `PROVIDER_RESPONDED` → green, label "Responded".
 - **Reference** (shared component): Geist Mono, small, muted.
 - **Toasts:** shadcn Sonner, for success and error messages only.
@@ -337,4 +338,8 @@ Log in just before presenting, so the 15-minute idle timeout doesn't log anyone 
 |---|---|---|
 | 2026-10-15 | §6.1 | Middleware renamed to `proxy.ts`, per Next.js 16. |
 | 2026-10-20 | §6.2 | Background changed from Pattern Waves to React Bits Threads (free): speed 0.3, mouse interaction off, other props default. |
-| 2026-10-20 | §5.3, §5.4, §5.6 | Workspace and published app share one storage prefix, `demo`, for Sprint 1. Seed files use fixed keys. No bulk deletes. || 2026-10-20 | §2, §5, §7–§10, §12 | Demo on the published app (§5.3 storage, §5.6 publishing); entity list split out to §5.5; seed gated on `DEMO_MODE`; inner screens reduced to the essentials. §5 renumbered once, before any handover referenced it. |
+| 2026-10-20 | §5.3, §5.4, §5.6 | Workspace and published app share one storage prefix, `demo`, for Sprint 1. Seed files use fixed keys. No bulk deletes. |
+| 2026-10-20 | §2, §5, §7–§10, §12 | Demo on the published app (§5.3 storage, §5.6 publishing); entity list split out to §5.5; seed gated on `DEMO_MODE`; inner screens reduced to the essentials. §5 renumbered once, before any handover referenced it. |
+| 2026-10-23 | §5.6 | First publish verified: Replit did not offer to apply schema changes to production. Prisma migrations remain the only path. |
+| 2026-10-23 | §7 | Demo badge removed from the header; the app never reaches a production audience. |
+| 2026-10-23 | §6.1 | Rate limits read from the existing rate-limit variables. Tests may backdate timestamps instead of waiting for real time to pass. |

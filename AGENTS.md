@@ -12,7 +12,7 @@ This is a graduation project (KSU, Software Engineering). The app is a realistic
 
 ## Specs: what to build
 
-- What to build lives in one spec per sprint: `docs/specs/sprint-<n>.md`. **The current sprint is `docs/specs/sprint-1.md`.**
+- What to build lives in one spec per sprint: `specs/sprint-<n>.md`. **The current sprint is `specs/sprint-1.md`.**
 - Tasks reference spec sections by number (e.g. "implement §6.1"). Read the referenced section, plus §2 (decisions), §3 (data model) and §4 (API contract) of the same spec, before writing code.
 - The spec's **Progress** checklist shows what exists. Tick items in the same commit that completes them.
 - If the spec and this file disagree, this file wins for rules; the spec wins for features. If a task contradicts the spec, stop and ask.
@@ -102,6 +102,9 @@ TEST_DATABASE_URL=
 OTP_HASH_SECRET=
 OTP_TTL_MINUTES=5
 OTP_MAX_ATTEMPTS=5
+OTP_RATE_WINDOW_SECONDS=600
+OTP_RATE_LIMIT_PER_EMAIL=5
+OTP_RATE_LIMIT_PER_IP=30
 SESSION_IDLE_MINUTES=15
 SESSION_ABSOLUTE_HOURS=8
 SMTP_HOST=smtp.ethereal.email
