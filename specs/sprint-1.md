@@ -18,7 +18,7 @@ What to build in Sprint 1. Standing rules (access rules, auth invariants, email 
 - [x] §8 Requests list
 - [x] §9 Submit a request
 - [x] §10 Request detail and provider response
-- [ ] §11 Entity isolation tests
+- [x] §11 Entity isolation tests
 
 ---
 
