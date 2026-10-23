@@ -81,14 +81,16 @@ export function LoginCard({
   }
 
   return (
-    // Entrance is CSS (tw-animate-css), so the card is visible before
-    // hydration and stays still under reduced motion.
-    <Card className="relative z-10 w-full max-w-[400px] gap-0 rounded-2xl bg-[#111111] py-(--card-spacing) shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_24px_64px_-12px_rgba(0,0,0,0.9)] ring-white/10 [--card-spacing:--spacing(6)] sm:[--card-spacing:--spacing(8)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 motion-safe:ease-out">
+    // A bottom sheet below sm, a floating card from sm. Entrance is CSS
+    // (tw-animate-css), so the card is visible before hydration and stays
+    // still under reduced motion.
+    <Card className="relative z-10 w-full gap-0 rounded-t-3xl rounded-b-none bg-[#111111] pt-8 pb-[max(2rem,calc(env(safe-area-inset-bottom)+1.5rem))] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_-16px_48px_-12px_rgba(0,0,0,0.9)] ring-white/10 [--card-spacing:--spacing(4)] min-[360px]:[--card-spacing:--spacing(6)] sm:max-w-[400px] sm:rounded-2xl sm:py-(--card-spacing) sm:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_24px_64px_-12px_rgba(0,0,0,0.9)] sm:[--card-spacing:--spacing(8)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 motion-safe:ease-out">
       <div className="px-(--card-spacing)">
-        <p className="text-sm font-semibold tracking-tight text-white/80">
+        {/* On phones the wordmark sits above the sheet (page.tsx). */}
+        <p className="hidden text-sm font-semibold tracking-tight text-white/80 sm:block">
           COMPEL
         </p>
-        <h1 className="mt-6 text-2xl font-semibold tracking-tight text-white">
+        <h1 className="text-2xl font-semibold tracking-tight text-white sm:mt-6">
           Sign in
         </h1>
         <AnimatePresence mode="wait" initial={false}>
@@ -348,7 +350,7 @@ function OtpStep({
             <InputOTPGroup className="shadow-xs">
               {[0, 1, 2].map(slot)}
             </InputOTPGroup>
-            <InputOTPSeparator className="px-1.5 text-white/40" />
+            <InputOTPSeparator className="px-0.5 text-white/40 min-[360px]:px-1.5" />
             <InputOTPGroup className="shadow-xs">
               {[3, 4, 5].map(slot)}
             </InputOTPGroup>
