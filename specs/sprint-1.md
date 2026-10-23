@@ -6,12 +6,12 @@ What to build in Sprint 1. Standing rules (access rules, auth invariants, email 
 
 ## Progress
 
-- [x] §5.1 Monorepo scaffold
-- [x] §5.2 Database and Prisma schema
-- [x] §5.3 File storage
-- [x] §5.4 Seed script
+- [ ] §5.1 Monorepo scaffold
+- [ ] §5.2 Database and Prisma schema
+- [ ] §5.3 File storage
+- [ ] §5.4 Seed script
 - [ ] §5.5 Entity list
-- [x] §5.6 Publishing
+- [ ] §5.6 Publishing
 - [ ] §6.1 Auth API and temporary login form
 - [ ] §6.2 Login screen design
 - [ ] §7 App shell
@@ -214,7 +214,13 @@ The published Replit app is the demo that is submitted (§2.8).
   - code requests beyond the limit return 429
 
 ### §6.2 Login screen design
-**Layout.** Full-screen dark page. Background: React Bits **Pattern Waves**, white/grey on black, slow, click effects off, loaded client-side only after the card renders. Exact settings are given in the task that implements this section. Under `prefers-reduced-motion`: a static frame or plain dark gradient. Centred card with a solid or frosted dark surface; text contrast must not depend on the background.
+**Layout.** Full-screen page on `#0a0a0a`. Centred card with a solid or frosted dark surface; text contrast must not depend on the background.
+
+**Background.** React Bits **Threads** (free; `npx shadcn@latest add @react-bits/Threads-TS-TW`).
+- Props: `speed={0.3}`, `enableMouseInteraction={false}`; every other prop stays at its default (white threads).
+- It is a client component that fills its parent, so place it in a fixed, full-viewport, `pointer-events-none` layer behind the card.
+- Load it client-side only after the card renders (e.g. `next/dynamic` with `ssr: false`), so the form never waits on WebGL. Until it loads, the plain `#0a0a0a` page shows.
+- It has no npm dependencies and already freezes its animation under `prefers-reduced-motion`; no extra handling is needed.
 
 **Card contents.** "COMPEL" wordmark (Geist, semibold) and the line "PDPL compliance verification".
 
@@ -329,8 +335,6 @@ Log in just before presenting, so the 15-minute idle timeout doesn't log anyone 
 ## §13 Change log
 | Date | Section | Change |
 |---|---|---|
-| 2026-10-22 | All | First version |
-| 2026-10-22 | §2, §5, §7–§10, §12 | Demo on the published app (§5.3 storage, §5.6 publishing); entity list split out to §5.5; seed gated on `DEMO_MODE`; inner screens reduced to the essentials. §5 renumbered once, before any handover referenced it. |
-| 2026-10-22 | §6.1 | Middleware renamed to `proxy.ts`, per Next.js 16. |
-| 2026-10-23 | §5.3, §5.4, §5.6 | Workspace and published app share one storage prefix, `demo`, for Sprint 1. Seed files use fixed keys. No bulk deletes. |
-| 2026-10-23 | §5.6 | First publish to usecompel.replit.app. No schema-diff or auto-migration prompt appeared during publish, so nothing needed to be declined. `/api/health` returns "ok" through the published URL; the production database has the 4 seeded entities and 3 demo requests. "A redeploy keeps any request created on the published app" is verified only as far as possible — there's no way to create a request through the app yet (§9); full verification deferred until then. |
+| 2026-10-15 | §6.1 | Middleware renamed to `proxy.ts`, per Next.js 16. |
+| 2026-10-20 | §6.2 | Background changed from Pattern Waves to React Bits Threads (free): speed 0.3, mouse interaction off, other props default. |
+| 2026-10-20 | §5.3, §5.4, §5.6 | Workspace and published app share one storage prefix, `demo`, for Sprint 1. Seed files use fixed keys. No bulk deletes. || 2026-10-20 | §2, §5, §7–§10, §12 | Demo on the published app (§5.3 storage, §5.6 publishing); entity list split out to §5.5; seed gated on `DEMO_MODE`; inner screens reduced to the essentials. §5 renumbered once, before any handover referenced it. |
