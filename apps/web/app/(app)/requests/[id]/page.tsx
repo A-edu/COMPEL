@@ -28,6 +28,10 @@ export default function RequestPage() {
     setAttempt((n) => n + 1);
   }, []);
 
+  // Fetches again while the current view stays on screen, e.g. to swap the
+  // response form for the read-only response once it is submitted.
+  const reload = useCallback(() => setAttempt((n) => n + 1), []);
+
   useEffect(() => {
     const controller = new AbortController();
     api<RequestDetail>(`/requests/${encodeURIComponent(id)}`, {
@@ -67,6 +71,8 @@ export default function RequestPage() {
         </Card>
       );
     case "ready":
-      return <RequestDetailView request={state.request} />;
+      return (
+        <RequestDetailView request={state.request} onResponded={reload} />
+      );
   }
 }
