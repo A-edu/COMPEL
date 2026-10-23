@@ -1,27 +1,28 @@
-import { Inbox, Plus } from "lucide-react";
-import { EmptyState } from "@/components/app/empty-state";
+import { Plus } from "lucide-react";
+import Link from "next/link";
+import { Suspense } from "react";
 import { PageHeader } from "@/components/app/page-header";
-import { surfaceFlush } from "@/components/app/surface";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { RequestsList, RequestsListSkeleton } from "./requests-list";
 
-// Placeholder so the shell and the page pattern can be judged; §8 replaces
-// the content but keeps the header and card structure.
+// §8: Sent and Received tabs, one card of rows each.
 export default function RequestsPage() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <PageHeader
         title="Requests"
         actions={
-          <Button disabled>
-            <Plus data-icon="inline-start" aria-hidden />
-            New request
+          <Button asChild>
+            <Link href="/requests/new">
+              <Plus data-icon="inline-start" aria-hidden />
+              New request
+            </Link>
           </Button>
         }
       />
-      <Card className={surfaceFlush}>
-        <EmptyState icon={Inbox} message="No requests sent yet." />
-      </Card>
+      <Suspense fallback={<RequestsListSkeleton />}>
+        <RequestsList />
+      </Suspense>
     </div>
   );
 }
