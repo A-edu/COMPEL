@@ -19,7 +19,7 @@
 
 ## When you're done
 
-- Logged in as `dpo@moh.example`, you see one sent request and two received ones (one awaiting, one responded), and nothing belonging to other entities.
+- Logged in as `dpo@moh.example`, you see one sent request (to `zatca`, awaiting response) under **Sent** and one received request (from `hrsd`, responded) under **Received**, and nothing belonging to other entities.
 - A valid submission creates the request as "Awaiting response", with a correct reference and its documents. Several submissions at the same time all get different references.
 - The form refuses: your own entity as the provider, a missing request form, the wrong file type, a file that's too big, or more than five supporting documents.
 - The seed runs cleanly with the full entity list, twice in a row, without duplicating anything.
