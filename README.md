@@ -34,7 +34,7 @@ There is one kind of user in Sprint 1: a **DPO** (data protection officer) belon
 | API | NestJS (TypeScript), Prisma, PostgreSQL |
 | Web | Next.js (App Router), Tailwind CSS, shadcn/ui |
 | Auth | Email OTP with server-side sessions (no passwords, no JWTs) |
-| Email | Nodemailer over SMTP to [Ethereal](https://ethereal.email), a test inbox that delivers nothing |
+| Email | Nodemailer over SMTP through the team mailbox; every login code is redirected to it, whichever account it is for |
 | Design | Black and white; Geist and Geist Mono; React Bits background on the login screen |
 | Environment | Replit, with Claude Code |
 
@@ -55,7 +55,7 @@ CLAUDE.md       Claude Code entry point (imports AGENTS.md)
 
 > The scripts below are **planned** and are created by the scaffold (§5.1 of the spec). Until then they will not run.
 
-**Prerequisites:** Node.js LTS, a PostgreSQL database, and an Ethereal account.
+**Prerequisites:** Node.js LTS, a PostgreSQL database, and access to the team mailbox.
 
 1. **Install dependencies**
    ```bash
@@ -68,7 +68,8 @@ CLAUDE.md       Claude Code entry point (imports AGENTS.md)
    Then set at least:
    - `DATABASE_URL` — your PostgreSQL connection string
    - `OTP_HASH_SECRET` — any long random string
-   - `SMTP_USER` and `SMTP_PASS` — the team's shared Ethereal credentials
+   - `SMTP_USER` and `SMTP_PASS` — the team mailbox's credentials
+   - `MAIL_FROM` and `MAIL_REDIRECT_TO` — addresses on the team domain (see AGENTS.md → Email)
 
    - `TEST_DATABASE_URL` — the same connection string with a separate `schema=` parameter, for tests
 
@@ -101,7 +102,7 @@ The four demo entities, which own the seeded demo requests:
 | `dpo@gosi.example` | General Organization for Social Insurance | Received one from `zatca` (awaiting) |
 | `dpo@hrsd.example` | Ministry of Human Resources and Social Development | Sent one to `moh` (responded) |
 
-Any other entity in `apps/api/prisma/seed/entities.json` follows the same pattern. After entering the email, open the shared Ethereal inbox to read the code. If SMTP isn't configured in development, the code is printed in the API console instead.
+Any other entity in `apps/api/prisma/seed/entities.json` follows the same pattern. After entering the email, open the team mailbox to read the code. Every code arrives addressed to `otp@`, whichever DPO it is for, so request one code at a time and use the newest. If SMTP isn't configured in development, the code is printed in the API console instead.
 
 To act as two entities at once, use a regular browser window and a private one, since they keep separate sessions.
 

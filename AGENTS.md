@@ -68,9 +68,13 @@ Email OTP with server-side sessions. Endpoints and screens are in the sprint spe
 
 ## Email
 
-- Send through Nodemailer over SMTP. **No email service provider (Resend, SendGrid, etc.).**
-- The workspace and the published app both use **Ethereal**, a fake SMTP inbox that accepts every message and delivers none. The team shares one Ethereal account; set its `SMTP_*` values in the workspace Secrets and in the deployment's Secrets.
-- **Safety switch:** whenever `MAIL_REDIRECT_TO` is set, in any environment, every outgoing email goes to that address regardless of recipient.
+- Send through Nodemailer over SMTP. **No email service provider (Resend, SendGrid, Mailgun, Postmark, SES, etc.)**: no sending service built for apps, and no email API or SDK. Signing in to an ordinary mailbox over SMTP is not an ESP.
+- The workspace and the published app both send through the **team mailbox**: one mailbox on the team's own domain, hosted on Namecheap Private Email. The team shares its credentials; set its `SMTP_*` values in the workspace Secrets and in the deployment's Secrets.
+- The team domain and its addresses live **only in Secrets**, never in the repository. The mailbox is `team@<team domain>`; `otp@` and `no-reply@` are aliases of it.
+- **Safety switch:** whenever `MAIL_REDIRECT_TO` is set, in any environment, every outgoing email goes to that address regardless of recipient. It **must be set** in the workspace and the published app, to `otp@<team domain>`, so every login code lands in the team mailbox.
+- `MAIL_FROM` uses an address on the team domain (`no-reply@`, or `team@` if the mailbox refuses to send from the alias). A `.example` sender fails SPF and DMARC on real mail.
+- Anyone who can read the team mailbox can log in as every DPO. Share its credentials only with the team.
+- Before the team domain lapses, point `MAIL_REDIRECT_TO` and the `SMTP_*` values elsewhere in both environments, so a later owner of the domain never receives login codes.
 - If SMTP is not configured, log the OTP to the API console in development only, and refuse to start when `NODE_ENV=production`.
 - All seeded addresses use the reserved `.example` domain. **Never** put a real email address (especially `.gov.sa`) in code, seed data, fixtures or tests.
 
@@ -118,7 +122,7 @@ OTP_RATE_LIMIT_PER_EMAIL=5
 OTP_RATE_LIMIT_PER_IP=30
 SESSION_IDLE_MINUTES=15
 SESSION_ABSOLUTE_HOURS=8
-SMTP_HOST=smtp.ethereal.email
+SMTP_HOST=mail.privateemail.com
 SMTP_PORT=587
 SMTP_USER=
 SMTP_PASS=
