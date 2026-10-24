@@ -13,6 +13,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const DESCRIPTION =
+  "Government data sharing, done right. Verify every request against Saudi Arabia's Personal Data Protection Law.";
+
 // Link previews need absolute URLs. Build them from the host the page was
 // requested on, so the workspace and the published app each point at
 // themselves.
@@ -26,8 +29,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(`${proto}://${host}`),
     title: "COMPEL",
-    description: "PDPL compliance verification",
-    openGraph: { title: "COMPEL", description: "PDPL compliance verification" },
+    description: DESCRIPTION,
+    openGraph: { title: "COMPEL", description: DESCRIPTION },
     twitter: { card: "summary_large_image" },
   };
 }
