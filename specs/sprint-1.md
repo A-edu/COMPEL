@@ -223,7 +223,7 @@ The published Replit app is the demo that is submitted (§2.8).
 - Load it client-side only after the card renders (e.g. `next/dynamic` with `ssr: false`), so the form never waits on WebGL. Until it loads, the plain `#0a0a0a` page shows.
 - It has no npm dependencies and already freezes its animation under `prefers-reduced-motion`; no extra handling is needed.
 
-**Card contents.** The heading **Sign in** (no wordmark). On the email step, below the heading: "Use your entity's DPO email. We'll send you a 6-digit code." On the OTP step, that line is replaced by "Code sent to" + the email (see OTP step). The heading stays on both steps.
+**Card contents.** The heading **Sign in** (no wordmark). On the email step, below the heading: "Use your entity's DPO email. We'll send you a 6-digit code." On the OTP step, that line is replaced by "If <email> is registered, we've sent a 6-digit code to it." (see OTP step). The heading stays on both steps.
 
 **Email step**
 - Label "Work email", shadcn `Input`, button **Send code**.
@@ -234,7 +234,7 @@ The published Replit app is the demo that is submitted (§2.8).
 - On 429: inline message from the API.
 
 **OTP step**
-- Text "Code sent to" + the email in Geist Mono, and a **Change email** link back to the email step.
+- Text "If <email> is registered, we've sent a 6-digit code to it.", with the email in Geist Mono. The wording is the same whether or not the account exists (AGENTS.md → Authentication). Below it, a **Change email** link back to the email step.
 - shadcn `Input OTP`, 6 slots, Geist Mono, `inputmode="numeric"`, `autocomplete="one-time-code"`, paste fills all slots, auto-submits on the 6th digit.
 - Slot styling is adapted from Watermelon UI `input-otp-7` (MIT): two groups of three slots with a dash separator, raised slots with an inset highlight, and a ring and slight scale on the active slot (no scale under reduced motion). Slots are at least 44 px square.
 - While verifying: slots disabled, small spinner.
