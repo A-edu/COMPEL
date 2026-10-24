@@ -15,7 +15,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   return (
     // Below sm: card docked near the bottom, with gaps that shrink on narrow
     // screens so six 44 px code slots still fit. From sm: a centred card.
-    <div className="dark relative isolate flex min-h-dvh flex-1 flex-col justify-end bg-[#0a0a0a] px-2 pt-12 pb-[max(0.5rem,env(safe-area-inset-bottom))] text-foreground min-[360px]:px-3 min-[360px]:pb-[max(0.75rem,env(safe-area-inset-bottom))] min-[400px]:px-4 min-[400px]:pb-[max(1rem,env(safe-area-inset-bottom))] sm:items-center sm:justify-center sm:py-12">
+    <div data-login-page className="dark relative isolate flex min-h-dvh flex-1 flex-col justify-end bg-[#0a0a0a] px-2 pt-12 pb-[max(0.5rem,env(safe-area-inset-bottom))] text-foreground min-[360px]:px-3 min-[360px]:pb-[max(0.75rem,env(safe-area-inset-bottom))] min-[400px]:px-4 min-[400px]:pb-[max(1rem,env(safe-area-inset-bottom))] sm:items-center sm:justify-center sm:py-12">
       <ThreadsBackground />
       <LoginCard
         expired={reason === "expired"}
