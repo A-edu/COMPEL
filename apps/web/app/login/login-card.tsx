@@ -310,8 +310,9 @@ function OtpStep({
     <div className="flex flex-col">
       <div className="mt-2 text-sm leading-relaxed text-white/60">
         <p>
-          Code sent to{" "}
-          <span className="font-mono break-all text-white">{email}</span>
+          If{" "}
+          <span className="font-mono break-all text-white">{email}</span> is
+          registered, we&apos;ve sent a 6-digit code to it.
         </p>
         <Button
           type="button"
