@@ -130,4 +130,10 @@
   html {
     @apply font-sans;
   }
+  /* Login: the overscroll bounce reveals the root background, so match the
+     page's black instead of the inner screens' white. */
+  html:has([data-login-page]),
+  html:has([data-login-page]) body {
+    background-color: #0a0a0a;
+  }
 }
