@@ -42,7 +42,7 @@ What to build in Sprint 1. Standing rules (access rules, auth invariants, email 
 2. **Requester sees status only.** The requesting entity never sees the provider's RoPA document or position in Sprint 1.
 3. **Two statuses only:** `AWAITING_PROVIDER_RESPONSE` and `PROVIDER_RESPONDED`.
 4. **One DPO per entity**, seeded for every entity, so any entity can log in and respond.
-5. **Real entity names, `.example` addresses**, Ethereal for all email.
+5. **Real entity names, `.example` addresses**; all email goes to the team mailbox through `MAIL_REDIRECT_TO` (AGENTS.md → Email).
 6. **Choosing the providing entity:** a searchable combobox of all entities, excluding the user's own. One request has exactly one providing entity.
 7. **The provider responds once:** the RoPA document and position are submitted together, atomically, and are read-only afterwards.
 8. **The demo runs on the published Replit app**, which uses its own production database and Replit App Storage for files.
@@ -190,7 +190,7 @@ The published Replit app is the demo that is submitted (§2.8).
 - **Deployment type:** Autoscale. It scales to zero when idle, so open the URL a minute before presenting.
 - **Build command:** `npm ci && npm run build`.
 - **Run command:** `npm run db:deploy && npm run db:seed && npm start`. Migrations and the idempotent seed run on every start, so a redeploy always brings the production database up to date.
-- **Deployment Secrets:** `NODE_ENV=production`, `DEMO_MODE=true`, `STORAGE_DRIVER=replit`, `STORAGE_PREFIX=demo` (shared with the workspace in Sprint 1), `OTP_HASH_SECRET` (different from the workspace's), the shared Ethereal `SMTP_*` values, and the remaining variables from `.env.example`. `DATABASE_URL` is provided by Replit for the production database.
+- **Deployment Secrets:** `NODE_ENV=production`, `DEMO_MODE=true`, `STORAGE_DRIVER=replit`, `STORAGE_PREFIX=demo` (shared with the workspace in Sprint 1), `OTP_HASH_SECRET` (different from the workspace's), the team mailbox's `SMTP_*` values, `MAIL_FROM` and `MAIL_REDIRECT_TO` (AGENTS.md → Email), and the remaining variables from `.env.example`. `DATABASE_URL` is provided by Replit for the production database.
 - **To verify on the first publish:** whether Replit's publish step offers to apply development schema changes to production on its own. Prisma migrations must be the only thing that changes the production schema; if Replit proposes its own changes, decline them and record what happened in §13.
 - **Done when:** the published URL serves the app; `/api/health` returns "ok" through it; the production database contains the seeded entities and demo requests; a redeploy keeps any request created on the published app.
 
@@ -198,7 +198,7 @@ The published Replit app is the demo that is submitted (§2.8).
 
 ### §6.1 Auth API and temporary login form
 - Implement the auth endpoints in §4 and the session guard, following AGENTS.md → Authentication invariants and Email.
-- Mail module: Nodemailer over SMTP, Ethereal config, `MAIL_REDIRECT_TO` switch, dev console fallback. OTP email subject "Your COMPEL login code"; body contains the code, its validity in minutes, and nothing else.
+- Mail module: Nodemailer over SMTP, configured from `SMTP_*`, `MAIL_REDIRECT_TO` switch, dev console fallback. OTP email subject "Your COMPEL login code"; body contains the code, its validity in minutes, and nothing else.
 - A **temporary, unstyled** `/login` page (email field → code field) so everyone can log in before §6.2 exists. §6.2 replaces it.
 - Next.js `proxy.ts` (the Next.js 16 name for middleware): redirect to `/login` when there is no `compel_session` cookie, except on `/login` itself.
 - Rate limits on `otp/request` and `otp/verify` come from the rate-limit variables already set in Secrets and listed in `.env.example`.
@@ -330,7 +330,7 @@ Run on the **published app**.
 
 1. A minute before presenting, open the published URL so the app wakes up.
 2. Two browser windows: a regular one and a private one.
-3. Window 1: log in as `dpo@moh.example`; open the Ethereal inbox to read the code.
+3. Window 1: log in as `dpo@moh.example`; open the team mailbox to read the code. Every code arrives addressed to `otp@`, whichever DPO it is for, so request one code at a time and use the newest.
 4. Show **Sent** and **Received**; open the responded request from `hrsd`.
 5. Submit a new request from `moh` to another entity with a synthetic document; show the reference and status.
 6. Window 2: log in as that entity's DPO; find the request under **Received**, awaiting response.
@@ -355,3 +355,4 @@ Log in just before presenting, so the 15-minute idle timeout doesn't log anyone 
 | 2026-10-23 | §5.1, §6 | `/` redirects to `/login`; the §5.1 health-check home page is retired (`/api/health` is unchanged). |
 | 2026-10-23 | §8 | Done-when reworded to match the §5.4 seed: `moh` has one sent request (awaiting) and one received request (responded). |
 | 2026-10-23 | §7, AGENTS.md | Inner-screen design system added (canvas and cards, `max-w-5xl` container, page header, lists, forms, states). Header gets a mark beside the wordmark and an entity chip. Design latitude added. |
+| 2026-10-24 | §2, §5.6, §6.1, §12, AGENTS.md | Ethereal replaced by the team mailbox (Namecheap Private Email on the team's domain). `MAIL_REDIRECT_TO` is required in both environments; seeded addresses stay on `.example`. No code change. |
