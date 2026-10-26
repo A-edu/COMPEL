@@ -81,9 +81,9 @@ export function LoginCard({
   }
 
   return (
-    // Entrance is CSS (tw-animate-css), so the card is visible before
-    // hydration and stays still under reduced motion.
-    <Card className="relative z-10 w-full gap-0 rounded-2xl bg-[#111111] py-(--card-spacing) shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_24px_64px_-12px_rgba(0,0,0,0.9)] ring-white/10 [--card-spacing:--spacing(3)] min-[360px]:[--card-spacing:--spacing(5)] min-[400px]:[--card-spacing:--spacing(6)] sm:max-w-[400px] sm:[--card-spacing:--spacing(8)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 motion-safe:ease-out">
+    // Entrance is CSS (tw-animate-css) and stays still under reduced motion.
+    // globals.css holds the card hidden until the Threads background is ready.
+    <Card data-login-card className="relative z-10 w-full gap-0 rounded-2xl bg-[#111111] py-(--card-spacing) shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_24px_64px_-12px_rgba(0,0,0,0.9)] ring-white/10 [--card-spacing:--spacing(3)] min-[360px]:[--card-spacing:--spacing(5)] min-[400px]:[--card-spacing:--spacing(6)] sm:max-w-[400px] sm:[--card-spacing:--spacing(8)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 motion-safe:ease-out">
       <div className="px-(--card-spacing)">
         <h1 className="text-2xl font-semibold tracking-tight text-white">
           Sign in
