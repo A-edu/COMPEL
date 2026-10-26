@@ -220,7 +220,7 @@ The published Replit app is the demo that is submitted (§2.8).
 **Background.** React Bits **Threads** (free; `npx shadcn@latest add @react-bits/Threads-TS-TW`).
 - Props: `speed={0.3}`, `enableMouseInteraction={false}`; every other prop stays at its default (white threads).
 - It is a client component that fills its parent, so place it in a fixed, full-viewport, `pointer-events-none` layer behind the card.
-- Load it client-side only after the card renders (e.g. `next/dynamic` with `ssr: false`), so the form never waits on WebGL. Until it loads, the plain `#0a0a0a` page shows.
+- Bundle it with the page (no separate chunk). The card stays hidden on the plain `#0a0a0a` page until Threads has drawn its first frame, or found WebGL2 unavailable, then both appear together; on slow connections the card no longer shows before it works. If the script never runs, a CSS failsafe shows the card after 10 seconds.
 - It has no npm dependencies and already freezes its animation under `prefers-reduced-motion`; no extra handling is needed.
 
 **Card contents.** The heading **Sign in** (no wordmark). On the email step, below the heading: "Use your entity's DPO email. We'll send you a 6-digit code." On the OTP step, that line is replaced by "If <email> is registered, we've sent a 6-digit code to it." (see OTP step). The heading stays on both steps.
@@ -356,3 +356,4 @@ Log in just before presenting, so the 15-minute idle timeout doesn't log anyone 
 | 2026-10-23 | §8 | Done-when reworded to match the §5.4 seed: `moh` has one sent request (awaiting) and one received request (responded). |
 | 2026-10-23 | §7, AGENTS.md | Inner-screen design system added (canvas and cards, `max-w-5xl` container, page header, lists, forms, states). Header gets a mark beside the wordmark and an entity chip. Design latitude added. |
 | 2026-10-24 | §2, §5.6, §6.1, §12, AGENTS.md | Ethereal replaced by the team mailbox (Namecheap Private Email on the team's domain). `MAIL_REDIRECT_TO` is required in both environments; seeded addresses stay on `.example`. No code change. |
+| 2026-10-26 | §6.2 | Threads is bundled with the login page, and the card waits for its first frame so both appear together (CSS failsafe after 10 s). Previously the card showed first, up to about 5 seconds early on slow connections. |

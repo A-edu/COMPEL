@@ -137,3 +137,18 @@
     background-color: #0a0a0a;
   }
 }
+/* Login: the card waits for the Threads background, so both appear together
+   instead of the card showing seconds early on slow connections. Unlayered so
+   it overrides the card's entrance utilities; once Threads is ready the rule
+   stops matching and the entrance plays. If the script never runs, the
+   failsafe shows the card after 10 s. */
+[data-login-page]:not(:has([data-threads-ready])) [data-login-card] {
+  visibility: hidden;
+  animation: login-failsafe 0s 10s forwards;
+}
+
+@keyframes login-failsafe {
+  to {
+    visibility: visible;
+  }
+}
