@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, ShieldCheck } from "lucide-react";
+import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { api, ApiError, FALLBACK_ERROR } from "@/lib/api";
+import { CompelMark } from "./compel-mark";
 import { EntityChip, EntityChipSkeleton, type ChipEntity } from "./entity-chip";
 import { PageContainer } from "./page-container";
 
@@ -53,9 +54,7 @@ export function AppHeader() {
           aria-label="COMPEL, go to requests"
           className="-m-1 flex items-center gap-2.5 rounded-lg p-1 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         >
-          <span className="flex size-7 items-center justify-center rounded-[7px] bg-black text-white">
-            <ShieldCheck className="size-4" strokeWidth={2} aria-hidden />
-          </span>
+          <CompelMark className="size-7" />
           <span className="text-[15px] font-semibold tracking-[0.08em]">
             COMPEL
           </span>
