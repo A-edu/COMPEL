@@ -9,31 +9,37 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { api, ApiError, FALLBACK_ERROR } from "@/lib/api";
+import { homePath, type UserRole } from "@/lib/safe-next";
 import { CompelMark } from "./compel-mark";
 import { EntityChip, EntityChipSkeleton, type ChipEntity } from "./entity-chip";
 import { PageContainer } from "./page-container";
 
 interface Me {
-  user: { id: string; email: string };
+  user: { id: string; email: string; role: UserRole };
   entity: { id: string; name: string; slug: string };
 }
+
+// An officer acts as a reviewer, not for their entity (Sprint 2 spec §4.1).
+const OFFICER_CHIP: ChipEntity = { name: "Compliance officer", slug: "co" };
 
 // The mark and wordmark, the user's entity and Log out. Nothing else (§7).
 export function AppHeader() {
   const router = useRouter();
   // undefined while loading; null if it could not be loaded.
-  const [entity, setEntity] = useState<ChipEntity | null>();
+  const [me, setMe] = useState<Me | null>();
   const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
     api<Me>("/auth/me", { signal: controller.signal })
-      .then((me) => setEntity(me.entity))
+      .then(setMe)
       .catch(() => {
-        if (!controller.signal.aborted) setEntity(null);
+        if (!controller.signal.aborted) setMe(null);
       });
     return () => controller.abort();
   }, []);
+
+  const isOfficer = me?.user.role === "COMPLIANCE_OFFICER";
 
   async function logOut() {
     setLoggingOut(true);
@@ -50,8 +56,8 @@ export function AppHeader() {
     <header className="sticky top-0 z-40 border-b border-black/6 bg-white/80 backdrop-blur-md">
       <PageContainer className="flex h-16 items-center gap-6">
         <Link
-          href="/requests"
-          aria-label="COMPEL, go to requests"
+          href={homePath(me?.user.role)}
+          aria-label={`COMPEL, go to ${isOfficer ? "the review queue" : "requests"}`}
           className="-m-1 flex items-center gap-2.5 rounded-lg p-1 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         >
           <CompelMark className="size-7" />
@@ -61,9 +67,9 @@ export function AppHeader() {
         </Link>
 
         <div className="ml-auto flex min-w-0 items-center gap-3">
-          {entity === undefined && <EntityChipSkeleton />}
-          {entity && <EntityChip entity={entity} />}
-          {entity !== null && (
+          {me === undefined && <EntityChipSkeleton />}
+          {me && <EntityChip entity={isOfficer ? OFFICER_CHIP : me.entity} />}
+          {me !== null && (
             <Separator
               orientation="vertical"
               className="bg-black/10 data-vertical:h-4 data-vertical:self-center"

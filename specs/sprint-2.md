@@ -14,7 +14,7 @@ What Sprint 2 must achieve, and why. Standing rules (access rules, auth invarian
 - [x] §5.2 Standing rules reconciled
 - [x] §5.3 Seed and existing data
 - [ ] §5.4 Scheduled work on the published app
-- [ ] §6 Compliance officer login
+- [x] §6 Compliance officer login
 - [ ] §7 Review queue and case view
 - [ ] §8.1 Final decision
 - [ ] §8.2 Stored decision records
@@ -102,6 +102,8 @@ Behaviour every story must share, whichever endpoints it uses.
 - Who counts as an officer is decided by the server, never by anything the client sends.
 
 **Decided:** compliance officers belong to SDAIA, the PDPL regulator, so the session contract does not change. An officer acts as a reviewer, not for SDAIA: an officer account has none of a DPO's access, even to SDAIA's own requests, and SDAIA's DPO has no officer access. Officers can review and decide requests SDAIA is a party to, because every officer belongs to SDAIA and those requests could otherwise never be decided. This conflict of interest is accepted for the demo.
+
+**Decided:** a role refusal is a 404 "Not found" in both directions: a DPO on a review console route, and an officer on a DPO route, including the Sent and Received lists and submitting a request. Routes are for DPOs unless explicitly opened to officers, so a new route is closed to officers by default.
 
 ### §4.2 Email
 
@@ -279,6 +281,7 @@ Run on the **published app**. Log in just before presenting, so the 15-minute id
 | 2026-11-07 | §2, §4.3, §5.4, §12 | Published app moves from Autoscale to a Reserved VM on the smallest tier, superseding the deployment type in Sprint 1 §5.6. The demo no longer needs a wake-up step. |
 | 2026-11-07 | §3.2, §3.3, §4.1, §4.2, §5.2, §5.3, §9, §11 | Shared decisions recorded, and `AGENTS.md` terminology and access rules updated for compliance officers. Flag reasons are records with a source, text and time. The justification is for officers only. Officers belong to SDAIA with no DPO access, and can decide requests SDAIA is a party to. Failed notifications are logged, not retried. A mail header carries the intended address while the safety switch is on. The reminder period is 3 days. |
 | 2026-11-07 | §3.1, §5.3 | Flagged is worked out from flag reasons rather than stored as a status. Seed adds `officer@sdaia.example` and a flagged demo request from `gosi` to `hrsd`. |
+| 2026-11-07 | §4.1 | A role refusal is a 404 in both directions, and routes are closed to officers unless explicitly opened. |
 
 ## §14 Out of scope
 

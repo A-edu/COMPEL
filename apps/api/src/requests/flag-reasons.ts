@@ -4,7 +4,7 @@ import type { RequestStatus } from '@prisma/client';
 // new identifier here; nothing that reads flag reasons depends on which one.
 export const FLAG_SOURCE_PROVIDER_OBJECTION = 'PROVIDER_OBJECTION';
 
-const DECIDED: RequestStatus[] = ['APPROVED', 'REJECTED'];
+export const DECIDED: RequestStatus[] = ['APPROVED', 'REJECTED'];
 
 // Flagged means at least one reason and no decision yet (§3.1). It is worked
 // out rather than stored, so the status the requester sees cannot show it.

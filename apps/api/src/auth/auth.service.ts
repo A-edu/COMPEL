@@ -1,8 +1,9 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import type { UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 export interface Me {
-  user: { id: string; email: string };
+  user: { id: string; email: string; role: UserRole };
   entity: { id: string; name: string; slug: string };
 }
 
@@ -17,7 +18,7 @@ export class AuthService {
     });
     if (!user) throw new UnauthorizedException('Not logged in.');
     return {
-      user: { id: user.id, email: user.email },
+      user: { id: user.id, email: user.email, role: user.role },
       entity: {
         id: user.entity.id,
         name: user.entity.name,

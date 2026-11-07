@@ -103,6 +103,19 @@ export async function createEntityFixtures(
   return { entities, cleanup };
 }
 
+// A compliance officer belonging to `entity`, removed by the fixtures'
+// cleanup() with the entity's other users. Officers belong to SDAIA in the
+// seed; a test passes the entity that stands in for it.
+export function createOfficer(prisma: PrismaClient, { entity }: EntityFixture) {
+  return prisma.user.create({
+    data: {
+      email: `officer@${entity.slug}.example`,
+      entityId: entity.id,
+      role: 'COMPLIANCE_OFFICER',
+    },
+  });
+}
+
 // A request from `from` to `to`, written straight to the test database with
 // a placeholder request-form PDF, as if submitted by `from`'s DPO. Removed by
 // the fixtures' cleanup(). The reference uses year 9999, which real
