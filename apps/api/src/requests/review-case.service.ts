@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import type { RequestStatus } from '@prisma/client';
+import type { DecisionOutcome, RequestStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
   STORAGE_SERVICE,
@@ -20,6 +20,18 @@ export interface FlagReasonView {
   source: string;
   text: string;
   createdAt: Date;
+  // Present only on a reason that arrived after the decision, so it is never
+  // read as one of the reasons that led to it (Sprint 2 spec §3.2, §8.2).
+  raisedAfterDecision?: true;
+}
+
+// The stored decision (Sprint 2 spec §3.3). The justification is for officers
+// only, so this is loaded on officer routes alone.
+export interface DecisionView {
+  outcome: DecisionOutcome;
+  justification: string;
+  createdAt: Date;
+  decidedBy: { email: string };
 }
 
 // Everything that exists so far on a case (Sprint 2 spec §7). Flag reasons are
@@ -36,6 +48,8 @@ export interface ReviewCase {
   documents: RequestDocumentView[];
   providerResponse: ProviderResponseView | null;
   flagReasons: FlagReasonView[];
+  // Null until an officer decides.
+  decision: DecisionView | null;
 }
 
 const entitySelect = { select: { id: true, name: true } } as const;
@@ -81,11 +95,25 @@ export class ReviewCaseService {
           orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
           select: { id: true, source: true, text: true, createdAt: true },
         },
+        decision: {
+          select: {
+            outcome: true,
+            justification: true,
+            createdAt: true,
+            decidedBy: { select: { email: true } },
+          },
+        },
       },
     });
+    const { decision } = request;
     return {
       ...request,
       flagged: isFlagged(request.status, request.flagReasons.length),
+      flagReasons: request.flagReasons.map((reason) =>
+        decision && reason.createdAt > decision.createdAt
+          ? { ...reason, raisedAfterDecision: true as const }
+          : reason,
+      ),
     };
   }
 

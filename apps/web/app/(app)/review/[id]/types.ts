@@ -11,6 +11,15 @@ export interface FlagReason {
   source: string;
   text: string;
   createdAt: string;
+  // Only on a reason that arrived after the decision.
+  raisedAfterDecision?: true;
+}
+
+export interface Decision {
+  outcome: "APPROVED" | "REJECTED";
+  justification: string;
+  createdAt: string;
+  decidedBy: { email: string };
 }
 
 export interface ReviewCase {
@@ -26,4 +35,6 @@ export interface ReviewCase {
   // Null until the provider responds.
   providerResponse: ProviderResponse | null;
   flagReasons: FlagReason[];
+  // Null until an officer decides.
+  decision: Decision | null;
 }

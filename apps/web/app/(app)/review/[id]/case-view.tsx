@@ -6,7 +6,7 @@ import { StatusBadge } from "@/components/app/status-badge";
 import { surface } from "@/components/app/surface";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DecisionForm } from "./decision-form";
-import type { FlagReason, ReviewCase } from "./types";
+import type { Decision, FlagReason, ReviewCase } from "./types";
 
 const DOCUMENTS_PATH = "/api/review/requests";
 
@@ -14,7 +14,16 @@ const SOURCE_LABEL: Record<string, string> = {
   PROVIDER_OBJECTION: "Provider objection",
 };
 
+const OUTCOME_LABEL: Record<Decision["outcome"], string> = {
+  APPROVED: "Approved",
+  REJECTED: "Rejected",
+};
+
 const raisedOn = new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" });
+const decidedOn = new Intl.DateTimeFormat("en-GB", {
+  dateStyle: "medium",
+  timeStyle: "short",
+});
 
 // A source with no label yet still reads properly, so a new source needs no
 // change here (Sprint 2 spec §3.2).
@@ -73,6 +82,8 @@ export function CaseView({
         </Card>
 
         <div className="flex min-w-0 flex-col gap-6">
+          {request.decision && <DecisionRecord decision={request.decision} />}
+
           <Card className={surface}>
             <CardHeader>
               <CardTitle>Provider response</CardTitle>
@@ -127,6 +138,47 @@ function Party({ label, name }: { label: string; name: string }) {
   );
 }
 
+// The stored decision, read-only (Sprint 2 spec §8.2).
+function DecisionRecord({ decision }: { decision: Decision }) {
+  return (
+    <Card className={surface}>
+      <CardHeader>
+        <CardTitle>Decision</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <dl className="flex flex-col gap-5">
+          <div className="flex flex-col gap-1">
+            <dt className="text-sm font-medium">Outcome</dt>
+            <dd className="text-sm text-neutral-700">
+              {OUTCOME_LABEL[decision.outcome]}
+            </dd>
+          </div>
+          <div className="flex flex-col gap-1">
+            <dt className="text-sm font-medium">Decided on</dt>
+            <dd className="text-sm text-neutral-700 tabular-nums">
+              <time dateTime={decision.createdAt}>
+                {decidedOn.format(new Date(decision.createdAt))}
+              </time>
+            </dd>
+          </div>
+          <div className="flex flex-col gap-1">
+            <dt className="text-sm font-medium">Officer</dt>
+            <dd className="font-mono text-sm break-all text-neutral-700">
+              {decision.decidedBy.email}
+            </dd>
+          </div>
+          <div className="flex flex-col gap-1">
+            <dt className="text-sm font-medium">Justification</dt>
+            <dd className="text-sm break-words whitespace-pre-line text-neutral-700">
+              {decision.justification}
+            </dd>
+          </div>
+        </dl>
+      </CardContent>
+    </Card>
+  );
+}
+
 function Reason({ reason }: { reason: FlagReason }) {
   return (
     <div className="flex flex-col gap-1">
@@ -142,6 +194,11 @@ function Reason({ reason }: { reason: FlagReason }) {
       <p className="text-sm whitespace-pre-line text-neutral-700">
         {reason.text}
       </p>
+      {reason.raisedAfterDecision && (
+        <p className="text-xs text-muted-foreground">
+          Raised after the decision
+        </p>
+      )}
     </div>
   );
 }
