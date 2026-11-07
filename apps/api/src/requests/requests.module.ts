@@ -12,6 +12,8 @@ import { RequestsListController } from './requests-list.controller.js';
 import { RequestsListService } from './requests-list.service.js';
 import { ReviewCaseController } from './review-case.controller.js';
 import { ReviewCaseService } from './review-case.service.js';
+import { ReviewDecisionController } from './review-decision.controller.js';
+import { ReviewDecisionService } from './review-decision.service.js';
 import { ReviewQueueController } from './review-queue.controller.js';
 import { ReviewQueueService } from './review-queue.service.js';
 
@@ -27,6 +29,7 @@ import { ReviewQueueService } from './review-queue.service.js';
     RequestResponseController,
     ReviewQueueController,
     ReviewCaseController,
+    ReviewDecisionController,
   ],
   providers: [
     RequestScope,
@@ -36,6 +39,7 @@ import { ReviewQueueService } from './review-queue.service.js';
     RequestResponseService,
     ReviewQueueService,
     ReviewCaseService,
+    ReviewDecisionService,
   ],
   exports: [RequestScope],
 })

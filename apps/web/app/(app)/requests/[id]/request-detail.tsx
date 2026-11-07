@@ -69,9 +69,10 @@ export function RequestDetailView({
             </CardContent>
           </Card>
         )}
-        {request.providerResponse === null && (
-          <ResponseForm requestId={request.id} onSubmitted={onResponded} />
-        )}
+        {request.providerResponse === null &&
+          request.status === "AWAITING_PROVIDER_RESPONSE" && (
+            <ResponseForm requestId={request.id} onSubmitted={onResponded} />
+          )}
       </div>
     </div>
   );

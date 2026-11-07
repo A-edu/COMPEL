@@ -66,9 +66,12 @@ describe('Review console (e2e)', () => {
   const addReason = (requestId: string, source: string, text: string) =>
     prisma.flagReason.create({ data: { requestId, source, text } });
 
-  // §8 records decisions; until then a test sets the outcome directly.
-  const decide = (id: string, status: 'APPROVED' | 'REJECTED') =>
-    prisma.dataSharingRequest.update({ where: { id }, data: { status } });
+  const decide = (id: string, outcome: 'APPROVED' | 'REJECTED') =>
+    request(app.getHttpServer())
+      .post(`/api/review/requests/${id}/decision`)
+      .set('Cookie', cookies.officer)
+      .send({ outcome, justification: 'Reviewed against the PDPL.' })
+      .expect(201);
 
   async function rows(query = ''): Promise<Row[]> {
     const res = await get(`/review/requests${query}`, cookies.officer).expect(

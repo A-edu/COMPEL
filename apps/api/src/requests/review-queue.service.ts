@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { Prisma, RequestStatus } from '@prisma/client';
 import type { ReviewSort, ReviewView } from './dto/review-queue.query.js';
-import { DECIDED, isFlagged } from './flag-reasons.js';
+import { DECIDED, FLAGGED, isFlagged } from './flag-reasons.js';
 import { RequestScope } from './request-scope.js';
 
 // One row of the review queue (Sprint 2 spec §7).
@@ -24,7 +24,7 @@ const entitySelect = { select: { id: true, name: true } } as const;
 // those out and no request appears in both.
 const VIEWS: Record<ReviewView, Prisma.DataSharingRequestWhereInput> = {
   queue: { status: { notIn: DECIDED } },
-  flagged: { status: { notIn: DECIDED }, flagReasons: { some: {} } },
+  flagged: FLAGGED,
   pending: {
     status: 'AWAITING_PROVIDER_RESPONSE',
     flagReasons: { none: {} },

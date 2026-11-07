@@ -16,7 +16,7 @@ What Sprint 2 must achieve, and why. Standing rules (access rules, auth invarian
 - [ ] §5.4 Scheduled work on the published app
 - [x] §6 Compliance officer login
 - [ ] §7 Review queue and case view
-- [ ] §8.1 Final decision
+- [x] §8.1 Final decision
 - [ ] §8.2 Stored decision records
 - [ ] §9 Pending requests and provider reminders
 - [ ] §10.1 Provider notified of a new request
@@ -88,6 +88,8 @@ A request can carry any number of flag reasons, from any number of sources. Ever
 A decision record identifies the request, and states its outcome, the time of the decision, the written justification and which officer made it. It belongs to the request, lasts as long as the request does, and can be retrieved later.
 
 **Decided:** the justification is visible to compliance officers only. The two parties see only the outcome, since a justification may quote the objection.
+
+**Decided:** a justification is 10 to 1000 characters after trimming, the same limits as an objection reason. Any flagged request can be decided, including one with a flag reason but no provider response yet (§3.1); once it is decided, the provider can no longer respond. A reason other than an objection is needed for this to arise, so it cannot happen until Sprint 3.
 
 ## §4 API contract: shared behaviour
 
@@ -282,6 +284,7 @@ Run on the **published app**. Log in just before presenting, so the 15-minute id
 | 2026-11-07 | §3.2, §3.3, §4.1, §4.2, §5.2, §5.3, §9, §11 | Shared decisions recorded, and `AGENTS.md` terminology and access rules updated for compliance officers. Flag reasons are records with a source, text and time. The justification is for officers only. Officers belong to SDAIA with no DPO access, and can decide requests SDAIA is a party to. Failed notifications are logged, not retried. A mail header carries the intended address while the safety switch is on. The reminder period is 3 days. |
 | 2026-11-07 | §3.1, §5.3 | Flagged is worked out from flag reasons rather than stored as a status. Seed adds `officer@sdaia.example` and a flagged demo request from `gosi` to `hrsd`. |
 | 2026-11-07 | §4.1 | A role refusal is a 404 in both directions, and routes are closed to officers unless explicitly opened. |
+| 2026-11-07 | §3.3 | A justification is 10 to 1000 characters after trimming. A flagged request with no provider response can be decided. |
 
 ## §14 Out of scope
 
