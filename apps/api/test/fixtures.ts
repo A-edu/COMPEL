@@ -18,9 +18,9 @@ function localStorage(): StorageService {
 }
 
 // `count` entities, each with one active DPO. cleanup() removes them and
-// everything a test created between them: provider responses, documents
-// (and their files, one at a time), requests, sessions, OTPs and auth
-// events. It can be called more than once.
+// everything a test created between them: flag reasons, provider responses,
+// documents (and their files, one at a time), requests, sessions, OTPs and
+// auth events. It can be called more than once.
 //
 //   const { entities: [a, b, c], cleanup } = await createEntityFixtures(prisma, 3);
 export async function createEntityFixtures(
@@ -62,6 +62,9 @@ export async function createEntityFixtures(
     });
     const requestIds = requests.map((r) => r.id);
 
+    await prisma.flagReason.deleteMany({
+      where: { requestId: { in: requestIds } },
+    });
     await prisma.providerResponse.deleteMany({
       where: { requestId: { in: requestIds } },
     });

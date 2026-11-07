@@ -4,6 +4,7 @@ import type { SessionUser } from '../auth/session-user.js';
 import { DocumentStorage } from '../documents/document-storage.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { RespondToRequestDto } from './dto/respond-to-request.dto.js';
+import { FLAG_SOURCE_PROVIDER_OBJECTION } from './flag-reasons.js';
 import { RequestScope } from './request-scope.js';
 
 export const ALREADY_RESPONDED = 'A response has already been submitted.';
@@ -18,8 +19,9 @@ export class RequestResponseService {
     private readonly documents: DocumentStorage,
   ) {}
 
-  // The provider's one response (§2.7): the RoPA document, the response and
-  // the status change are written in one transaction.
+  // The provider's one response (§2.7): the RoPA document, the response, the
+  // status change and any objection's flag reason are written in one
+  // transaction.
   async respond(
     user: SessionUser,
     id: string,
@@ -44,6 +46,8 @@ export class RequestResponseService {
     // Storage cannot join a database transaction, so the file goes first
     // and is removed again if the transaction does not commit.
     const stored = await this.documents.save(ropaFile);
+    const objection =
+      dto.position === 'OBJECTED' ? (dto.objectionReason ?? null) : null;
     try {
       await this.prisma.$transaction(async (tx) => {
         // Claims the request. Under concurrent responses Postgres makes the
@@ -72,11 +76,19 @@ export class RequestResponseService {
             requestId: request.id,
             ropaDocumentId: ropa.id,
             position: dto.position,
-            objectionReason:
-              dto.position === 'OBJECTED' ? dto.objectionReason : null,
+            objectionReason: objection,
             respondedById: user.userId,
           },
         });
+        if (objection !== null) {
+          await tx.flagReason.create({
+            data: {
+              requestId: request.id,
+              source: FLAG_SOURCE_PROVIDER_OBJECTION,
+              text: objection,
+            },
+          });
+        }
       });
     } catch (error) {
       await this.discard(stored.storageKey);

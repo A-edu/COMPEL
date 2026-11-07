@@ -34,7 +34,7 @@ export function RequestDetailView({
         description={
           <>
             <Reference value={request.reference} />
-            <StatusBadge status={request.status} />
+            <StatusBadge status={request.status} flagged={request.flagged} />
           </>
         }
       />

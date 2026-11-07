@@ -23,6 +23,7 @@ interface RequestListItem {
   reference: string;
   title: string;
   status: RequestStatus;
+  flagged?: true;
   counterpartEntity: { id: string; name: string };
 }
 
@@ -164,7 +165,7 @@ function RequestRow({ request: r }: { request: RequestListItem }) {
       <span className="hidden max-w-56 text-right text-sm text-balance text-muted-foreground sm:block">
         {r.counterpartEntity.name}
       </span>
-      <StatusBadge status={r.status} className="shrink-0" />
+      <StatusBadge status={r.status} flagged={r.flagged} className="shrink-0" />
       <ChevronRight className="size-4 shrink-0 text-neutral-400" aria-hidden />
     </Link>
   );

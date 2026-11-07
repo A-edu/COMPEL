@@ -1,23 +1,35 @@
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-export type RequestStatus = "AWAITING_PROVIDER_RESPONSE" | "PROVIDER_RESPONDED";
+export type RequestStatus =
+  | "AWAITING_PROVIDER_RESPONSE"
+  | "PROVIDER_RESPONDED"
+  | "APPROVED"
+  | "REJECTED";
 
 // A neutral badge where colour appears only in the dot (after Untitled UI's
 // BadgeWithDot, "modern" style). The label carries the meaning.
 const STATUS: Record<RequestStatus, { label: string; dot: string }> = {
   AWAITING_PROVIDER_RESPONSE: { label: "Awaiting response", dot: "bg-[#f79009]" },
   PROVIDER_RESPONDED: { label: "Responded", dot: "bg-[#10b981]" },
+  APPROVED: { label: "Approved", dot: "bg-[#10b981]" },
+  REJECTED: { label: "Rejected", dot: "bg-[#f04438]" },
 };
+
+// A flagged request, as its provider sees it. The API sends `flagged` to the
+// provider only; the requester keeps seeing the status.
+const UNDER_REVIEW = { label: "Under review", dot: "bg-[#f79009]" };
 
 export function StatusBadge({
   status,
+  flagged,
   className,
 }: {
   status: RequestStatus;
+  flagged?: boolean;
   className?: string;
 }) {
-  const { label, dot } = STATUS[status];
+  const { label, dot } = flagged ? UNDER_REVIEW : STATUS[status];
   return (
     <Badge
       variant="outline"
