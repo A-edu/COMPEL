@@ -39,6 +39,7 @@ model User {
   submittedRequests DataSharingRequest[] @relation("SubmittedBy")
   uploadedDocuments Document[]
   providerResponses ProviderResponse[]
+  decisions         Decision[]
 }
 
 model OtpChallenge {
@@ -106,6 +107,7 @@ model DataSharingRequest {
   documents        Document[]
   providerResponse ProviderResponse?
   flagReasons      FlagReason[]
+  decision         Decision?
 }
 
 enum DocumentKind {
@@ -161,6 +163,25 @@ model FlagReason {
   createdAt DateTime           @default(now())
 
   @@index([requestId])
+}
+
+enum DecisionOutcome {
+  APPROVED
+  REJECTED
+}
+
+// An officer's final decision on a flagged request (Sprint 2 spec §3.3). Decided
+// once: the unique requestId is what makes a second decision impossible, even
+// when two officers decide at the same moment.
+model Decision {
+  id            String             @id @default(cuid())
+  requestId     String             @unique
+  request       DataSharingRequest @relation(fields: [requestId], references: [id])
+  outcome       DecisionOutcome
+  justification String
+  decidedById   String
+  decidedBy     User               @relation(fields: [decidedById], references: [id])
+  createdAt     DateTime           @default(now())
 }
 
 // The last sequence number issued per year for request references
