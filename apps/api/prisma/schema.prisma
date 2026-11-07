@@ -21,6 +21,7 @@ model Entity {
 
 enum UserRole {
   DPO
+  COMPLIANCE_OFFICER
 }
 
 model User {
@@ -84,6 +85,8 @@ model AuthEvent {
 enum RequestStatus {
   AWAITING_PROVIDER_RESPONSE
   PROVIDER_RESPONDED
+  APPROVED
+  REJECTED
 }
 
 model DataSharingRequest {
@@ -102,6 +105,7 @@ model DataSharingRequest {
 
   documents        Document[]
   providerResponse ProviderResponse?
+  flagReasons      FlagReason[]
 }
 
 enum DocumentKind {
@@ -142,6 +146,21 @@ model ProviderResponse {
   respondedById   String
   respondedBy     User               @relation(fields: [respondedById], references: [id])
   createdAt       DateTime           @default(now())
+}
+
+// Why a request needs an officer's decision (Sprint 2 spec §3.2). A request
+// with at least one is flagged, so a flag is never a status of its own and
+// the requester's status cannot reveal one. `source` is a plain string so a
+// new source needs no migration.
+model FlagReason {
+  id        String             @id @default(cuid())
+  requestId String
+  request   DataSharingRequest @relation(fields: [requestId], references: [id])
+  source    String
+  text      String
+  createdAt DateTime           @default(now())
+
+  @@index([requestId])
 }
 
 // The last sequence number issued per year for request references
