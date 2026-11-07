@@ -1,4 +1,4 @@
-import type { RequestStatus } from '@prisma/client';
+import type { Prisma, RequestStatus } from '@prisma/client';
 
 // The first source of flag reasons (Sprint 2 spec §3.2). A new source is a
 // new identifier here; nothing that reads flag reasons depends on which one.
@@ -11,3 +11,9 @@ export const DECIDED: RequestStatus[] = ['APPROVED', 'REJECTED'];
 export function isFlagged(status: RequestStatus, reasonCount: number): boolean {
   return reasonCount > 0 && !DECIDED.includes(status);
 }
+
+// The same rule as a query filter.
+export const FLAGGED: Prisma.DataSharingRequestWhereInput = {
+  status: { notIn: DECIDED },
+  flagReasons: { some: {} },
+};

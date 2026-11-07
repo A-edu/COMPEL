@@ -14,6 +14,7 @@ import {
 } from './auth-helpers.js';
 import {
   createEntityFixtures,
+  createOfficer,
   createTestRequest,
   type EntityFixture,
 } from './fixtures.js';
@@ -45,7 +46,12 @@ describe('Flagging (e2e)', () => {
   let a: EntityFixture;
   let b: EntityFixture;
   let c: EntityFixture;
-  const cookies: Record<'a' | 'b' | 'c', string> = { a: '', b: '', c: '' };
+  const cookies: Record<'a' | 'b' | 'c' | 'officer', string> = {
+    a: '',
+    b: '',
+    c: '',
+    officer: '',
+  };
 
   const get = (path: string, cookie: string) =>
     request(app.getHttpServer()).get(`/api${path}`).set('Cookie', cookie);
@@ -64,6 +70,13 @@ describe('Flagging (e2e)', () => {
       contentType: 'application/pdf',
     });
   }
+
+  const decide = (id: string, outcome: 'APPROVED' | 'REJECTED') =>
+    request(app.getHttpServer())
+      .post(`/api/review/requests/${id}/decision`)
+      .set('Cookie', cookies.officer)
+      .send({ outcome, justification: 'Reviewed against the PDPL.' })
+      .expect(201);
 
   const reasons = (requestId: string) =>
     prisma.flagReason.findMany({ where: { requestId } });
@@ -112,7 +125,8 @@ describe('Flagging (e2e)', () => {
 
   beforeAll(async () => {
     ({ app, mail, throttler } = await createTestApp());
-    fixtures = await createEntityFixtures(prisma, 3);
+    fixtures = await createEntityFixtures(prisma, 4);
+    const [sdaia] = fixtures.entities.slice(3);
     [a, b, c] = fixtures.entities;
     for (const [key, fixture] of [
       ['a', a],
@@ -122,6 +136,9 @@ describe('Flagging (e2e)', () => {
       throttler.reset();
       cookies[key] = await loginAs(app, mail, fixture.dpo.email);
     }
+    const officer = await createOfficer(prisma, sdaia);
+    throttler.reset();
+    cookies.officer = await loginAs(app, mail, officer.email);
   });
 
   afterAll(async () => {
@@ -198,10 +215,7 @@ describe('Flagging (e2e)', () => {
     it('sees the outcome once decided, but still not the position', async () => {
       const { id } = await newRequest('Requester view: decided');
       await respond(id, 'OBJECTED', REASON).expect(201);
-      await prisma.dataSharingRequest.update({
-        where: { id },
-        data: { status: 'REJECTED' },
-      });
+      await decide(id, 'REJECTED');
 
       const res = await get(`/requests/${id}`, cookies.a).expect(200);
       expect(res.body).toMatchObject({ status: 'REJECTED' });
@@ -236,10 +250,7 @@ describe('Flagging (e2e)', () => {
     it('sees the outcome instead of the flag once decided', async () => {
       const { id } = await newRequest('Provider view: decided');
       await respond(id, 'OBJECTED', REASON).expect(201);
-      await prisma.dataSharingRequest.update({
-        where: { id },
-        data: { status: 'APPROVED' },
-      });
+      await decide(id, 'APPROVED');
 
       const detail = await get(`/requests/${id}`, cookies.b).expect(200);
       expect(detail.body).toMatchObject({ status: 'APPROVED' });
