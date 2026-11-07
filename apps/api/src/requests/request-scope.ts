@@ -114,6 +114,23 @@ export class RequestScope {
     }) as Promise<Prisma.DataSharingRequestGetPayload<A>[]>;
   }
 
+  // Loads one request officers can reach. Anything else, including a request
+  // the provider endorsed with nothing flagged, is the same 404 as an unknown
+  // ID.
+  async findForOfficerOrThrow<A extends FindFirstArgs>(
+    id: string,
+    args?: Prisma.SelectSubset<A, FindFirstArgs>,
+    tx?: Prisma.TransactionClient,
+  ): Promise<Prisma.DataSharingRequestGetPayload<A>> {
+    const db = tx ?? this.prisma;
+    const request = await db.dataSharingRequest.findFirst({
+      ...((args ?? {}) as FindFirstArgs),
+      where: this.officerWhere({ id }),
+    });
+    if (!request) throw new NotFoundException(REQUEST_NOT_FOUND);
+    return request as Prisma.DataSharingRequestGetPayload<A>;
+  }
+
   roleOf(request: Parties, user: SessionUser): RequestRole {
     const entityId = entityIdOf(user);
     if (request.providingEntityId === entityId) return 'PROVIDER';

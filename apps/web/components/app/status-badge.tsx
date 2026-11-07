@@ -16,20 +16,25 @@ const STATUS: Record<RequestStatus, { label: string; dot: string }> = {
   REJECTED: { label: "Rejected", dot: "bg-[#f04438]" },
 };
 
-// A flagged request, as its provider sees it. The API sends `flagged` to the
-// provider only; the requester keeps seeing the status.
-const UNDER_REVIEW = { label: "Under review", dot: "bg-[#f79009]" };
+// A flagged request has a different label for each audience (Sprint 2 spec
+// §3.1): the provider sees "Under review" and an officer "Flagged". The API
+// never sends `flagged` to the requester, who keeps seeing the status.
+const FLAGGED_DOT = "bg-[#f79009]";
 
 export function StatusBadge({
   status,
   flagged,
+  flaggedLabel = "Under review",
   className,
 }: {
   status: RequestStatus;
   flagged?: boolean;
+  flaggedLabel?: string;
   className?: string;
 }) {
-  const { label, dot } = flagged ? UNDER_REVIEW : STATUS[status];
+  const { label, dot } = flagged
+    ? { label: flaggedLabel, dot: FLAGGED_DOT }
+    : STATUS[status];
   return (
     <Badge
       variant="outline"
