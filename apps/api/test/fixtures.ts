@@ -18,9 +18,8 @@ function localStorage(): StorageService {
 }
 
 // `count` entities, each with one active DPO. cleanup() removes them and
-// everything a test created between them: decisions, flag reasons, provider
-// responses, documents (and their files, one at a time), requests, sessions,
-// OTPs and auth events. It can be called more than once.
+// everything a test created between them (see removeEntities). It can be called
+// more than once.
 //
 //   const { entities: [a, b, c], cleanup } = await createEntityFixtures(prisma, 3);
 export async function createEntityFixtures(
@@ -44,66 +43,75 @@ export async function createEntityFixtures(
     entities.push({ entity, dpo });
   }
 
-  const cleanup = async () => {
-    const entityIds = entities.map((f) => f.entity.id);
-    const users = await prisma.user.findMany({
-      where: { entityId: { in: entityIds } },
-      select: { id: true },
-    });
-    const userIds = users.map((u) => u.id);
-    const requests = await prisma.dataSharingRequest.findMany({
-      where: {
-        OR: [
-          { requestingEntityId: { in: entityIds } },
-          { providingEntityId: { in: entityIds } },
-        ],
-      },
-      select: { id: true },
-    });
-    const requestIds = requests.map((r) => r.id);
-
-    await prisma.decision.deleteMany({
-      where: { requestId: { in: requestIds } },
-    });
-    await prisma.flagReason.deleteMany({
-      where: { requestId: { in: requestIds } },
-    });
-    await prisma.providerResponse.deleteMany({
-      where: { requestId: { in: requestIds } },
-    });
-    const documents = await prisma.document.findMany({
-      where: { requestId: { in: requestIds } },
-      select: { storageKey: true },
-    });
-    // One file at a time, never by prefix (AGENTS.md -> Architecture).
-    const storage = localStorage();
-    for (const { storageKey } of documents) await storage.delete(storageKey);
-    await prisma.document.deleteMany({
-      where: { requestId: { in: requestIds } },
-    });
-    await prisma.dataSharingRequest.deleteMany({
-      where: { id: { in: requestIds } },
-    });
-
-    await prisma.authEvent.deleteMany({
-      where: {
-        OR: [
-          { userId: { in: userIds } },
-          ...entities.map((f) => ({
-            email: { endsWith: `@${f.entity.slug}.example` },
-          })),
-        ],
-      },
-    });
-    await prisma.session.deleteMany({ where: { userId: { in: userIds } } });
-    await prisma.otpChallenge.deleteMany({
-      where: { userId: { in: userIds } },
-    });
-    await prisma.user.deleteMany({ where: { id: { in: userIds } } });
-    await prisma.entity.deleteMany({ where: { id: { in: entityIds } } });
-  };
+  const cleanup = () =>
+    removeEntities(
+      prisma,
+      entities.map((f) => f.entity),
+    );
 
   return { entities, cleanup };
+}
+
+// Removes these entities and everything between them: decisions, flag reasons,
+// provider responses, documents (and their files, one at a time), requests,
+// users, sessions, OTPs and auth events.
+export async function removeEntities(prisma: PrismaClient, entities: Entity[]) {
+  const entityIds = entities.map((e) => e.id);
+  const users = await prisma.user.findMany({
+    where: { entityId: { in: entityIds } },
+    select: { id: true },
+  });
+  const userIds = users.map((u) => u.id);
+  const requests = await prisma.dataSharingRequest.findMany({
+    where: {
+      OR: [
+        { requestingEntityId: { in: entityIds } },
+        { providingEntityId: { in: entityIds } },
+      ],
+    },
+    select: { id: true },
+  });
+  const requestIds = requests.map((r) => r.id);
+
+  await prisma.decision.deleteMany({
+    where: { requestId: { in: requestIds } },
+  });
+  await prisma.flagReason.deleteMany({
+    where: { requestId: { in: requestIds } },
+  });
+  await prisma.providerResponse.deleteMany({
+    where: { requestId: { in: requestIds } },
+  });
+  const documents = await prisma.document.findMany({
+    where: { requestId: { in: requestIds } },
+    select: { storageKey: true },
+  });
+  // One file at a time, never by prefix (AGENTS.md -> Architecture).
+  const storage = localStorage();
+  for (const { storageKey } of documents) await storage.delete(storageKey);
+  await prisma.document.deleteMany({
+    where: { requestId: { in: requestIds } },
+  });
+  await prisma.dataSharingRequest.deleteMany({
+    where: { id: { in: requestIds } },
+  });
+
+  await prisma.authEvent.deleteMany({
+    where: {
+      OR: [
+        { userId: { in: userIds } },
+        ...entities.map((e) => ({
+          email: { endsWith: `@${e.slug}.example` },
+        })),
+      ],
+    },
+  });
+  await prisma.session.deleteMany({ where: { userId: { in: userIds } } });
+  await prisma.otpChallenge.deleteMany({
+    where: { userId: { in: userIds } },
+  });
+  await prisma.user.deleteMany({ where: { id: { in: userIds } } });
+  await prisma.entity.deleteMany({ where: { id: { in: entityIds } } });
 }
 
 // A compliance officer belonging to `entity`, removed by the fixtures'
