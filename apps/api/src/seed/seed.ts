@@ -5,6 +5,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { AppModule } from '../app.module.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { FLAG_SOURCE_PROVIDER_OBJECTION } from '../requests/flag-reasons.js';
 import { allocateReference } from '../requests/reference.js';
 import { STORAGE_SERVICE, type StorageService } from '../storage/storage.interface.js';
 import { buildPlaceholderPdf } from './placeholder-pdf.js';
@@ -22,6 +23,7 @@ interface DemoRequest {
   toSlug: string;
   title: string;
   responded: boolean;
+  objection?: string;
 }
 
 // References come from the same per-year counter as real submissions, so
@@ -48,7 +50,20 @@ const DEMO_REQUESTS: DemoRequest[] = [
     title: 'Occupational health records for labour inspections',
     responded: true,
   },
+  {
+    slug: 'gosi-hrsd',
+    fromSlug: 'gosi',
+    toSlug: 'hrsd',
+    title: 'Employee wage records for contribution audits',
+    responded: true,
+    objection: 'The request does not state a legal basis for sharing wage records.',
+  },
 ];
+
+// Officers belong to SDAIA but act as reviewers, not for it (Sprint 2 spec
+// §4.1).
+const OFFICER_ENTITY_SLUG = 'sdaia';
+const OFFICER_EMAIL = `officer@${OFFICER_ENTITY_SLUG}.example`;
 
 async function uploadIfMissing(
   storage: StorageService,
@@ -100,6 +115,27 @@ async function run(): Promise<void> {
       dpoIdBySlug.set(slug, dpo.id);
 
       console.log(`entity: ${slug} (${name})`);
+    }
+
+    const officerEntityId = entityIdBySlug.get(OFFICER_ENTITY_SLUG);
+    if (officerEntityId) {
+      await prisma.user.upsert({
+        where: { email: OFFICER_EMAIL },
+        update: {
+          isActive: true,
+          entityId: officerEntityId,
+          role: 'COMPLIANCE_OFFICER',
+        },
+        create: {
+          email: OFFICER_EMAIL,
+          entityId: officerEntityId,
+          isActive: true,
+          role: 'COMPLIANCE_OFFICER',
+        },
+      });
+      console.log(`officer: ${OFFICER_EMAIL}`);
+    } else {
+      console.log(`skipping officer: ${OFFICER_ENTITY_SLUG} not in entities.json`);
     }
 
     for (const demo of DEMO_REQUESTS) {
@@ -184,10 +220,21 @@ async function run(): Promise<void> {
             data: {
               requestId: request.id,
               ropaDocumentId: ropaDocument.id,
-              position: 'ENDORSED',
+              position: demo.objection ? 'OBJECTED' : 'ENDORSED',
+              objectionReason: demo.objection ?? null,
               respondedById,
             },
           });
+
+          if (demo.objection) {
+            await tx.flagReason.create({
+              data: {
+                requestId: request.id,
+                source: FLAG_SOURCE_PROVIDER_OBJECTION,
+                text: demo.objection,
+              },
+            });
+          }
         }
       });
 

@@ -7,6 +7,7 @@ import {
   STORAGE_SERVICE,
   type StorageService,
 } from '../storage/storage.interface.js';
+import { isFlagged } from './flag-reasons.js';
 import { RequestScope, type RequestRole } from './request-scope.js';
 
 export const DOCUMENT_NOT_FOUND = 'Document not found.';
@@ -35,8 +36,9 @@ export interface ProviderResponseView {
   createdAt: Date;
 }
 
-// §4 detail. `providerResponse` is present only for the provider; for the
-// requester the key does not exist at all (§2.2).
+// §4 detail. `providerResponse` and `flagged` are present only for the
+// provider; for the requester the keys do not exist at all (§2.2, Sprint 2
+// spec §3.1).
 export interface RequestDetail {
   id: string;
   reference: string;
@@ -48,6 +50,7 @@ export interface RequestDetail {
   myRole: RequestRole;
   documents: RequestDocumentView[];
   providerResponse?: ProviderResponseView | null;
+  flagged?: true;
 }
 
 export interface DocumentDownload {
@@ -105,10 +108,14 @@ export class RequestDetailService {
       myRole,
       documents: request.documents,
     };
-    // The response is loaded only for the provider, so the requester's
-    // detail cannot carry it by accident.
+    // The response and the flag are loaded only for the provider, so the
+    // requester's detail cannot carry them by accident.
     if (myRole === 'PROVIDER') {
       detail.providerResponse = await this.providerResponse(request.id);
+      const reasons = await this.prisma.flagReason.count({
+        where: { requestId: request.id },
+      });
+      if (isFlagged(request.status, reasons)) detail.flagged = true;
     }
     return detail;
   }

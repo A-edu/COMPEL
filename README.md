@@ -99,10 +99,10 @@ The four demo entities, which own the seeded demo requests:
 |---|---|---|
 | `dpo@moh.example` | Ministry of Health | Sent one to `zatca` (awaiting); received one from `hrsd` (responded) |
 | `dpo@zatca.example` | Zakat, Tax and Customs Authority | Received one from `moh` (awaiting); sent one to `gosi` (awaiting) |
-| `dpo@gosi.example` | General Organization for Social Insurance | Received one from `zatca` (awaiting) |
-| `dpo@hrsd.example` | Ministry of Human Resources and Social Development | Sent one to `moh` (responded) |
+| `dpo@gosi.example` | General Organization for Social Insurance | Received one from `zatca` (awaiting); sent one to `hrsd` (flagged) |
+| `dpo@hrsd.example` | Ministry of Human Resources and Social Development | Sent one to `moh` (responded); received one from `gosi` (flagged) |
 
-Any other entity in `apps/api/prisma/seed/entities.json` follows the same pattern. After entering the email, open the team mailbox to read the code. Every code arrives addressed to `otp@`, whichever DPO it is for, so request one code at a time and use the newest. If SMTP isn't configured in development, the code is printed in the API console instead.
+The seeded compliance officer is `officer@sdaia.example`. Any other entity in `apps/api/prisma/seed/entities.json` follows the same pattern. After entering the email, open the team mailbox to read the code. Every code arrives addressed to `otp@`, whichever DPO it is for, so request one code at a time and use the newest. If SMTP isn't configured in development, the code is printed in the API console instead.
 
 To act as two entities at once, use a regular browser window and a private one, since they keep separate sessions.
 

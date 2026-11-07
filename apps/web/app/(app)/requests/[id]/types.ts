@@ -36,4 +36,6 @@ export interface RequestDetail {
   documents: RequestDocument[];
   // Present only for the provider: null until they respond.
   providerResponse?: ProviderResponse | null;
+  // Present only for the provider, while the request is flagged.
+  flagged?: true;
 }

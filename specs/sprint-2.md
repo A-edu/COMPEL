@@ -12,7 +12,7 @@ What Sprint 2 must achieve, and why. Standing rules (access rules, auth invarian
 
 - [x] §5.1 Shared decisions recorded
 - [x] §5.2 Standing rules reconciled
-- [ ] §5.3 Seed and existing data
+- [x] §5.3 Seed and existing data
 - [ ] §5.4 Scheduled work on the published app
 - [ ] §6 Compliance officer login
 - [ ] §7 Review queue and case view
@@ -75,7 +75,7 @@ A request moves through these stages. What each party sees is fixed; the stored 
 
 The list must leave room for Sprint 3 to add stages without reworking the stages above.
 
-**Decided:** the labels are those in the table, and the final outcomes are approved and rejected (US-16).
+**Decided:** the labels are those in the table, and the final outcomes are approved and rejected (US-16). Flagged is not a stored status: a request is flagged when it has at least one flag reason and no decision. The status the requester sees therefore cannot show a flag, and only the provider is told a request is under review.
 
 ### §3.2 Flag reasons
 
@@ -278,6 +278,7 @@ Run on the **published app**. Log in just before presenting, so the 15-minute id
 | 2026-11-07 | §1–§4, §6–§12, §14 | Reconciled with the story definitions, now in `docs/backlog.md`. The review queue holds pending and flagged requests, with filters and sorting. Outcomes are approved and rejected. Notifications go to the data office email. One reminder per pending request. The provider's submission email also states what is required. |
 | 2026-11-07 | §2, §4.3, §5.4, §12 | Published app moves from Autoscale to a Reserved VM on the smallest tier, superseding the deployment type in Sprint 1 §5.6. The demo no longer needs a wake-up step. |
 | 2026-11-07 | §3.2, §3.3, §4.1, §4.2, §5.2, §5.3, §9, §11 | Shared decisions recorded, and `AGENTS.md` terminology and access rules updated for compliance officers. Flag reasons are records with a source, text and time. The justification is for officers only. Officers belong to SDAIA with no DPO access, and can decide requests SDAIA is a party to. Failed notifications are logged, not retried. A mail header carries the intended address while the safety switch is on. The reminder period is 3 days. |
+| 2026-11-07 | §3.1, §5.3 | Flagged is worked out from flag reasons rather than stored as a status. Seed adds `officer@sdaia.example` and a flagged demo request from `gosi` to `hrsd`. |
 
 ## §14 Out of scope
 
