@@ -12,7 +12,8 @@ This is a graduation project (KSU, Software Engineering). The app is a realistic
 
 ## Specs: what to build
 
-- What to build lives in one spec per sprint: `specs/sprint-<n>.md`. **The current sprint is `specs/sprint-1.md`.**
+- What to build lives in one spec per sprint: `specs/sprint-<n>.md`. **The current sprint is `specs/sprint-2.md`.**
+- User story definitions (US-xx) live in `docs/backlog.md`. Read a story's definition before building it. If it disagrees with the spec, stop and ask.
 - Tasks reference spec sections by number (e.g. "implement §6.1"). Read the referenced section, plus §2 (decisions), §3 (data model) and §4 (API contract) of the same spec, before writing code.
 - The spec's **Progress** checklist shows what exists. Tick items in the same commit that completes them.
 - If the spec and this file disagree, this file wins for rules; the spec wins for features. If a task contradicts the spec, stop and ask.
