@@ -5,13 +5,15 @@ import { Download, FileText } from "lucide-react";
 export function DocumentLink({
   requestId,
   document,
+  basePath = "/api/requests",
 }: {
   requestId: string;
   document: { id: string; originalName: string };
+  basePath?: string;
 }) {
   return (
     <a
-      href={`/api/requests/${requestId}/documents/${document.id}`}
+      href={`${basePath}/${requestId}/documents/${document.id}`}
       download
       className="group flex items-center gap-3 rounded-lg px-2 py-2 outline-none transition-colors hover:bg-neutral-50 focus-visible:ring-3 focus-visible:ring-ring/50"
     >

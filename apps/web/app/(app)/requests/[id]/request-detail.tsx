@@ -5,12 +5,8 @@ import { surface } from "@/components/app/surface";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DocumentLink } from "./document-link";
 import { ResponseForm } from "./response-form";
-import type { Position, ProviderResponse, RequestDetail } from "./types";
-
-const POSITION_LABEL: Record<Position, string> = {
-  ENDORSED: "Endorsed",
-  OBJECTED: "Objected",
-};
+import { ResponseSummary } from "./response-summary";
+import type { RequestDetail } from "./types";
 
 // §10: what both parties see, plus the provider's response panel. The grid
 // stays two columns for the requester too, so the left card's width does
@@ -78,39 +74,5 @@ export function RequestDetailView({
         )}
       </div>
     </div>
-  );
-}
-
-// The provider's response, read-only (§2.7).
-function ResponseSummary({
-  requestId,
-  response,
-}: {
-  requestId: string;
-  response: ProviderResponse;
-}) {
-  return (
-    <dl className="flex flex-col gap-5">
-      <div className="flex flex-col gap-2">
-        <dt className="text-sm font-medium">RoPA entry</dt>
-        <dd className="-mx-2">
-          <DocumentLink requestId={requestId} document={response.ropaDocument} />
-        </dd>
-      </div>
-      <div className="flex flex-col gap-1">
-        <dt className="text-sm font-medium">Position</dt>
-        <dd className="text-sm text-neutral-700">
-          {POSITION_LABEL[response.position]}
-        </dd>
-      </div>
-      {response.objectionReason && (
-        <div className="flex flex-col gap-1">
-          <dt className="text-sm font-medium">Reason</dt>
-          <dd className="text-sm whitespace-pre-line text-neutral-700">
-            {response.objectionReason}
-          </dd>
-        </div>
-      )}
-    </dl>
   );
 }

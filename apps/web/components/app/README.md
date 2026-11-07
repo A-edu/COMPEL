@@ -10,7 +10,7 @@ Shared pieces for every page inside `app/(app)/`. Rules: AGENTS.md → Design sy
 | `EmptyState` | `icon` (lucide), `message`, optional `action`. Inside a card. |
 | `ErrorState` | `message?`, `onRetry`. Inside a card. |
 | `PageHeaderSkeleton`, `ListSkeleton`, `ListRowSkeleton`, `BlockSkeleton` | Loading placeholders, in the same card the content will use. |
-| `StatusBadge` | `status`: `AWAITING_PROVIDER_RESPONSE` or `PROVIDER_RESPONDED`. |
+| `StatusBadge` | `status`: any stored status. `flagged` replaces it with "Under review", or with `flaggedLabel` (officers see "Flagged"). |
 | `Reference` | `value`: the request reference. |
 
 Page content is a vertical stack: `<div className="flex flex-col gap-6">`. Use `lib/api.ts` for every API call and `toast.success` / `toast.error` from `sonner` for feedback.
