@@ -22,6 +22,27 @@ describe('RequestScope', () => {
     scope = new RequestScope(prisma);
   });
 
+  describe('officerWhere', () => {
+    const officerFilter = {
+      OR: [
+        { status: 'AWAITING_PROVIDER_RESPONSE' },
+        { status: { in: ['APPROVED', 'REJECTED'] } },
+        { flagReasons: { some: {} } },
+      ],
+    };
+
+    it('limits officers to pending, flagged and decided requests', () => {
+      expect(scope.officerWhere()).toEqual({ AND: [officerFilter, {}] });
+    });
+
+    it('ANDs extra conditions so they cannot widen the filter', async () => {
+      await scope.findManyForOfficer({ where: { id: 'req-1' } });
+      expect(findMany).toHaveBeenCalledWith({
+        where: { AND: [officerFilter, { id: 'req-1' }] },
+      });
+    });
+  });
+
   describe('partyWhere', () => {
     it("filters by the session user's entity as requester or provider", () => {
       expect(scope.partyWhere(user)).toEqual({ AND: [partyFilter, {}] });

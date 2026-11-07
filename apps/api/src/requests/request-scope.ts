@@ -6,6 +6,7 @@ import {
 import { Prisma } from '@prisma/client';
 import type { SessionUser } from '../auth/session-user.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { DECIDED } from './flag-reasons.js';
 
 export const REQUEST_NOT_FOUND = 'Request not found.';
 export const PROVIDER_ONLY =
@@ -20,9 +21,11 @@ interface Parties {
   providingEntityId: string;
 }
 
-// The one place request queries are scoped to the caller's entity
-// (AGENTS.md -> Access rules 1 and 5). Every method takes the SessionUser
-// attached by SessionGuard, never an entity ID from the client.
+// The one place request queries are scoped (AGENTS.md -> Access rules 1, 5
+// and 6). The party methods take the SessionUser attached by SessionGuard,
+// never an entity ID from the client, and serve DPO routes. The officer
+// methods take no user: an officer's entity gives them nothing, and RoleGuard
+// has already established who they are.
 @Injectable()
 export class RequestScope {
   constructor(private readonly prisma: PrismaService) {}
@@ -76,6 +79,39 @@ export class RequestScope {
     });
     if (!request) throw new NotFoundException(REQUEST_NOT_FOUND);
     return request as Prisma.DataSharingRequestGetPayload<A>;
+  }
+
+  // Requests officers can reach: pending, flagged and decided. A request the
+  // provider responded to with nothing flagged matches none of these. The
+  // filter is ANDed with `extra`, so `extra` can never widen it.
+  officerWhere(
+    extra?: Prisma.DataSharingRequestWhereInput,
+  ): Prisma.DataSharingRequestWhereInput {
+    return {
+      AND: [
+        {
+          OR: [
+            { status: 'AWAITING_PROVIDER_RESPONSE' },
+            { status: { in: DECIDED } },
+            { flagReasons: { some: {} } },
+          ],
+        },
+        extra ?? {},
+      ],
+    };
+  }
+
+  findManyForOfficer<A extends Prisma.DataSharingRequestFindManyArgs>(
+    args?: Prisma.SelectSubset<A, Prisma.DataSharingRequestFindManyArgs>,
+    tx?: Prisma.TransactionClient,
+  ): Promise<Prisma.DataSharingRequestGetPayload<A>[]> {
+    const db = tx ?? this.prisma;
+    const { where, ...rest } = (args ??
+      {}) as Prisma.DataSharingRequestFindManyArgs;
+    return db.dataSharingRequest.findMany({
+      ...rest,
+      where: this.officerWhere(where),
+    }) as Promise<Prisma.DataSharingRequestGetPayload<A>[]>;
   }
 
   roleOf(request: Parties, user: SessionUser): RequestRole {

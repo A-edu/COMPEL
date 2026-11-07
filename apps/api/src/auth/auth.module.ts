@@ -5,6 +5,7 @@ import { AuthEventService } from './auth-event.service.js';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 import { OtpService } from './otp.service.js';
+import { RoleGuard } from './role.guard.js';
 import { SessionGuard } from './session.guard.js';
 import { SessionService } from './session.service.js';
 
@@ -18,6 +19,8 @@ import { SessionService } from './session.service.js';
     SessionService,
     // Global: every route needs a session unless marked @Public().
     { provide: APP_GUARD, useClass: SessionGuard },
+    // After SessionGuard: routes are for DPOs unless marked otherwise.
+    { provide: APP_GUARD, useClass: RoleGuard },
   ],
 })
 export class AuthModule {}

@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/input-otp";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
-import { safeNextPath } from "@/lib/safe-next";
+import { safeNextPath, type UserRole } from "@/lib/safe-next";
 
 const RESEND_SECONDS = 60;
 const CODE_LENGTH = 6;
@@ -36,7 +36,7 @@ const TEXT_LINK =
 const OTP_SLOT =
   "size-11 bg-muted/50 font-mono text-lg tabular-nums shadow-[inset_0px_1px_0px_0px_rgba(255,255,255,1),inset_0px_-1px_0px_0px_rgba(0,0,0,0.05)] dark:shadow-[inset_0px_1px_0px_0px_rgba(255,255,255,0.25),inset_0px_-1px_0px_0px_rgba(0,0,0,0.7)] data-[active=true]:border-white/50 data-[active=true]:ring-2 data-[active=true]:ring-white/20 motion-safe:data-[active=true]:scale-105";
 
-type Result = { status: number; message?: string };
+type Result = { status: number; message?: string; role?: UserRole };
 
 async function post(path: string, body: unknown): Promise<Result> {
   try {
@@ -45,8 +45,11 @@ async function post(path: string, body: unknown): Promise<Result> {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
-    const data = (await res.json().catch(() => ({}))) as { message?: string };
-    return { status: res.status, message: data.message };
+    const data = (await res.json().catch(() => ({}))) as {
+      message?: string;
+      user?: { role: UserRole };
+    };
+    return { status: res.status, message: data.message, role: data.user?.role };
   } catch {
     return { status: 0 };
   }
@@ -263,7 +266,7 @@ function OtpStep({
     const result = await post("/api/auth/otp/verify", { email, code: value });
 
     if (result.status === 200) {
-      router.replace(safeNextPath(next));
+      router.replace(safeNextPath(next, result.role ?? "DPO"));
       return;
     }
 

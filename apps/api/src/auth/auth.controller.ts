@@ -15,6 +15,7 @@ import { RequestOtpDto } from './dto/request-otp.dto.js';
 import { VerifyOtpDto } from './dto/verify-otp.dto.js';
 import { OtpService } from './otp.service.js';
 import { Public } from './public.decorator.js';
+import { AnyRole } from './route-access.js';
 import { SESSION_COOKIE, sessionCookieOptions } from './session-cookie.js';
 import { CurrentUser, type SessionUser } from './session-user.js';
 import { SessionService } from './session.service.js';
@@ -22,6 +23,7 @@ import { SessionService } from './session.service.js';
 export const OTP_REQUESTED_MESSAGE =
   'If this email is registered, a code has been sent.';
 
+@AnyRole()
 @Controller('auth')
 export class AuthController {
   constructor(

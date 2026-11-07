@@ -169,7 +169,11 @@ describe('Auth (e2e)', () => {
     it('logs in with a correct code, sets the cookie, and /me returns the user', async () => {
       const { res, cookie } = await login();
       const expected = {
-        user: { id: fixtures.user.id, email: fixtures.user.email },
+        user: {
+          id: fixtures.user.id,
+          email: fixtures.user.email,
+          role: 'DPO',
+        },
         entity: {
           id: fixtures.entity.id,
           name: fixtures.entity.name,

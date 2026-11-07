@@ -10,6 +10,8 @@ import { RequestSubmissionController } from './request-submission.controller.js'
 import { RequestSubmissionService } from './request-submission.service.js';
 import { RequestsListController } from './requests-list.controller.js';
 import { RequestsListService } from './requests-list.service.js';
+import { ReviewQueueController } from './review-queue.controller.js';
+import { ReviewQueueService } from './review-queue.service.js';
 
 // Each task adds its own controller and service files here.
 @Module({
@@ -21,6 +23,7 @@ import { RequestsListService } from './requests-list.service.js';
     RequestSubmissionController,
     RequestDetailController,
     RequestResponseController,
+    ReviewQueueController,
   ],
   providers: [
     RequestScope,
@@ -28,6 +31,7 @@ import { RequestsListService } from './requests-list.service.js';
     RequestSubmissionService,
     RequestDetailService,
     RequestResponseService,
+    ReviewQueueService,
   ],
   exports: [RequestScope],
 })
