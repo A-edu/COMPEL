@@ -14,7 +14,7 @@ export const DOCUMENT_NOT_FOUND = 'Document not found.';
 
 // Documents both parties see. ROPA belongs to the provider's response and
 // is never listed here (AGENTS.md -> Access rules 3).
-const SHARED_KINDS: DocumentKind[] = ['REQUEST_FORM', 'SUPPORTING'];
+export const SHARED_KINDS: DocumentKind[] = ['REQUEST_FORM', 'SUPPORTING'];
 
 export interface RequestDocumentView {
   id: string;

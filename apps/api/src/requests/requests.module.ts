@@ -10,6 +10,8 @@ import { RequestSubmissionController } from './request-submission.controller.js'
 import { RequestSubmissionService } from './request-submission.service.js';
 import { RequestsListController } from './requests-list.controller.js';
 import { RequestsListService } from './requests-list.service.js';
+import { ReviewCaseController } from './review-case.controller.js';
+import { ReviewCaseService } from './review-case.service.js';
 import { ReviewQueueController } from './review-queue.controller.js';
 import { ReviewQueueService } from './review-queue.service.js';
 
@@ -24,6 +26,7 @@ import { ReviewQueueService } from './review-queue.service.js';
     RequestDetailController,
     RequestResponseController,
     ReviewQueueController,
+    ReviewCaseController,
   ],
   providers: [
     RequestScope,
@@ -32,6 +35,7 @@ import { ReviewQueueService } from './review-queue.service.js';
     RequestDetailService,
     RequestResponseService,
     ReviewQueueService,
+    ReviewCaseService,
   ],
   exports: [RequestScope],
 })

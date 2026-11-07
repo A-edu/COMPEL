@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import type { RequestStatus } from '@prisma/client';
+import type { Prisma, RequestStatus } from '@prisma/client';
+import type { ReviewSort, ReviewView } from './dto/review-queue.query.js';
 import { DECIDED, isFlagged } from './flag-reasons.js';
 import { RequestScope } from './request-scope.js';
 
@@ -17,16 +18,29 @@ export interface ReviewQueueItem {
 
 const entitySelect = { select: { id: true, name: true } } as const;
 
+// What each view holds. `queue` is every pending and flagged request; decided
+// requests have left it but stay reachable through their own view. A request
+// with a flag reason is flagged whatever its status (§3.1), so `pending` leaves
+// those out and no request appears in both.
+const VIEWS: Record<ReviewView, Prisma.DataSharingRequestWhereInput> = {
+  queue: { status: { notIn: DECIDED } },
+  flagged: { status: { notIn: DECIDED }, flagReasons: { some: {} } },
+  pending: {
+    status: 'AWAITING_PROVIDER_RESPONSE',
+    flagReasons: { none: {} },
+  },
+  decided: { status: { in: DECIDED } },
+};
+
 @Injectable()
 export class ReviewQueueService {
   constructor(private readonly scope: RequestScope) {}
 
-  // Every pending and flagged request, from all entities, oldest first.
-  // Decided requests are reachable by officers but have left the queue.
-  async list(): Promise<ReviewQueueItem[]> {
+  async list(view: ReviewView, sort: ReviewSort): Promise<ReviewQueueItem[]> {
+    const direction = sort === 'newest' ? 'desc' : 'asc';
     const rows = await this.scope.findManyForOfficer({
-      where: { status: { notIn: DECIDED } },
-      orderBy: [{ createdAt: 'asc' }, { reference: 'asc' }],
+      where: VIEWS[view],
+      orderBy: [{ createdAt: direction }, { reference: direction }],
       select: {
         id: true,
         reference: true,
