@@ -28,6 +28,10 @@ export default function ReviewCasePage() {
     setAttempt((n) => n + 1);
   }, []);
 
+  // Fetches again while the case stays on screen, to swap the decision form
+  // for the read-only case once a decision is recorded.
+  const reload = useCallback(() => setAttempt((n) => n + 1), []);
+
   useEffect(() => {
     const controller = new AbortController();
     api<ReviewCase>(`/review/requests/${encodeURIComponent(id)}`, {
@@ -67,6 +71,6 @@ export default function ReviewCasePage() {
         </Card>
       );
     case "ready":
-      return <CaseView request={state.request} />;
+      return <CaseView request={state.request} onDecided={reload} />;
   }
 }

@@ -5,6 +5,7 @@ import { Reference } from "@/components/app/reference";
 import { StatusBadge } from "@/components/app/status-badge";
 import { surface } from "@/components/app/surface";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DecisionForm } from "./decision-form";
 import type { FlagReason, ReviewCase } from "./types";
 
 const DOCUMENTS_PATH = "/api/review/requests";
@@ -25,7 +26,13 @@ function sourceLabel(source: string) {
 }
 
 // Everything that exists so far on a case (Sprint 2 spec §7).
-export function CaseView({ request }: { request: ReviewCase }) {
+export function CaseView({
+  request,
+  onDecided,
+}: {
+  request: ReviewCase;
+  onDecided: () => void;
+}) {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
@@ -100,6 +107,10 @@ export function CaseView({ request }: { request: ReviewCase }) {
                 </ul>
               </CardContent>
             </Card>
+          )}
+
+          {request.flagged && (
+            <DecisionForm requestId={request.id} onDecided={onDecided} />
           )}
         </div>
       </div>
