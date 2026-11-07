@@ -24,19 +24,23 @@ This is a graduation project (KSU, Software Engineering). The app is a realistic
 Use these terms exactly, in code and UI.
 
 - **Entity**: a government body, with a name, a short slug and a data office email.
-- **DPO**: a user. Belongs to exactly one entity.
+- **DPO**: a user who acts for one entity. Belongs to exactly one entity.
+- **Compliance officer**: a user holding the compliance officer role, who reviews requests in the review console. Belongs to SDAIA but acts as a reviewer, not for SDAIA.
 - **Data-sharing request** ("request"): has a requesting entity and a providing entity. Whether an entity is the requester or the provider is decided **per request**; the same entity sends some requests and receives others. Users have no requester/provider role.
 - **Reference**: the request's unique, human-readable ID.
 - **RoPA entry**: the providing entity's Record of Processing Activities document for a request.
 - **Position**: the providing entity's endorsement of, or objection to, a request.
+- **Flag reason**: why a request needs an officer's decision. A request with at least one is flagged.
+- **Decision**: an officer's final approval or rejection of a flagged request, with a written justification.
 
 ## Access rules (enforce on every query)
 
-1. A user can see a request only if their entity is its requesting or providing entity. Otherwise respond **404 Not Found**, never 403, so the request's existence is not revealed.
+1. A DPO can see a request only if their entity is its requesting or providing entity. Otherwise respond **404 Not Found**, never 403, so the request's existence is not revealed.
 2. Only the providing entity's DPO can respond to a request (RoPA entry and position). A party to the request who is not the provider gets 403.
-3. The requesting entity sees a request's status, but **not** the provider's RoPA document or position.
+3. The requesting entity sees a request's status, but **not** the provider's RoPA document, position or flag reasons, and it can't tell a flagged request from a responded one. It sees the outcome once a decision is recorded, but not the justification.
 4. A DPO cannot create a request whose providing entity is their own entity.
-5. All request queries go through one scoping helper in the API that filters by the current user's `entityId`. Never query requests directly from a controller, and never trust an entity ID sent by the client for authorization.
+5. All request queries go through one scoping helper in the API. For a DPO it filters by the current user's `entityId`; for a compliance officer it limits results to pending, flagged and decided requests. Never query requests directly from a controller, and never trust an entity ID or role sent by the client for authorization.
+6. Only compliance officers can reach the review console or record decisions. An officer has no DPO access, even to their own entity's requests.
 
 ## Architecture
 

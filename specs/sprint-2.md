@@ -10,8 +10,8 @@ What Sprint 2 must achieve, and why. Standing rules (access rules, auth invarian
 
 ## Progress
 
-- [ ] §5.1 Shared decisions recorded
-- [ ] §5.2 Standing rules reconciled
+- [x] §5.1 Shared decisions recorded
+- [x] §5.2 Standing rules reconciled
 - [ ] §5.3 Seed and existing data
 - [ ] §5.4 Scheduled work on the published app
 - [ ] §6 Compliance officer login
@@ -81,13 +81,13 @@ The list must leave room for Sprint 3 to add stages without reworking the stages
 
 A request can carry any number of flag reasons, from any number of sources. Every reason must say where it came from, what it says and when it was raised, whatever its source. A new source must need nothing more than recording a reason: the queue, the case view and the decision flow keep working without being changed, and without assuming that a flagged request has an objection.
 
-**Decided: not yet.** Record how flag reasons are represented, how a source is identified, and what happens to a reason that arrives once a request is decided. The result must work for any future source, including Sprint 3's checks.
+**Decided:** each flag reason is its own record on the request, holding its source, its text and the time it was raised. Adding a source means adding a new source identifier, and nothing else. The first source is the provider's objection, and its text is the objection. A reason that arrives after a decision is kept on the request, but does not reopen it or change the decision.
 
 ### §3.3 Decision records
 
 A decision record identifies the request, and states its outcome, the time of the decision, the written justification and which officer made it. It belongs to the request, lasts as long as the request does, and can be retrieved later.
 
-**Decided: not yet.** Record whether the two parties can read the justification, or only the outcome. Until this is settled, treat the justification as visible to compliance officers only, since it may quote the objection.
+**Decided:** the justification is visible to compliance officers only. The two parties see only the outcome, since a justification may quote the objection.
 
 ## §4 API contract: shared behaviour
 
@@ -101,6 +101,8 @@ Behaviour every story must share, whichever endpoints it uses.
 - Someone refused access learns nothing from the refusal: the response is the same whether or not the request is flagged, and whether or not it exists.
 - Who counts as an officer is decided by the server, never by anything the client sends.
 
+**Decided:** compliance officers belong to SDAIA, the PDPL regulator, so the session contract does not change. An officer acts as a reviewer, not for SDAIA: an officer account has none of a DPO's access, even to SDAIA's own requests, and SDAIA's DPO has no officer access. Officers can review and decide requests SDAIA is a party to, because every officer belongs to SDAIA and those requests could otherwise never be decided. This conflict of interest is accepted for the demo.
+
 ### §4.2 Email
 
 - All sprint email goes out one way, through the existing mail setup and its safety switch (AGENTS.md → Email). No story gets its own way of sending.
@@ -110,7 +112,7 @@ Behaviour every story must share, whichever endpoints it uses.
 
 **Decided:** notifications go to the entity's data office email, since the stories address the entity rather than a person.
 
-**Decided: not yet.** Record whether a failed notification is retried, and how a tester can tell who an email was meant for while the safety switch sends everything to one mailbox.
+A failed notification is logged, not retried. While the safety switch is on, each email carries its intended address in a mail header, never in the subject or body, so a tester can read it from the message source.
 
 ### §4.3 Scheduled work
 
@@ -134,7 +136,7 @@ Everything shared between stories is decided once and recorded in this spec, in 
 
 - **Terminology** has no compliance officer, flag, flag reason or decision. It also defines a user as a DPO.
 - **Access rules 1 and 5** limit every request query to requests the user's entity is a party to, which rules out a cross-entity review queue.
-- **The session contract** assumes every user belongs to an entity, and says that shape must not change. Decide how an officer fits it: whether officers belong to some entity, and if so, that entity must not become a choosable provider or a party to requests.
+- **The session contract** assumes every user belongs to an entity, and says that shape must not change. Officers belong to SDAIA (§4.1), so the shape stands, but the rules must say that an officer's entity gives them no party access.
 
 - **Done when:** `AGENTS.md` describes the officer and the access rules cover the review queue, with the approved wording, and no rule contradicts §4.1.
 
@@ -142,7 +144,7 @@ Everything shared between stories is decided once and recorded in this spec, in 
 
 The published app already holds demo data, and runs migrations and the seed on every start.
 
-- The seed provides at least one compliance officer account on a `.example` address, and at least one flagged request awaiting a decision, with documents marked **"SYNTHETIC — DEMO DATA"**.
+- The seed provides at least one compliance officer account in SDAIA, on a `.example` address, and at least one flagged request awaiting a decision, with documents marked **"SYNTHETIC — DEMO DATA"**.
 - Requests objected to before this sprint appear in the review queue once it is released, with their objection as the reason.
 - Upgrading loses nothing: every existing request keeps its documents, response and history, and the requester sees the same status as before.
 
@@ -209,7 +211,7 @@ The whole process waits on the provider's response, and nothing today prompts a 
 
 Each pending request gets one reminder, once it has waited for the defined period.
 
-**Decided: not yet.** Record the length of the defined period.
+**Decided:** the defined period is 3 days. It is a setting, so a sprint review can shorten it without changing code.
 
 **Done when:**
 - a pending request shows how long it has been waiting, wherever it is listed
@@ -248,6 +250,7 @@ Sprint 2 is done only when these pass, using entities A, B and C with a request 
 - no DPO, including those of A and B, can reach the review console or record a decision, and the refusal is the same whether or not the request is flagged
 - changing an ID, role or any other value sent by the client grants no officer access
 - an officer gets "not found" for a request the provider endorsed with nothing flagged, and cannot submit or respond to a request
+- an officer has no DPO access, even when SDAIA is a party: no Sent or Received lists, and the "not found" above still applies
 - until a decision is recorded, A cannot tell an objection from an endorsement through any screen, download, API response or email; afterwards it sees the outcome but still not the position or the RoPA document
 - B sees its own position and the outcome
 - C sees nothing about the request, in any list or view, and receives no email about it
@@ -274,6 +277,7 @@ Run on the **published app**. Log in just before presenting, so the 15-minute id
 | 2026-11-07 | All | Sprint 2 spec created. Sprint 1 §2.3 superseded by §3.1. |
 | 2026-11-07 | §1–§4, §6–§12, §14 | Reconciled with the story definitions, now in `docs/backlog.md`. The review queue holds pending and flagged requests, with filters and sorting. Outcomes are approved and rejected. Notifications go to the data office email. One reminder per pending request. The provider's submission email also states what is required. |
 | 2026-11-07 | §2, §4.3, §5.4, §12 | Published app moves from Autoscale to a Reserved VM on the smallest tier, superseding the deployment type in Sprint 1 §5.6. The demo no longer needs a wake-up step. |
+| 2026-11-07 | §3.2, §3.3, §4.1, §4.2, §5.2, §5.3, §9, §11 | Shared decisions recorded, and `AGENTS.md` terminology and access rules updated for compliance officers. Flag reasons are records with a source, text and time. The justification is for officers only. Officers belong to SDAIA with no DPO access, and can decide requests SDAIA is a party to. Failed notifications are logged, not retried. A mail header carries the intended address while the safety switch is on. The reminder period is 3 days. |
 
 ## §14 Out of scope
 
