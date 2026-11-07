@@ -18,6 +18,15 @@ function setup(env: Record<string, string>) {
 }
 
 describe('MailService', () => {
+  // ConfigService falls back to process.env, so the workspace's own safety
+  // switch would otherwise redirect every message in these tests.
+  beforeEach(() => {
+    vi.stubEnv('MAIL_REDIRECT_TO', undefined);
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it('sends the login code with its validity and nothing else', () => {
     const { sent, mail } = setup({});
     mail.sendLoginCode('dpo@moh.example', '012345', 5);
