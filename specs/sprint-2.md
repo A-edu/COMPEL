@@ -13,7 +13,7 @@ What Sprint 2 must achieve, and why. Standing rules (access rules, auth invarian
 - [x] §5.1 Shared decisions recorded
 - [x] §5.2 Standing rules reconciled
 - [x] §5.3 Seed and existing data
-- [ ] §5.4 Scheduled work on the published app
+- [x] §5.4 Scheduled work on the published app
 - [x] §6 Compliance officer login
 - [x] §7 Review queue and case view
 - [x] §8.1 Final decision
