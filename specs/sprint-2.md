@@ -18,11 +18,11 @@ What Sprint 2 must achieve, and why. Standing rules (access rules, auth invarian
 - [x] §7 Review queue and case view
 - [x] §8.1 Final decision
 - [x] §8.2 Stored decision records
-- [ ] §9 Pending requests and provider reminders
-- [ ] §10.1 Provider notified of a new request
-- [ ] §10.2 Requester notified of status changes
-- [ ] §10.3 Provider notified of the final outcome
-- [ ] §11 Access and isolation tests
+- [x] §9 Pending requests and provider reminders
+- [x] §10.1 Provider notified of a new request
+- [x] §10.2 Requester notified of status changes
+- [x] §10.3 Provider notified of the final outcome
+- [x] §11 Access and isolation tests
 
 ---
 
