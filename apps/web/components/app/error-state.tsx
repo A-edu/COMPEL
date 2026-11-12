@@ -1,9 +1,9 @@
-import { CircleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FALLBACK_ERROR } from "@/lib/api";
 import { EmptyState } from "./empty-state";
 
-// Shown inside a card in place of content that failed to load.
+// Shown inside a surface in place of content that failed to load. The message
+// is the heading, with Try again beneath it.
 export function ErrorState({
   message = FALLBACK_ERROR,
   onRetry,
@@ -14,8 +14,7 @@ export function ErrorState({
   return (
     <EmptyState
       role="alert"
-      icon={CircleAlert}
-      message={message}
+      title={message}
       action={
         <Button variant="outline" onClick={onRetry}>
           Try again

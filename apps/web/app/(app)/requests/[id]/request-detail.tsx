@@ -1,9 +1,10 @@
 import { PageHeader } from "@/components/app/page-header";
 import { Reference } from "@/components/app/reference";
+import { FileRow } from "@/components/app/file-row";
 import { StatusBadge } from "@/components/app/status-badge";
 import { surface } from "@/components/app/surface";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DocumentLink } from "./document-link";
+import { partyVariant } from "@/lib/status";
 import { ResponseForm } from "./response-form";
 import { ResponseSummary } from "./response-summary";
 import type { RequestDetail } from "./types";
@@ -30,7 +31,7 @@ export function RequestDetailView({
         description={
           <>
             <Reference value={request.reference} />
-            <StatusBadge status={request.status} flagged={request.flagged} />
+            <StatusBadge variant={partyVariant(request.status, request.flagged)} />
           </>
         }
       />
@@ -45,10 +46,10 @@ export function RequestDetailView({
             </p>
             <section className="flex flex-col gap-2">
               <h2 className="text-sm font-medium">Documents</h2>
-              <ul className="-mx-2 flex flex-col">
+              <ul className="flex flex-col gap-2">
                 {request.documents.map((document) => (
                   <li key={document.id}>
-                    <DocumentLink requestId={request.id} document={document} />
+                    <FileRow requestId={request.id} document={document} />
                   </li>
                 ))}
               </ul>

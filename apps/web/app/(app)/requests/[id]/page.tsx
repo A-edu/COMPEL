@@ -1,6 +1,5 @@
 "use client";
 
-import { FileQuestion } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { EmptyState } from "@/components/app/empty-state";
@@ -61,7 +60,7 @@ export default function RequestPage() {
     case "not-found":
       return (
         <Card className={surfaceFlush}>
-          <EmptyState icon={FileQuestion} message="Not found." />
+          <EmptyState title="Not found." />
         </Card>
       );
     case "error":

@@ -4,9 +4,18 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Shadows in tinted ink rather than pure black (AGENTS.md -> Inner screens). */
+@theme {
+  --shadow-xs: 0 1px 2px 0 rgb(20 20 19 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(20 20 19 / 0.08), 0 1px 2px -1px rgb(20 20 19 / 0.08);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-canvas: var(--canvas);
+  --color-sunken: var(--sunken);
+  --color-ink-2: var(--ink-2);
+  --color-hairline: var(--hairline);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -50,23 +59,24 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
+  --background: #fdfdfc;
+  --foreground: #141413;
+  --card: #fdfdfc;
+  --card-foreground: #141413;
+  --popover: #fdfdfc;
+  --popover-foreground: #141413;
+  --primary: #141413;
+  --primary-foreground: #fdfdfc;
+  --secondary: #f0f0ed;
+  --secondary-foreground: #141413;
+  --muted: #f0f0ed;
+  --muted-foreground: #6b6a65;
+  --accent: #f0f0ed;
+  --accent-foreground: #141413;
+  /* Flag red: validation and error text (docs/design/sprint-2.md). */
+  --destructive: #d92d20;
+  --border: rgb(20 20 19 / 0.12);
+  --input: rgb(20 20 19 / 0.12);
   --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
@@ -82,8 +92,15 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  /* Inner screens: the page behind the cards (AGENTS.md -> Inner screens). */
-  --canvas: oklch(0.985 0 0);
+  /* Inner screens: the page behind the surfaces (docs/design/sprint-2.md ->
+     Paper and ink). */
+  --canvas: #f5f5f3;
+  /* Quoted text, file rows and tags inside a surface. */
+  --sunken: #f3f3f0;
+  /* Body copy in long text. */
+  --ink-2: #3a3a37;
+  /* Dividers and surface rings: ink at 8%. */
+  --hairline: rgb(20 20 19 / 0.08);
 }
 
 .dark {

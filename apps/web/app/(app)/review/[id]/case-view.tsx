@@ -1,18 +1,16 @@
-import { DocumentLink } from "@/app/(app)/requests/[id]/document-link";
 import { ResponseSummary } from "@/app/(app)/requests/[id]/response-summary";
+import { FileRow } from "@/components/app/file-row";
+import { flagSourceLabel } from "@/components/app/flag-reason";
 import { PageHeader } from "@/components/app/page-header";
 import { Reference } from "@/components/app/reference";
 import { StatusBadge } from "@/components/app/status-badge";
 import { surface } from "@/components/app/surface";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { officerVariant } from "@/lib/status";
 import { DecisionForm } from "./decision-form";
 import type { Decision, FlagReason, ReviewCase } from "./types";
 
 const DOCUMENTS_PATH = "/api/review/requests";
-
-const SOURCE_LABEL: Record<string, string> = {
-  PROVIDER_OBJECTION: "Provider objection",
-};
 
 const OUTCOME_LABEL: Record<Decision["outcome"], string> = {
   APPROVED: "Approved",
@@ -24,15 +22,6 @@ const decidedOn = new Intl.DateTimeFormat("en-GB", {
   dateStyle: "medium",
   timeStyle: "short",
 });
-
-// A source with no label yet still reads properly, so a new source needs no
-// change here (Sprint 2 spec §3.2).
-function sourceLabel(source: string) {
-  const known = SOURCE_LABEL[source];
-  if (known) return known;
-  const words = source.replaceAll("_", " ").toLowerCase();
-  return words.charAt(0).toUpperCase() + words.slice(1);
-}
 
 // Everything that exists so far on a case (Sprint 2 spec §7).
 export function CaseView({
@@ -50,9 +39,7 @@ export function CaseView({
           <>
             <Reference value={request.reference} />
             <StatusBadge
-              status={request.status}
-              flagged={request.flagged}
-              flaggedLabel="Flagged"
+              variant={officerVariant(request.status, request.flagged)}
             />
           </>
         }
@@ -66,10 +53,10 @@ export function CaseView({
             </dl>
             <section className="flex flex-col gap-2">
               <h2 className="text-sm font-medium">Documents</h2>
-              <ul className="-mx-2 flex flex-col">
+              <ul className="flex flex-col gap-2">
                 {request.documents.map((document) => (
                   <li key={document.id}>
-                    <DocumentLink
+                    <FileRow
                       requestId={request.id}
                       document={document}
                       basePath={DOCUMENTS_PATH}
@@ -149,13 +136,13 @@ function DecisionRecord({ decision }: { decision: Decision }) {
         <dl className="flex flex-col gap-5">
           <div className="flex flex-col gap-1">
             <dt className="text-sm font-medium">Outcome</dt>
-            <dd className="text-sm text-neutral-700">
+            <dd className="text-sm text-ink-2">
               {OUTCOME_LABEL[decision.outcome]}
             </dd>
           </div>
           <div className="flex flex-col gap-1">
             <dt className="text-sm font-medium">Decided on</dt>
-            <dd className="text-sm text-neutral-700 tabular-nums">
+            <dd className="text-sm text-ink-2 tabular-nums">
               <time dateTime={decision.createdAt}>
                 {decidedOn.format(new Date(decision.createdAt))}
               </time>
@@ -163,13 +150,13 @@ function DecisionRecord({ decision }: { decision: Decision }) {
           </div>
           <div className="flex flex-col gap-1">
             <dt className="text-sm font-medium">Officer</dt>
-            <dd className="font-mono text-sm break-all text-neutral-700">
+            <dd className="font-mono text-sm break-all text-ink-2">
               {decision.decidedBy.email}
             </dd>
           </div>
           <div className="flex flex-col gap-1">
             <dt className="text-sm font-medium">Justification</dt>
-            <dd className="text-sm break-words whitespace-pre-line text-neutral-700">
+            <dd className="text-sm break-words whitespace-pre-line text-ink-2">
               {decision.justification}
             </dd>
           </div>
@@ -183,7 +170,7 @@ function Reason({ reason }: { reason: FlagReason }) {
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-baseline justify-between gap-3">
-        <span className="text-sm font-medium">{sourceLabel(reason.source)}</span>
+        <span className="text-sm font-medium">{flagSourceLabel(reason.source)}</span>
         <time
           dateTime={reason.createdAt}
           className="shrink-0 text-xs text-muted-foreground tabular-nums"
@@ -191,7 +178,7 @@ function Reason({ reason }: { reason: FlagReason }) {
           {raisedOn.format(new Date(reason.createdAt))}
         </time>
       </div>
-      <p className="text-sm whitespace-pre-line text-neutral-700">
+      <p className="text-sm whitespace-pre-line text-ink-2">
         {reason.text}
       </p>
       {reason.raisedAfterDecision && (

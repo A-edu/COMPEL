@@ -11,7 +11,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { api, ApiError, FALLBACK_ERROR } from "@/lib/api";
 import { homePath, type UserRole } from "@/lib/safe-next";
 import { CompelMark } from "./compel-mark";
-import { EntityChip, EntityChipSkeleton, type ChipEntity } from "./entity-chip";
+import { EntityChip, EntityChipSkeleton } from "./entity-chip";
 import { PageContainer } from "./page-container";
 
 interface Me {
@@ -19,10 +19,10 @@ interface Me {
   entity: { id: string; name: string; slug: string };
 }
 
-// An officer acts as a reviewer, not for their entity (Sprint 2 spec §4.1).
-const OFFICER_CHIP: ChipEntity = { name: "Compliance officer", slug: "co" };
-
 // The mark and wordmark, the user's entity and Log out. Nothing else (§7).
+// Officers get the review console variant (docs/design/sprint-2.md -> Officer
+// header): an officer acts as a reviewer, not for their entity (Sprint 2 spec
+// §4.1), so the chip names the role, with SDAIA after it.
 export function AppHeader() {
   const router = useRouter();
   // undefined while loading; null if it could not be loaded.
@@ -53,7 +53,7 @@ export function AppHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-black/6 bg-white/80 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-hairline bg-card/80 backdrop-blur-md">
       <PageContainer className="flex h-16 items-center gap-6">
         <Link
           href={homePath(me?.user.role)}
@@ -65,14 +65,34 @@ export function AppHeader() {
             COMPEL
           </span>
         </Link>
+        {isOfficer && (
+          <div className="-ml-2 flex items-center gap-4">
+            <Separator
+              orientation="vertical"
+              className="bg-hairline data-vertical:h-4 data-vertical:self-center"
+            />
+            <span className="text-[13px] whitespace-nowrap text-muted-foreground">
+              Review console
+            </span>
+          </div>
+        )}
 
         <div className="ml-auto flex min-w-0 items-center gap-3">
           {me === undefined && <EntityChipSkeleton />}
-          {me && <EntityChip entity={isOfficer ? OFFICER_CHIP : me.entity} />}
+          {me &&
+            (isOfficer ? (
+              <EntityChip
+                name="Compliance officer"
+                suffix={me.entity.slug.toUpperCase()}
+                title={me.user.email}
+              />
+            ) : (
+              <EntityChip name={me.entity.name} />
+            ))}
           {me !== null && (
             <Separator
               orientation="vertical"
-              className="bg-black/10 data-vertical:h-4 data-vertical:self-center"
+              className="bg-hairline data-vertical:h-4 data-vertical:self-center"
             />
           )}
           <Button

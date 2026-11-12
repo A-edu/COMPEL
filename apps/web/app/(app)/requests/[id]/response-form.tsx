@@ -137,9 +137,9 @@ export function ResponseForm({
             <Field data-invalid={fileError ? true : undefined}>
               <FieldLabel htmlFor={ids.file}>RoPA entry</FieldLabel>
               {file ? (
-                <div className="flex items-center gap-3 rounded-lg px-3 py-2 ring-1 ring-black/6">
+                <div className="flex items-center gap-3 rounded-lg px-3 py-2 ring-1 ring-hairline">
                   <FileText
-                    className="size-4 shrink-0 text-neutral-500"
+                    className="size-4 shrink-0 text-muted-foreground"
                     aria-hidden
                   />
                   <span className="min-w-0 flex-1 truncate text-sm text-foreground">
@@ -156,8 +156,8 @@ export function ResponseForm({
                   </Button>
                 </div>
               ) : (
-                <label className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-neutral-300 px-6 py-8 text-center text-foreground transition-colors hover:bg-neutral-50 focus-within:ring-3 focus-within:ring-ring/50">
-                  <Upload className="size-5 text-neutral-500" aria-hidden />
+                <label className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-border px-6 py-8 text-center text-foreground transition-colors hover:bg-muted focus-within:ring-3 focus-within:ring-ring/50">
+                  <Upload className="size-5 text-muted-foreground" aria-hidden />
                   <span className="text-sm font-medium">
                     Choose a PDF or DOCX file
                   </span>
@@ -221,7 +221,7 @@ export function ResponseForm({
             )}
           </CardContent>
 
-          <CardFooter className="justify-end gap-2 border-t border-black/6 bg-transparent py-4">
+          <CardFooter className="justify-end gap-2 border-t border-hairline bg-transparent py-4">
             <Button type="submit" disabled={!valid || submitting}>
               {submitting && <Spinner data-icon="inline-start" />}
               Submit response

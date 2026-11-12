@@ -3,12 +3,6 @@
 import {
   ArrowUpDown,
   ChevronRight,
-  FileQuestion,
-  Flag,
-  Hourglass,
-  Inbox,
-  Scale,
-  type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -17,8 +11,10 @@ import { EmptyState } from "@/components/app/empty-state";
 import { ErrorState } from "@/components/app/error-state";
 import { PageHeader } from "@/components/app/page-header";
 import { Reference } from "@/components/app/reference";
+import { segmentedList, segmentedTrigger } from "@/components/app/segmented";
 import { ListSkeleton } from "@/components/app/skeletons";
 import { StatusBadge, type RequestStatus } from "@/components/app/status-badge";
+import { officerVariant } from "@/lib/status";
 import { surfaceFlush } from "@/components/app/surface";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -48,36 +44,28 @@ const VIEWS: {
   value: View;
   label: string;
   empty: string;
-  icon: LucideIcon;
 }[] = [
   {
     value: "queue",
     label: "In queue",
     empty: "No requests to review.",
-    icon: Inbox,
   },
   {
     value: "flagged",
     label: "Flagged",
     empty: "No flagged requests.",
-    icon: Flag,
   },
   {
     value: "pending",
     label: "Awaiting response",
     empty: "No requests awaiting a response.",
-    icon: Hourglass,
   },
   {
     value: "decided",
     label: "Decided",
     empty: "No decided requests yet.",
-    icon: Scale,
   },
 ];
-
-const TRIGGER =
-  "rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-xs";
 
 function viewFrom(value: string | null): View {
   return VIEWS.find((v) => v.value === value)?.value ?? "queue";
@@ -143,7 +131,7 @@ export function ReviewQueue() {
   if (result && "notFound" in result) {
     return (
       <Card className={surfaceFlush}>
-        <EmptyState icon={FileQuestion} message="Not found." />
+        <EmptyState title="Not found." />
       </Card>
     );
   }
@@ -157,9 +145,9 @@ export function ReviewQueue() {
         className="gap-4"
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <TabsList className="h-9 max-w-full justify-start overflow-x-auto rounded-lg bg-neutral-100 p-1">
+          <TabsList className={`${segmentedList} justify-start overflow-x-auto`}>
             {VIEWS.map(({ value, label }) => (
-              <TabsTrigger key={value} value={value} className={TRIGGER}>
+              <TabsTrigger key={value} value={value} className={segmentedTrigger}>
                 {label}
               </TabsTrigger>
             ))}
@@ -203,7 +191,7 @@ function QueueCard({
   result: Exclude<Result, { notFound: true }> | undefined;
   onRetry: () => void;
 }) {
-  const { empty, icon } = VIEWS.find((v) => v.value === view) ?? VIEWS[0];
+  const { empty } = VIEWS.find((v) => v.value === view) ?? VIEWS[0];
   return (
     <Card className={surfaceFlush}>
       {result === undefined ? (
@@ -211,9 +199,9 @@ function QueueCard({
       ) : "error" in result ? (
         <ErrorState message={result.error} onRetry={onRetry} />
       ) : result.requests.length === 0 ? (
-        <EmptyState icon={icon} message={empty} />
+        <EmptyState title={empty} />
       ) : (
-        <ul className="divide-y divide-black/6">
+        <ul className="divide-y divide-hairline">
           {result.requests.map((r) => (
             <li key={r.id}>
               <QueueRow request={r} />
@@ -231,7 +219,7 @@ function QueueRow({ request: r }: { request: QueueItem }) {
   return (
     <Link
       href={`/review/${r.id}`}
-      className="flex items-center gap-4 px-5 py-4 outline-none transition-colors hover:bg-neutral-50 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset sm:gap-6"
+      className="flex items-center gap-4 px-5 py-4 outline-none transition-colors hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset sm:gap-6"
     >
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <span className="truncate text-[15px] font-medium" title={r.title}>
@@ -243,12 +231,10 @@ function QueueRow({ request: r }: { request: QueueItem }) {
         </span>
       </div>
       <StatusBadge
-        status={r.status}
-        flagged={r.flagged}
-        flaggedLabel="Flagged"
+        variant={officerVariant(r.status, r.flagged)}
         className="shrink-0"
       />
-      <ChevronRight className="size-4 shrink-0 text-neutral-400" aria-hidden />
+      <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
     </Link>
   );
 }

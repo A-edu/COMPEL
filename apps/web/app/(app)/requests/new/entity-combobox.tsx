@@ -70,7 +70,7 @@ export function EntityCombobox({
           </span>
           <ChevronsUpDown
             data-icon="inline-end"
-            className="text-neutral-400"
+            className="text-muted-foreground"
             aria-hidden
           />
         </Button>

@@ -1,12 +1,13 @@
 "use client";
 
-import { ChevronRight, Inbox, Send } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { EmptyState } from "@/components/app/empty-state";
 import { ErrorState } from "@/components/app/error-state";
 import { Reference } from "@/components/app/reference";
+import { segmentedList, segmentedTrigger } from "@/components/app/segmented";
 import { ListSkeleton } from "@/components/app/skeletons";
 import { StatusBadge, type RequestStatus } from "@/components/app/status-badge";
 import { surfaceFlush } from "@/components/app/surface";
@@ -15,6 +16,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api, ApiError, FALLBACK_ERROR } from "@/lib/api";
+import { partyVariant } from "@/lib/status";
 
 type Tab = "sent" | "received";
 
@@ -28,9 +30,6 @@ interface RequestListItem {
 }
 
 type Result = { requests: RequestListItem[] } | { error: string };
-
-const TRIGGER =
-  "rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-xs";
 
 // The active tab lives in the URL (?tab=received); anything else is Sent.
 export function RequestsList() {
@@ -76,11 +75,11 @@ export function RequestsList() {
 
   return (
     <Tabs value={tab} onValueChange={selectTab} className="gap-4">
-      <TabsList className="h-9 rounded-lg bg-neutral-100 p-1">
-        <TabsTrigger value="sent" className={TRIGGER}>
+      <TabsList className={segmentedList}>
+        <TabsTrigger value="sent" className={segmentedTrigger}>
           Sent
         </TabsTrigger>
-        <TabsTrigger value="received" className={TRIGGER}>
+        <TabsTrigger value="received" className={segmentedTrigger}>
           Received
         </TabsTrigger>
       </TabsList>
@@ -121,8 +120,7 @@ function RequestsCard({
       ) : result.requests.length === 0 ? (
         direction === "sent" ? (
           <EmptyState
-            icon={Send}
-            message="No requests sent yet."
+            title="No requests sent yet."
             action={
               <Button asChild>
                 <Link href="/requests/new">New request</Link>
@@ -130,10 +128,10 @@ function RequestsCard({
             }
           />
         ) : (
-          <EmptyState icon={Inbox} message="No requests received yet." />
+          <EmptyState title="No requests received yet." />
         )
       ) : (
-        <ul className="divide-y divide-black/6">
+        <ul className="divide-y divide-hairline">
           {result.requests.map((r) => (
             <li key={r.id}>
               <RequestRow request={r} />
@@ -151,7 +149,7 @@ function RequestRow({ request: r }: { request: RequestListItem }) {
   return (
     <Link
       href={`/requests/${r.id}`}
-      className="flex items-center gap-4 px-5 py-4 outline-none transition-colors hover:bg-neutral-50 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset sm:gap-6"
+      className="flex items-center gap-4 px-5 py-4 outline-none transition-colors hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset sm:gap-6"
     >
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <span className="truncate text-[15px] font-medium" title={r.title}>
@@ -165,8 +163,11 @@ function RequestRow({ request: r }: { request: RequestListItem }) {
       <span className="hidden max-w-56 text-right text-sm text-balance text-muted-foreground sm:block">
         {r.counterpartEntity.name}
       </span>
-      <StatusBadge status={r.status} flagged={r.flagged} className="shrink-0" />
-      <ChevronRight className="size-4 shrink-0 text-neutral-400" aria-hidden />
+      <StatusBadge
+        variant={partyVariant(r.status, r.flagged)}
+        className="shrink-0"
+      />
+      <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
     </Link>
   );
 }

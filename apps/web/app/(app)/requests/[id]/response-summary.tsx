@@ -1,4 +1,4 @@
-import { DocumentLink } from "./document-link";
+import { FileRow } from "@/components/app/file-row";
 import type { Position, ProviderResponse } from "./types";
 
 const POSITION_LABEL: Record<Position, string> = {
@@ -21,8 +21,8 @@ export function ResponseSummary({
     <dl className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
         <dt className="text-sm font-medium">RoPA entry</dt>
-        <dd className="-mx-2">
-          <DocumentLink
+        <dd>
+          <FileRow
             requestId={requestId}
             document={response.ropaDocument}
             basePath={basePath}
@@ -31,14 +31,14 @@ export function ResponseSummary({
       </div>
       <div className="flex flex-col gap-1">
         <dt className="text-sm font-medium">Position</dt>
-        <dd className="text-sm text-neutral-700">
+        <dd className="text-sm text-ink-2">
           {POSITION_LABEL[response.position]}
         </dd>
       </div>
       {response.objectionReason && (
         <div className="flex flex-col gap-1">
           <dt className="text-sm font-medium">Reason</dt>
-          <dd className="text-sm whitespace-pre-line text-neutral-700">
+          <dd className="text-sm whitespace-pre-line text-ink-2">
             {response.objectionReason}
           </dd>
         </div>

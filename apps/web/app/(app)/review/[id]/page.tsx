@@ -1,6 +1,5 @@
 "use client";
 
-import { FileQuestion } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { RequestDetailSkeleton } from "@/app/(app)/requests/[id]/detail-skeleton";
@@ -61,7 +60,7 @@ export default function ReviewCasePage() {
     case "not-found":
       return (
         <Card className={surfaceFlush}>
-          <EmptyState icon={FileQuestion} message="Not found." />
+          <EmptyState title="Not found." />
         </Card>
       );
     case "error":
