@@ -53,9 +53,9 @@ export function FileDrop({
         const files = Array.from(e.dataTransfer.files);
         if (files.length) onFiles(multiple ? files : files.slice(0, 1));
       }}
-      className="flex cursor-pointer flex-col items-center gap-1.5 rounded-lg border border-dashed border-neutral-300 px-6 py-7 text-center transition-colors focus-within:ring-3 focus-within:ring-ring/50 hover:bg-neutral-50 has-disabled:cursor-not-allowed has-disabled:opacity-50 has-disabled:hover:bg-transparent"
+      className="flex cursor-pointer flex-col items-center gap-1.5 rounded-lg border border-dashed border-border px-6 py-7 text-center transition-colors focus-within:ring-3 focus-within:ring-ring/50 hover:bg-muted has-disabled:cursor-not-allowed has-disabled:opacity-50 has-disabled:hover:bg-transparent"
     >
-      <Upload className="mb-1 size-5 text-neutral-500" aria-hidden />
+      <Upload className="mb-1 size-5 text-muted-foreground" aria-hidden />
       <span className="text-sm font-medium">
         {multiple ? "Choose PDF or DOCX files" : "Choose a PDF or DOCX file"}
       </span>
@@ -95,8 +95,8 @@ export function FileRow({
 }) {
   return (
     <li className="flex flex-col gap-1">
-      <div className="flex items-center gap-3 rounded-lg py-1.5 pr-1.5 pl-3 ring-1 ring-black/6">
-        <FileText className="size-4 shrink-0 text-neutral-500" aria-hidden />
+      <div className="flex items-center gap-3 rounded-lg py-1.5 pr-1.5 pl-3 ring-1 ring-hairline">
+        <FileText className="size-4 shrink-0 text-muted-foreground" aria-hidden />
         <span className="min-w-0 flex-1 truncate text-sm" title={file.name}>
           {file.name}
         </span>

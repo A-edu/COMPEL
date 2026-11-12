@@ -202,7 +202,9 @@ describe('Decision records (e2e)', () => {
         cookies.officer,
       ).expect(200);
 
-      expect((list.body as { id: string }[]).map((r) => r.id)).toContain(
+      expect(
+        (list.body as { items: { id: string }[] }).items.map((r) => r.id),
+      ).toContain(
         req.id,
       );
     });

@@ -77,7 +77,7 @@ describe('Review console (e2e)', () => {
     const res = await get(`/review/requests${query}`, cookies.officer).expect(
       200,
     );
-    return res.body as Row[];
+    return (res.body as { items: Row[] }).items;
   }
 
   const ids = async (query = '') => (await rows(query)).map((r) => r.id);
@@ -146,7 +146,7 @@ describe('Review console (e2e)', () => {
       await expect(ids('?view=pending')).resolves.not.toContain(both.id);
     });
 
-    it('sorts oldest first by default, and newest first on request', async () => {
+    it('lists the longest waiting first by default, and the most recent first on request', async () => {
       const older = (await newRequest('Older')).request;
       const newer = (await newRequest('Newer')).request;
       await prisma.dataSharingRequest.update({
@@ -164,19 +164,22 @@ describe('Review console (e2e)', () => {
       ];
       const [olderByDefault, newerByDefault] = position(await ids());
       expect(olderByDefault).toBeLessThan(newerByDefault);
-      const [olderIfOldest, newerIfOldest] = position(
-        await ids('?sort=oldest'),
+      const [olderIfLongest, newerIfLongest] = position(
+        await ids('?sort=longest'),
       );
-      expect(olderIfOldest).toBeLessThan(newerIfOldest);
-      const [olderIfNewest, newerIfNewest] = position(
-        await ids('?sort=newest'),
+      expect(olderIfLongest).toBeLessThan(newerIfLongest);
+      const [olderIfRecent, newerIfRecent] = position(
+        await ids('?sort=recent'),
       );
-      expect(newerIfNewest).toBeLessThan(olderIfNewest);
+      expect(newerIfRecent).toBeLessThan(olderIfRecent);
     });
 
     it('refuses an unknown view or sort', async () => {
       await get('/review/requests?view=endorsed', cookies.officer).expect(400);
       await get('/review/requests?sort=sideways', cookies.officer).expect(400);
+      // The earlier sort names are gone.
+      await get('/review/requests?sort=oldest', cookies.officer).expect(400);
+      await get('/review/requests?sort=newest', cookies.officer).expect(400);
     });
 
     it('never widens to a responded request, whatever view is asked for', async () => {

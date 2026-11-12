@@ -1,5 +1,5 @@
-import { RequestDetailSkeleton } from "@/app/(app)/requests/[id]/detail-skeleton";
+import { CaseSkeleton } from "@/components/app/skeletons";
 
 export default function Loading() {
-  return <RequestDetailSkeleton />;
+  return <CaseSkeleton />;
 }

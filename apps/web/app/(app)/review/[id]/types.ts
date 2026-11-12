@@ -2,24 +2,20 @@ import type {
   ProviderResponse,
   RequestDocument,
 } from "@/app/(app)/requests/[id]/types";
+import type { DecisionRecordData } from "@/components/app/decision-record";
+import type { FlagReasonItem } from "@/components/app/flag-reason";
 import type { RequestStatus } from "@/components/app/status-badge";
 
 // GET /api/review/requests/:id (Sprint 2 spec §7). Dates arrive as ISO strings.
 
-export interface FlagReason {
-  id: string;
-  source: string;
-  text: string;
-  createdAt: string;
-  // Only on a reason that arrived after the decision.
-  raisedAfterDecision?: true;
-}
+export type FlagReason = FlagReasonItem;
 
-export interface Decision {
-  outcome: "APPROVED" | "REJECTED";
-  justification: string;
-  createdAt: string;
-  decidedBy: { email: string };
+export type Decision = DecisionRecordData;
+
+export interface CaseEntity {
+  id: string;
+  name: string;
+  slug: string;
 }
 
 export interface ReviewCase {
@@ -29,8 +25,8 @@ export interface ReviewCase {
   status: RequestStatus;
   flagged: boolean;
   createdAt: string;
-  requestingEntity: { id: string; name: string };
-  providingEntity: { id: string; name: string };
+  requestingEntity: CaseEntity;
+  providingEntity: CaseEntity;
   documents: RequestDocument[];
   // Null until the provider responds.
   providerResponse: ProviderResponse | null;

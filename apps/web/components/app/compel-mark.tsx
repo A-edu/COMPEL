@@ -1,7 +1,8 @@
 import { cn } from "@/lib/utils";
 
 // The COMPEL mark. Mirrors app/icon.svg (the favicon), fixed to its light
-// colours since inner screens are always light.
+// colours since inner screens are always light, in the tinted ink and paper
+// of docs/design/sprint-2.md.
 export function CompelMark({ className }: { className?: string }) {
   return (
     <svg
@@ -9,11 +10,11 @@ export function CompelMark({ className }: { className?: string }) {
       className={cn("shrink-0", className)}
       aria-hidden
     >
-      <rect width="32" height="32" rx="7" fill="#0a0a0a" />
+      <rect width="32" height="32" rx="7" fill="#141413" />
       <path
         d="M20.7 10.3A8 8 0 1 0 15 24L25.5 12.5"
         fill="none"
-        stroke="#fff"
+        stroke="#fdfdfc"
         strokeWidth="3.2"
         strokeLinecap="round"
         strokeLinejoin="round"

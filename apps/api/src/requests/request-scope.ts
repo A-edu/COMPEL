@@ -114,6 +114,15 @@ export class RequestScope {
     }) as Promise<Prisma.DataSharingRequestGetPayload<A>[]>;
   }
 
+  // How many requests officers can reach match `where`.
+  countForOfficer(
+    where?: Prisma.DataSharingRequestWhereInput,
+    tx?: Prisma.TransactionClient,
+  ): Promise<number> {
+    const db = tx ?? this.prisma;
+    return db.dataSharingRequest.count({ where: this.officerWhere(where) });
+  }
+
   // Loads one request officers can reach. Anything else, including a request
   // the provider endorsed with nothing flagged, is the same 404 as an unknown
   // ID.

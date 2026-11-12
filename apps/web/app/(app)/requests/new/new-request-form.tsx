@@ -249,7 +249,7 @@ function RequestForm({
             </Field>
           </CardContent>
 
-          <CardFooter className="justify-end gap-2 border-t border-black/6 bg-transparent py-4">
+          <CardFooter className="justify-end gap-2 border-t border-hairline bg-transparent py-4">
             <Button
               type="button"
               variant="ghost"

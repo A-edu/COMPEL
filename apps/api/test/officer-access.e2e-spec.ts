@@ -164,7 +164,9 @@ describe('Compliance officer access (e2e)', () => {
         .get('/api/review/requests')
         .set('Cookie', cookie)
         .expect(200);
-      const ids = (res.body as { id: string }[]).map((r) => r.id);
+      const ids = (res.body as { items: { id: string }[] }).items.map(
+        (r) => r.id,
+      );
       expect(ids).toContain(pending.request.id);
     });
 

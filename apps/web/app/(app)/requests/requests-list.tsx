@@ -1,36 +1,66 @@
 "use client";
 
-import { ChevronRight, Inbox, Send } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { EmptyState } from "@/components/app/empty-state";
 import { ErrorState } from "@/components/app/error-state";
 import { Reference } from "@/components/app/reference";
+import { segmentedList, segmentedTrigger } from "@/components/app/segmented";
 import { ListSkeleton } from "@/components/app/skeletons";
 import { StatusBadge, type RequestStatus } from "@/components/app/status-badge";
 import { surfaceFlush } from "@/components/app/surface";
+import { WaitingTime } from "@/components/app/waiting-time";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api, ApiError, FALLBACK_ERROR } from "@/lib/api";
+import { partyVariant } from "@/lib/status";
+import { cn } from "@/lib/utils";
 
 type Tab = "sent" | "received";
 
+// GET /api/requests (spec §4 -> List item). Dates arrive as ISO strings.
 interface RequestListItem {
   id: string;
   reference: string;
   title: string;
   status: RequestStatus;
+  createdAt: string;
   flagged?: true;
   counterpartEntity: { id: string; name: string };
 }
 
 type Result = { requests: RequestListItem[] } | { error: string };
 
-const TRIGGER =
-  "rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-xs";
+// Each tab is one surface with two groups: what still waits on the provider,
+// then everything it has responded to (docs/design/sprint-2.md -> DPO
+// requests list).
+const GROUPS: Record<
+  Tab,
+  { waiting: string; responded: string; counterpart: string }
+> = {
+  received: {
+    waiting: "Awaiting your response",
+    responded: "Responded",
+    counterpart: "From",
+  },
+  sent: {
+    waiting: "Waiting for a response",
+    responded: "Responded",
+    counterpart: "To",
+  },
+};
+
+const isWaiting = (r: RequestListItem) =>
+  r.status === "AWAITING_PROVIDER_RESPONSE";
+
+// Request · counterpart · waiting · status · chevron. Both groups share it so
+// their columns line up; the Responded group leaves Waiting empty.
+const GRID =
+  "grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,12rem)_5.5rem_9rem_1rem] sm:gap-6";
 
 // The active tab lives in the URL (?tab=received); anything else is Sent.
 export function RequestsList() {
@@ -44,18 +74,23 @@ export function RequestsList() {
 
   useEffect(() => {
     const controller = new AbortController();
-    const settle = (result: Result) =>
-      setResults((prev) => ({ ...prev, [tab]: result }));
-    api<RequestListItem[]>(`/requests?direction=${tab}`, {
-      signal: controller.signal,
-    })
-      .then((requests) => settle({ requests }))
-      .catch((error: unknown) => {
-        if (controller.signal.aborted) return;
-        settle({
-          error: error instanceof ApiError ? error.message : FALLBACK_ERROR,
+    // Received is loaded on the Sent tab too, for its count of requests
+    // awaiting a response.
+    const tabs: Tab[] = tab === "received" ? ["received"] : ["sent", "received"];
+    for (const direction of tabs) {
+      const settle = (result: Result) =>
+        setResults((prev) => ({ ...prev, [direction]: result }));
+      api<RequestListItem[]>(`/requests?direction=${direction}`, {
+        signal: controller.signal,
+      })
+        .then((requests) => settle({ requests }))
+        .catch((error: unknown) => {
+          if (controller.signal.aborted) return;
+          settle({
+            error: error instanceof ApiError ? error.message : FALLBACK_ERROR,
+          });
         });
-      });
+    }
     return () => controller.abort();
   }, [tab, attempt]);
 
@@ -74,14 +109,26 @@ export function RequestsList() {
     setAttempt((n) => n + 1);
   }
 
+  const received = results.received;
+  const awaitingCount =
+    received && "requests" in received
+      ? received.requests.filter(isWaiting).length
+      : 0;
+
   return (
     <Tabs value={tab} onValueChange={selectTab} className="gap-4">
-      <TabsList className="h-9 rounded-lg bg-neutral-100 p-1">
-        <TabsTrigger value="sent" className={TRIGGER}>
+      <TabsList className={segmentedList}>
+        <TabsTrigger value="sent" className={segmentedTrigger}>
           Sent
         </TabsTrigger>
-        <TabsTrigger value="received" className={TRIGGER}>
+        <TabsTrigger value="received" className={segmentedTrigger}>
           Received
+          {awaitingCount > 0 && (
+            <span className="text-muted-foreground tabular-nums">
+              <span className="sr-only">, awaiting your response: </span>
+              {awaitingCount}
+            </span>
+          )}
         </TabsTrigger>
       </TabsList>
       <TabsContent value={tab}>
@@ -112,17 +159,26 @@ function RequestsCard({
   result: Result | undefined;
   onRetry: () => void;
 }) {
-  return (
-    <Card className={surfaceFlush}>
-      {result === undefined ? (
+  if (result === undefined) {
+    return (
+      <Card className={surfaceFlush}>
         <ListSkeleton />
-      ) : "error" in result ? (
+      </Card>
+    );
+  }
+  if ("error" in result) {
+    return (
+      <Card className={surfaceFlush}>
         <ErrorState message={result.error} onRetry={onRetry} />
-      ) : result.requests.length === 0 ? (
-        direction === "sent" ? (
+      </Card>
+    );
+  }
+  if (result.requests.length === 0) {
+    return (
+      <Card className={surfaceFlush}>
+        {direction === "sent" ? (
           <EmptyState
-            icon={Send}
-            message="No requests sent yet."
+            title="No requests sent yet."
             action={
               <Button asChild>
                 <Link href="/requests/new">New request</Link>
@@ -130,43 +186,143 @@ function RequestsCard({
             }
           />
         ) : (
-          <EmptyState icon={Inbox} message="No requests received yet." />
-        )
-      ) : (
-        <ul className="divide-y divide-black/6">
-          {result.requests.map((r) => (
-            <li key={r.id}>
-              <RequestRow request={r} />
-            </li>
-          ))}
-        </ul>
+          <EmptyState title="No requests received yet." />
+        )}
+      </Card>
+    );
+  }
+
+  const labels = GROUPS[direction];
+  const waiting = result.requests.filter(isWaiting);
+  const responded = result.requests.filter((r) => !isWaiting(r));
+  return (
+    <Card className={surfaceFlush}>
+      {waiting.length > 0 && (
+        <Group
+          title={labels.waiting}
+          counterpart={labels.counterpart}
+          showWaiting
+          requests={waiting}
+        />
+      )}
+      {responded.length > 0 && (
+        <Group
+          title={labels.responded}
+          counterpart={labels.counterpart}
+          requests={responded}
+        />
       )}
     </Card>
   );
 }
 
-// Title with the reference beneath it, the other entity and the status
-// (§8). On phones the entity moves under the reference.
-function RequestRow({ request: r }: { request: RequestListItem }) {
+// A heading row with the column labels, then the group's rows.
+function Group({
+  title,
+  counterpart,
+  showWaiting = false,
+  requests,
+}: {
+  title: string;
+  counterpart: string;
+  showWaiting?: boolean;
+  requests: RequestListItem[];
+}) {
+  const headingId = useId();
+  const label = "text-xs font-medium text-muted-foreground";
+  return (
+    <section
+      aria-labelledby={headingId}
+      className="border-t border-hairline first:border-t-0"
+    >
+      <div className={cn(GRID, "px-5 pt-5 pb-2.5")}>
+        <h2 id={headingId} className="text-sm leading-5 font-semibold">
+          {title}
+        </h2>
+        <span aria-hidden className={cn(label, "hidden sm:block")}>
+          {counterpart}
+        </span>
+        <span
+          aria-hidden
+          className={cn(label, "hidden text-right sm:block")}
+        >
+          {showWaiting ? "Waiting" : ""}
+        </span>
+        <span aria-hidden className={cn(label, "hidden sm:block")}>
+          Status
+        </span>
+        <span aria-hidden className="hidden sm:block" />
+      </div>
+      <ul className="divide-y divide-hairline border-t border-hairline">
+        {requests.map((r) => (
+          <li key={r.id}>
+            <RequestRow
+              request={r}
+              counterpart={counterpart}
+              showWaiting={showWaiting}
+            />
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+// Title with the reference beneath it, the other entity, how long it has
+// waited (pending rows only) and the status. On phones the entity and the
+// waiting time move under the reference.
+function RequestRow({
+  request: r,
+  counterpart,
+  showWaiting,
+}: {
+  request: RequestListItem;
+  counterpart: string;
+  showWaiting: boolean;
+}) {
   return (
     <Link
       href={`/requests/${r.id}`}
-      className="flex items-center gap-4 px-5 py-4 outline-none transition-colors hover:bg-neutral-50 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset sm:gap-6"
+      className={cn(
+        GRID,
+        "px-5 py-4 outline-none transition-colors hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset",
+      )}
     >
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="truncate text-[15px] font-medium" title={r.title}>
+      <div className="flex min-w-0 flex-col gap-1">
+        <span className="truncate text-sm font-medium" title={r.title}>
           {r.title}
         </span>
         <Reference value={r.reference} />
-        <span className="text-sm text-muted-foreground sm:hidden">
-          {r.counterpartEntity.name}
+        <span className="text-[13px] text-muted-foreground sm:hidden">
+          {counterpart} {r.counterpartEntity.name}
+          {showWaiting && (
+            <>
+              {" · "}
+              <WaitingTime since={r.createdAt} className="text-[13px]" />
+            </>
+          )}
         </span>
       </div>
-      <span className="hidden max-w-56 text-right text-sm text-balance text-muted-foreground sm:block">
+      <span className="hidden text-sm text-balance text-muted-foreground sm:block">
+        <span className="sr-only">{counterpart} </span>
         {r.counterpartEntity.name}
       </span>
-      <StatusBadge status={r.status} flagged={r.flagged} className="shrink-0" />
-      <ChevronRight className="size-4 shrink-0 text-neutral-400" aria-hidden />
+      <span className="hidden text-right sm:block">
+        {showWaiting && (
+          <>
+            <span className="sr-only">Waiting </span>
+            <WaitingTime since={r.createdAt} />
+          </>
+        )}
+      </span>
+      <StatusBadge
+        variant={partyVariant(r.status, r.flagged)}
+        className="justify-self-start"
+      />
+      <ChevronRight
+        className="size-4 shrink-0 text-muted-foreground"
+        aria-hidden
+      />
     </Link>
   );
 }
