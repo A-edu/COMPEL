@@ -43,8 +43,8 @@ export interface ReviewCase {
   status: RequestStatus;
   flagged: boolean;
   createdAt: Date;
-  requestingEntity: { id: string; name: string };
-  providingEntity: { id: string; name: string };
+  requestingEntity: { id: string; name: string; slug: string };
+  providingEntity: { id: string; name: string; slug: string };
   documents: RequestDocumentView[];
   providerResponse: ProviderResponseView | null;
   flagReasons: FlagReasonView[];
@@ -52,7 +52,10 @@ export interface ReviewCase {
   decision: DecisionView | null;
 }
 
-const entitySelect = { select: { id: true, name: true } } as const;
+// Officers get the slug for the entity tags; party routes never do.
+const entitySelect = {
+  select: { id: true, name: true, slug: true },
+} as const;
 const documentSelect = {
   id: true,
   originalName: true,

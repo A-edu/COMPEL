@@ -11,13 +11,15 @@ describe('RequestScope', () => {
 
   let findFirst: ReturnType<typeof vi.fn>;
   let findMany: ReturnType<typeof vi.fn>;
+  let count: ReturnType<typeof vi.fn>;
   let scope: RequestScope;
 
   beforeEach(() => {
     findFirst = vi.fn();
     findMany = vi.fn().mockResolvedValue([]);
+    count = vi.fn().mockResolvedValue(0);
     const prisma = {
-      dataSharingRequest: { findFirst, findMany },
+      dataSharingRequest: { findFirst, findMany, count },
     } as unknown as PrismaService;
     scope = new RequestScope(prisma);
   });
@@ -39,6 +41,15 @@ describe('RequestScope', () => {
       await scope.findManyForOfficer({ where: { id: 'req-1' } });
       expect(findMany).toHaveBeenCalledWith({
         where: { AND: [officerFilter, { id: 'req-1' }] },
+      });
+    });
+
+    it('counts within the officer filter, which extra conditions cannot widen', async () => {
+      await scope.countForOfficer({ status: 'AWAITING_PROVIDER_RESPONSE' });
+      expect(count).toHaveBeenCalledWith({
+        where: {
+          AND: [officerFilter, { status: 'AWAITING_PROVIDER_RESPONSE' }],
+        },
       });
     });
   });
