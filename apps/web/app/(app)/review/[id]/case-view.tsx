@@ -1,29 +1,32 @@
-import { ResponseSummary } from "@/app/(app)/requests/[id]/response-summary";
+"use client";
+
+import { useState } from "react";
+import { CaseHeader } from "@/components/app/case-header";
+import { CaseLayout } from "@/components/app/case-layout";
+import { DecisionRecord } from "@/components/app/decision-record";
+import { DossierSection } from "@/components/app/dossier-section";
+import { EntityPair } from "@/components/app/entity-pair";
 import { FileRow } from "@/components/app/file-row";
-import { flagSourceLabel } from "@/components/app/flag-reason";
-import { PageHeader } from "@/components/app/page-header";
-import { Reference } from "@/components/app/reference";
-import { StatusBadge } from "@/components/app/status-badge";
+import { FlagReason, flagSourceLabel } from "@/components/app/flag-reason";
+import {
+  RecordTimeline,
+  type RecordEvent,
+} from "@/components/app/record-timeline";
 import { surface } from "@/components/app/surface";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
+import { formatDateTime } from "@/lib/format";
 import { officerVariant } from "@/lib/status";
-import { DecisionForm } from "./decision-form";
-import type { Decision, FlagReason, ReviewCase } from "./types";
+import { cn } from "@/lib/utils";
+import { AlreadyDecided, DecisionForm } from "./decision-form";
+import type { ReviewCase } from "./types";
 
 const DOCUMENTS_PATH = "/api/review/requests";
 
-const OUTCOME_LABEL: Record<Decision["outcome"], string> = {
-  APPROVED: "Approved",
-  REJECTED: "Rejected",
-};
+const POSITION_LABEL = { ENDORSED: "Endorsed", OBJECTED: "Objected" };
 
-const raisedOn = new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" });
-const decidedOn = new Intl.DateTimeFormat("en-GB", {
-  dateStyle: "medium",
-  timeStyle: "short",
-});
-
-// Everything that exists so far on a case (Sprint 2 spec §7).
+// Everything that exists so far on a case, as one dossier, with the panel the
+// officer acts in beside it (Sprint 2 spec §7, §8; docs/design/sprint-2.md ->
+// Case view).
 export function CaseView({
   request,
   onDecided,
@@ -31,161 +34,246 @@ export function CaseView({
   request: ReviewCase;
   onDecided: () => void;
 }) {
-  return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        title={request.title}
-        description={
-          <>
-            <Reference value={request.reference} />
-            <StatusBadge
-              variant={officerVariant(request.status, request.flagged)}
-            />
-          </>
-        }
+  // The officer's own justification when another officer decided first. Kept
+  // here, above the reload that brings in the other decision, so it stays
+  // until they leave or move on.
+  const [conflict, setConflict] = useState<string | null>(null);
+
+  const { decision } = request;
+  const basedOn = [
+    ...new Set(
+      request.flagReasons
+        .filter((reason) => !reason.raisedAfterDecision)
+        .map((reason) => flagSourceLabel(reason.source)),
+    ),
+  ];
+
+  let aside: React.ReactNode;
+  if (decision && conflict !== null) {
+    aside = (
+      <AlreadyDecided
+        decidedAt={decision.createdAt}
+        justification={conflict}
+        onDismiss={() => setConflict(null)}
       />
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <Card className={surface}>
-          <CardContent className="flex flex-col gap-6">
-            <dl className="flex flex-col gap-5">
-              <Party label="Requesting entity" name={request.requestingEntity.name} />
-              <Party label="Providing entity" name={request.providingEntity.name} />
-            </dl>
-            <section className="flex flex-col gap-2">
-              <h2 className="text-sm font-medium">Documents</h2>
-              <ul className="flex flex-col gap-2">
-                {request.documents.map((document) => (
-                  <li key={document.id}>
-                    <FileRow
-                      requestId={request.id}
-                      document={document}
-                      basePath={DOCUMENTS_PATH}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          </CardContent>
-        </Card>
+    );
+  } else if (decision) {
+    aside = <DecisionRecord decision={decision} basedOn={basedOn} />;
+  } else if (request.flagged) {
+    aside = (
+      <DecisionForm
+        requestId={request.id}
+        reference={request.reference}
+        onDecided={onDecided}
+        onConflict={(justification) => {
+          setConflict(justification);
+          onDecided();
+        }}
+      />
+    );
+  } else {
+    aside = <NothingToDecide providerName={request.providingEntity.name} />;
+  }
 
-        <div className="flex min-w-0 flex-col gap-6">
-          {request.decision && <DecisionRecord decision={request.decision} />}
+  return (
+    <div className="flex flex-col gap-8">
+      <CaseHeader
+        back={{ href: "/review", label: "Review queue" }}
+        title={request.title}
+        reference={request.reference}
+        status={officerVariant(request.status, request.flagged)}
+      />
+      <CaseLayout aside={aside}>
+        <Dossier request={request} />
+      </CaseLayout>
+    </div>
+  );
+}
 
-          <Card className={surface}>
-            <CardHeader>
-              <CardTitle>Provider response</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {request.providerResponse ? (
-                <ResponseSummary
+function Dossier({ request }: { request: ReviewCase }) {
+  const response = request.providerResponse;
+  const reasons = request.flagReasons;
+  const requestForms = request.documents.filter(
+    (d) => d.kind === "REQUEST_FORM",
+  );
+  const supporting = request.documents.filter((d) => d.kind === "SUPPORTING");
+
+  return (
+    <Card className={cn(surface, "gap-0 py-0")}>
+      <DossierSection>
+        <EntityPair
+          parties={[
+            {
+              label: "Requester",
+              ...request.requestingEntity,
+              meta: `Submitted ${formatDateTime(request.createdAt)}`,
+            },
+            {
+              label: "Provider",
+              ...request.providingEntity,
+              meta: response
+                ? `Responded ${formatDateTime(response.createdAt)}`
+                : "No response yet",
+            },
+          ]}
+        />
+      </DossierSection>
+
+      {reasons.length > 0 && (
+        <DossierSection
+          title="Why it was flagged"
+          meta={reasons.length === 1 ? "1 reason" : `${reasons.length} reasons`}
+        >
+          <ul className="flex flex-col gap-5">
+            {reasons.map((reason) => (
+              <li key={reason.id}>
+                <FlagReason reason={reason} />
+              </li>
+            ))}
+          </ul>
+        </DossierSection>
+      )}
+
+      {/* The objection text is already a flag reason, so it isn't repeated. */}
+      <DossierSection title="Provider's response">
+        {response ? (
+          <dl className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1">
+              <dt className="text-xs font-medium text-muted-foreground">
+                Position
+              </dt>
+              <dd className="text-sm">{POSITION_LABEL[response.position]}</dd>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <dt className="text-xs font-medium text-muted-foreground">
+                RoPA entry
+              </dt>
+              <dd>
+                <FileRow
                   requestId={request.id}
-                  response={request.providerResponse}
+                  document={response.ropaDocument}
                   basePath={DOCUMENTS_PATH}
                 />
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  The provider has not responded yet.
-                </p>
-              )}
-            </CardContent>
-          </Card>
+              </dd>
+            </div>
+          </dl>
+        ) : (
+          <p className="max-w-[60ch] text-sm text-muted-foreground">
+            Not received. The RoPA entry and the provider&apos;s position will
+            appear here once {request.providingEntity.name} responds.
+          </p>
+        )}
+      </DossierSection>
 
-          {request.flagReasons.length > 0 && (
-            <Card className={surface}>
-              <CardHeader>
-                <CardTitle>Flag reasons</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="flex flex-col gap-5">
-                  {request.flagReasons.map((reason) => (
-                    <li key={reason.id}>
-                      <Reason reason={reason} />
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          )}
-
-          {request.flagged && (
-            <DecisionForm requestId={request.id} onDecided={onDecided} />
-          )}
+      <DossierSection title="Submitted documents">
+        <div className="flex flex-col gap-4">
+          <DocumentGroup label="Request form">
+            {requestForms.map((document) => (
+              <li key={document.id}>
+                <FileRow
+                  requestId={request.id}
+                  document={document}
+                  basePath={DOCUMENTS_PATH}
+                />
+              </li>
+            ))}
+          </DocumentGroup>
+          <DocumentGroup label="Supporting documents">
+            {supporting.length > 0 ? (
+              supporting.map((document) => (
+                <li key={document.id}>
+                  <FileRow
+                    requestId={request.id}
+                    document={document}
+                    basePath={DOCUMENTS_PATH}
+                  />
+                </li>
+              ))
+            ) : (
+              <li className="text-sm text-muted-foreground">None submitted</li>
+            )}
+          </DocumentGroup>
         </div>
-      </div>
-    </div>
-  );
-}
+      </DossierSection>
 
-function Party({ label, name }: { label: string; name: string }) {
-  return (
-    <div className="flex flex-col gap-1">
-      <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="text-sm font-medium">{name}</dd>
-    </div>
-  );
-}
-
-// The stored decision, read-only (Sprint 2 spec §8.2).
-function DecisionRecord({ decision }: { decision: Decision }) {
-  return (
-    <Card className={surface}>
-      <CardHeader>
-        <CardTitle>Decision</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <dl className="flex flex-col gap-5">
-          <div className="flex flex-col gap-1">
-            <dt className="text-sm font-medium">Outcome</dt>
-            <dd className="text-sm text-ink-2">
-              {OUTCOME_LABEL[decision.outcome]}
-            </dd>
-          </div>
-          <div className="flex flex-col gap-1">
-            <dt className="text-sm font-medium">Decided on</dt>
-            <dd className="text-sm text-ink-2 tabular-nums">
-              <time dateTime={decision.createdAt}>
-                {decidedOn.format(new Date(decision.createdAt))}
-              </time>
-            </dd>
-          </div>
-          <div className="flex flex-col gap-1">
-            <dt className="text-sm font-medium">Officer</dt>
-            <dd className="font-mono text-sm break-all text-ink-2">
-              {decision.decidedBy.email}
-            </dd>
-          </div>
-          <div className="flex flex-col gap-1">
-            <dt className="text-sm font-medium">Justification</dt>
-            <dd className="text-sm break-words whitespace-pre-line text-ink-2">
-              {decision.justification}
-            </dd>
-          </div>
-        </dl>
-      </CardContent>
+      <DossierSection title="Record">
+        <RecordTimeline events={recordOf(request)} />
+      </DossierSection>
     </Card>
   );
 }
 
-function Reason({ reason }: { reason: FlagReason }) {
+function DocumentGroup({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="flex flex-col gap-1">
-      <div className="flex items-baseline justify-between gap-3">
-        <span className="text-sm font-medium">{flagSourceLabel(reason.source)}</span>
-        <time
-          dateTime={reason.createdAt}
-          className="shrink-0 text-xs text-muted-foreground tabular-nums"
-        >
-          {raisedOn.format(new Date(reason.createdAt))}
-        </time>
-      </div>
-      <p className="text-sm whitespace-pre-line text-ink-2">
-        {reason.text}
-      </p>
-      {reason.raisedAfterDecision && (
-        <p className="text-xs text-muted-foreground">
-          Raised after the decision
-        </p>
-      )}
+    <div className="flex flex-col gap-1.5">
+      <h3 className="text-xs font-medium text-muted-foreground">{label}</h3>
+      <ul className="flex flex-col gap-2">{children}</ul>
     </div>
+  );
+}
+
+// What happened to the request, in time order. "Provider reminded" waits for
+// §9's reminder times.
+function recordOf(request: ReviewCase): RecordEvent[] {
+  const events: RecordEvent[] = [
+    { key: "submitted", title: "Submitted", time: request.createdAt },
+  ];
+  if (request.providerResponse) {
+    events.push({
+      key: "responded",
+      title: "Provider responded",
+      time: request.providerResponse.createdAt,
+      tone: "green",
+    });
+  }
+  for (const reason of request.flagReasons) {
+    events.push({
+      key: `flag-${reason.id}`,
+      title: "Flagged for a decision",
+      detail: flagSourceLabel(reason.source),
+      time: reason.createdAt,
+      tone: "flag",
+    });
+  }
+  const { decision } = request;
+  if (decision) {
+    events.push({
+      key: "decision",
+      title: decision.outcome === "APPROVED" ? "Approved" : "Rejected",
+      // TODO(§10): add "both entities emailed" once the outcome emails exist.
+      detail: (
+        <span className="font-mono text-xs">{decision.decidedBy.email}</span>
+      ),
+      time: decision.createdAt,
+      tone: decision.outcome === "APPROVED" ? "green" : "red",
+    });
+  }
+  // Stable, so events with the same time keep the order above.
+  return events.sort(
+    (x, y) => new Date(x.time ?? 0).getTime() - new Date(y.time ?? 0).getTime(),
+  );
+}
+
+// A pending request: nothing to decide yet.
+function NothingToDecide({ providerName }: { providerName: string }) {
+  return (
+    <Card className={cn(surface, "gap-3 px-6 py-5")}>
+      <h2 className="text-[17px] leading-6 font-semibold tracking-[-0.01em]">
+        Decision
+      </h2>
+      <p className="text-sm">
+        The provider hasn&apos;t responded, so there is nothing to decide yet.
+      </p>
+      <p className="text-sm text-muted-foreground">
+        If {providerName} objects, this request moves to Flagged and a decision
+        becomes possible here. If it endorses, the request leaves the queue.
+      </p>
+    </Card>
   );
 }

@@ -1,7 +1,8 @@
 import { formatDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export type RecordTone = "neutral" | "amber" | "red" | "green";
+// `flag` is flag red (a reason raised); `red` is rejection.
+export type RecordTone = "neutral" | "amber" | "flag" | "red" | "green";
 
 export interface RecordEvent {
   key: string;
@@ -16,6 +17,7 @@ export interface RecordEvent {
 const DOT: Record<RecordTone, string> = {
   neutral: "bg-muted-foreground/50",
   amber: "bg-[#f79009]",
+  flag: "bg-[#d92d20]",
   red: "bg-[#f04438]",
   green: "bg-[#10b981]",
 };
