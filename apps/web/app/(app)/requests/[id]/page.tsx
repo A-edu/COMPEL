@@ -4,10 +4,10 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { EmptyState } from "@/components/app/empty-state";
 import { ErrorState } from "@/components/app/error-state";
+import { CaseSkeleton } from "@/components/app/skeletons";
 import { surfaceFlush } from "@/components/app/surface";
 import { Card } from "@/components/ui/card";
 import { api, ApiError } from "@/lib/api";
-import { RequestDetailSkeleton } from "./detail-skeleton";
 import { RequestDetailView } from "./request-detail";
 import type { RequestDetail } from "./types";
 
@@ -56,7 +56,7 @@ export default function RequestPage() {
 
   switch (state.kind) {
     case "loading":
-      return <RequestDetailSkeleton />;
+      return <CaseSkeleton />;
     case "not-found":
       return (
         <Card className={surfaceFlush}>

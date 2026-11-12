@@ -72,7 +72,7 @@ The snippets below are patterns to copy; replace `…` with your data and handle
 
 ## §8 Requests list (`/requests`)
 
-`PageHeader` with **New request** → `Tabs` as a segmented control, 16 px below the header → one card of rows. While loading, render `<ListSkeleton />` inside the same card; when a tab is empty, an `EmptyState`.
+`PageHeader` with **New request** → `Tabs` as a segmented control, 16 px below the header → one surface. Since Sprint 2 (§9) the surface holds two groups, each a heading row with column labels then rows: Received has **Awaiting your response** (From · Waiting · Status) and **Responded**; Sent has **Waiting for a response** (To · Waiting · Status) and **Responded**. See `app/(app)/requests/requests-list.tsx`; the snippet below shows the row pattern. While loading, render `<ListSkeleton />` inside the same card; when a tab is empty, an `EmptyState`.
 
 ```tsx
 <div className="flex flex-col gap-4">
@@ -186,41 +186,6 @@ The dashed drop area is a label around a visually hidden file input, so it stays
 
 ## §10 Request detail (`/requests/[id]`)
 
-`PageHeader` with the `Reference` and `StatusBadge` in the description line → a two-column grid. Left card: the "To …" / "From …" line, then **Documents** as rows. Right card, provider only: **Your response** form, or the read-only response. For the requester, render only the left card; the grid stays the same so its width doesn't change, and nothing is rendered on the right.
+Built from the case pieces, like the officer's case view (see **Case pieces** above and `docs/design/sprint-2.md`): `CaseHeader` (back to Requests), then `CaseLayout`. The dossier holds From or To (`EntityPair`, no slug on party routes), the documents as `FileRow`s and a `RecordTimeline` of only the events the party's own data proves. The right column is the provider's response form, or their response read-only (beneath the "under review" strip while flagged), or, for the requester once decided, the Outcome panel. Never read a response, position, RoPA entry or flag for the requester.
 
-```tsx
-<div className="flex flex-col gap-6">
-  <PageHeader
-    title={request.title}
-    description={<><Reference value={request.reference} /><StatusBadge variant={partyVariant(request.status, request.flagged)} /></>}
-  />
-  <div className="grid grid-cols-[minmax(0,1fr)_360px] items-start gap-6">
-    <Card className={surface}>
-      <CardContent className="flex flex-col gap-6">
-        <p className="text-sm text-muted-foreground">
-          {myRole === "REQUESTER" ? "To" : "From"}{" "}
-          <span className="font-medium text-foreground">{otherEntity.name}</span>
-        </p>
-        <section className="flex flex-col gap-2">
-          <h2 className="text-sm font-medium">Documents</h2>
-          <ul className="flex flex-col gap-2">
-            {documents.map((d) => (
-              <li key={d.id}>
-                <FileRow requestId={request.id} document={d} />
-              </li>
-            ))}
-          </ul>
-        </section>
-      </CardContent>
-    </Card>
-    {myRole === "PROVIDER" && (
-      <Card className={surface}>
-        <CardHeader><CardTitle>Your response</CardTitle></CardHeader>
-        <CardContent>…form, or the read-only response…</CardContent>
-      </Card>
-    )}
-  </div>
-</div>
-```
-
-While the detail loads: `PageHeaderSkeleton`, then `<Card className={surface}><BlockSkeleton /></Card>` in the left column. If loading fails: `<Card className={surfaceFlush}><ErrorState onRetry={…} /></Card>`.
+While the detail loads: `CaseSkeleton`. If loading fails: `<Card className={surfaceFlush}><ErrorState onRetry={…} /></Card>`.

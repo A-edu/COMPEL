@@ -6,43 +6,38 @@ const POSITION_LABEL: Record<Position, string> = {
   OBJECTED: "Objected",
 };
 
-// The provider's response, read-only (§2.7). Officers read it too, and open
-// the RoPA entry through their own route (`basePath`).
+// The provider's own response, read-only (§2.7): Position, the reason in full
+// and the RoPA entry (docs/design/sprint-2.md -> Provider: request under
+// review). Shown to the provider only.
 export function ResponseSummary({
   requestId,
   response,
-  basePath,
 }: {
   requestId: string;
   response: ProviderResponse;
-  basePath?: string;
 }) {
   return (
-    <dl className="flex flex-col gap-5">
-      <div className="flex flex-col gap-2">
-        <dt className="text-sm font-medium">RoPA entry</dt>
-        <dd>
-          <FileRow
-            requestId={requestId}
-            document={response.ropaDocument}
-            basePath={basePath}
-          />
-        </dd>
-      </div>
+    <dl className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
-        <dt className="text-sm font-medium">Position</dt>
-        <dd className="text-sm text-ink-2">
-          {POSITION_LABEL[response.position]}
-        </dd>
+        <dt className="text-xs font-medium text-muted-foreground">Position</dt>
+        <dd className="text-sm">{POSITION_LABEL[response.position]}</dd>
       </div>
       {response.objectionReason && (
-        <div className="flex flex-col gap-1">
-          <dt className="text-sm font-medium">Reason</dt>
-          <dd className="text-sm whitespace-pre-line text-ink-2">
+        <div className="flex flex-col gap-1.5">
+          <dt className="text-xs font-medium text-muted-foreground">Reason</dt>
+          <dd className="rounded-lg bg-sunken px-4 py-3 text-[15px] leading-6 break-words whitespace-pre-line text-ink-2">
             {response.objectionReason}
           </dd>
         </div>
       )}
+      <div className="flex flex-col gap-1.5">
+        <dt className="text-xs font-medium text-muted-foreground">
+          RoPA entry
+        </dt>
+        <dd>
+          <FileRow requestId={requestId} document={response.ropaDocument} />
+        </dd>
+      </div>
     </dl>
   );
 }
