@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-All standing project rules live in AGENTS.md so every coding agent follows the same rules. What to build lives in the current sprint spec, `specs/sprint-2.md`.
+All standing project rules live in AGENTS.md so every coding agent follows the same rules. What to build lives in the current sprint spec, `specs/sprint-3.md`.
 
 @AGENTS.md
 
