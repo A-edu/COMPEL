@@ -99,9 +99,7 @@ describe('purpose step (PC-01)', () => {
 
   it('keeps the three values and their quotes as evidence', async () => {
     const { finding } = await run([form(), ropa()], 'compatible');
-    expect(
-      finding.evidence.map((e) => [e.field, e.state, e.quote]),
-    ).toEqual([
+    expect(finding.evidence.map((e) => [e.field, e.state, e.quote])).toEqual([
       ['F-R1', 'found', REQUEST_PURPOSE],
       ['F-P2', 'found', COLLECTION_PURPOSE],
       ['F-P3', 'found', LEGAL_BASIS],
@@ -125,7 +123,7 @@ describe('purpose step (PC-01)', () => {
     },
   );
 
-  it('gives a compatible finding the model\'s explanation alone', async () => {
+  it("gives a compatible finding the model's explanation alone", async () => {
     const { finding } = await run([form(), ropa()], 'compatible');
     expect(finding.explanation).toBe('Stand-in verdict for PC-01.');
   });
@@ -184,10 +182,12 @@ describe('purpose step (PC-01)', () => {
     expect(finding.explanation).toContain(
       `Collection purpose (ropa.pdf): "${COLLECTION_PURPOSE}".`,
     );
-    expect(finding.explanation).toContain('Collection legal basis: not stated.');
+    expect(finding.explanation).toContain(
+      'Collection legal basis: not stated.',
+    );
   });
 
-  it('gives the dataset\'s indeterminate case (C05, no collection legal basis) as indeterminate without the model', async () => {
+  it("gives the dataset's indeterminate case (C05, no collection legal basis) as indeterminate without the model", async () => {
     const expected = JSON.parse(
       await readFile(
         new URL(
@@ -228,7 +228,9 @@ describe('purpose step (PC-01)', () => {
     const model = new StandInModelClient().script(PURPOSE_STEP, {
       model: 'stand-in',
       text: '',
-      json: { results: [{ checkId: 'PC-01', verdict: 'probably fine', explanation: '' }] },
+      json: {
+        results: { 'PC-01': { verdict: 'probably fine', explanation: '' } },
+      },
     });
     await expect(
       purposeStep.run(checkContext(PURPOSE_STEP, [form(), ropa()], model)),

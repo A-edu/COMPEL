@@ -18,7 +18,7 @@ Run it from this folder:
 Needs Python 3.10+ and Chromium (or Google Chrome) for HTML -> PDF; nothing
 else. Every page carries "SYNTHETIC — DEMO DATA"; the documents contain no
 real person's data, and their only email addresses are on `.example`.
-Expectations follow rule set 1.0 (docs/rule-set.md).
+Expectations follow rule set 1.1 (docs/rule-set.md).
 """
 
 from __future__ import annotations
@@ -31,7 +31,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-RULE_SET_VERSION = "1.0"
+RULE_SET_VERSION = "1.1"
 MARK = "SYNTHETIC — DEMO DATA"
 
 REQUESTER_FIELDS = ["F-R1", "F-R2", "F-R3", "F-R4", "F-R5", "F-R6"]

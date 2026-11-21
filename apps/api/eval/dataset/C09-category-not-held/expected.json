@@ -2,7 +2,7 @@
   "case": "C09",
   "slug": "category-not-held",
   "covers": "Contradiction between the request and the RoPA: a requested data category the provider doesn't hold",
-  "rule_set_version": "1.0",
+  "rule_set_version": "1.1",
   "title": "Registered wages for payroll declaration audits",
   "position": "ENDORSED",
   "objection": null,

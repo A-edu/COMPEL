@@ -2,7 +2,7 @@
   "case": "C10",
   "slug": "vague-purpose-arabic",
   "covers": "Arabic documents; request purpose stated only in general terms",
-  "rule_set_version": "1.0",
+  "rule_set_version": "1.1",
   "title": "التحقق من الالتزام الضريبي للموردين",
   "position": "ENDORSED",
   "objection": null,

@@ -118,8 +118,22 @@ function requesterReference(
   const stated = parties.flatMap((r) =>
     r.value.state === 'found' ? [r.value.value] : [],
   );
-  return stated.length > 0 ? { partiesStatedInTheRequest: stated } : {};
+  return stated.length > 0
+    ? {
+        partiesStatedInTheRequest: stated,
+        requestingEntityIs:
+          'the entity the request is made by, not the one it is made to',
+      }
+    : {};
 }
+
+// FL-10 is about who the recipients are. The model read conditions attached
+// to a recipient category ("where a law requires disclosure", "to check their
+// tax status") as something the request had to prove, and failed requests
+// whose requesting entity plainly belongs to the category (evaluation cases
+// C02, C04 and C10). Whether the request's purpose fits is PC-01's question.
+const RECIPIENTS_NOTE =
+  'Judge only who the recipients are, not when or why they receive data. The requesting entity belongs to a category when it is the kind of entity the category names; every party to a request is a Saudi government entity, so it belongs to "government entities". A condition or purpose attached to a category, such as "where a law requires disclosure" or "to check their tax status", is not part of this check: the request does not have to show it is met. Whether the purpose fits is assessed by a separate check.';
 
 function itemFor(
   check: CheckDefinition,
@@ -134,7 +148,7 @@ function itemFor(
       passesWhen: check.passesWhen,
       failsWhen: check.failsWhen,
       // FL-10 asks whether the requesting entity is among the recipients.
-      ...(check.id === 'FL-10' ? requester : {}),
+      ...(check.id === 'FL-10' ? { ...requester, note: RECIPIENTS_NOTE } : {}),
       values: readings.map((r) => ({
         document: r.documentName,
         value: r.value.state === 'found' ? r.value.value : null,

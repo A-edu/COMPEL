@@ -2,7 +2,7 @@
   "case": "C06",
   "slug": "clean-arabic",
   "covers": "Arabic documents; clean case that should auto-clear (Arabic version of C01)",
-  "rule_set_version": "1.0",
+  "rule_set_version": "1.1",
   "title": "سجلات أجور العاملين لأغراض التفتيش العمالي",
   "position": "ENDORSED",
   "objection": null,

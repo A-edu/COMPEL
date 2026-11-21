@@ -2,7 +2,7 @@
   "case": "C08",
   "slug": "provider-objection",
   "covers": "Provider objection: every check passes, but the provider objected, so the request must still be flagged",
-  "rule_set_version": "1.0",
+  "rule_set_version": "1.1",
   "title": "Employee wage records for contribution audits",
   "position": "OBJECTED",
   "objection": "We object because the request covers every establishment rather than only those selected for audit.",
