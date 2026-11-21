@@ -2,7 +2,7 @@
   "case": "C07",
   "slug": "scanned-page",
   "covers": "Scanned page: page 2 of the RoPA entry is an image with no text layer",
-  "rule_set_version": "1.0",
+  "rule_set_version": "1.1",
   "title": "Supplier tax compliance verification",
   "position": "ENDORSED",
   "objection": null,

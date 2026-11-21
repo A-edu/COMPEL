@@ -2,10 +2,11 @@
 
 | | |
 |---|---|
-| **Version** | 1.0 |
+| **Version** | 1.1 |
 | **Status** | Approved |
 | **Drafted** | 2026-11-21 |
 | **Approved** | 2026-11-21, by the team (`specs/sprint-3.md` §14) |
+| **Changed** | 1.1, 2026-11-21: FL-10 clarified (§4.1; spec §14) |
 
 The rule set is the single statement of which fields the pipeline extracts, which checks run on them, what passing means, and which PDPL article or Implementing Regulation clause each check cites (`specs/sprint-3.md` §3.4). Every finding records the version it used. When this file changes after approval, the version goes up and the change is logged in §14 of the current spec. Rule IDs (`F-…`, `FL-…`, `CD-…`, `PC-…`) never change meaning and are never reused.
 
@@ -79,6 +80,8 @@ Results: passed, failed, not found, or ambiguous when the field was extracted as
 | FL-10 | F-P6 Recipients | Recipients are stated **and** include the requesting entity, or a category it clearly belongs to | Recipients stated but the requesting entity is not among them | Law Art 31(4); IR Art 33(5)(f); IR Art 20(6) | No |
 | FL-11 | F-P7 Transfer outside the Kingdom | The entry says whether there is a transfer; if there is, it gives the basis and recipients | Says there is a transfer but gives no basis or recipients | Law Art 31(5); IR Art 33(5)(g) | No |
 | FL-12 | F-P8 Retention period | A period, or the criteria that set it, is stated | "Indefinitely" or similar | Law Art 31(6); IR Art 33(5)(e) | No |
+
+**FL-10: who, not when or why (1.1).** FL-10 asks only who the recipients are. The requesting entity belongs to a category when it is the kind of entity the category names; every party to a request is a Saudi government entity, so it belongs to "government entities". A condition or purpose attached to a category, such as "where a law requires disclosure", is not part of FL-10, and the request does not have to show it is met: whether the request's purpose fits is PC-01's question. Version 1.0 left this unsaid, and the model failed requests whose requester plainly belongs to the category.
 
 F-P3 (collection legal basis) has no field-level check, because no provision requires a RoPA to state it. It is extracted only for the purpose compatibility check, PC-01. See decision D3.
 

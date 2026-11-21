@@ -133,7 +133,7 @@ The rule set is the single, versioned statement of which fields are extracted, w
 - There is one rule set, with a version. Every finding records the version it used, so a later change never changes what a stored finding said.
 - No check relies on a version until the team has approved it. The approval and its date are recorded in §14.
 
-**Status: version 1.0 approved by the team on 2026-11-21** (§14). (§5.3)
+**Status: version 1.0 approved by the team on 2026-11-21; version 1.1 (FL-10 clarified) approved on 2026-11-21** (§14). (§5.3)
 
 ### §3.5 Decision records
 
@@ -402,6 +402,7 @@ Run on the **published app**. Log in just before presenting, so the 15-minute id
 | 2026-11-21 | §7.1, §7.2 | The dataset README's open points settled. (1) A field-level check gives one finding per request: ambiguous if any document gives the field as ambiguous, not found if none states it, otherwise failed if any stated value fails. (2) **Team decision:** an ambiguous value that takes part in a cross-document comparison gives inconsistent, since it cannot be confirmed to agree; no new result is added, so rule set 1.0 stands. (3) A field no requester document states passes its cross-document check; the field-level check flags it. D4's missing-from-the-request-form rule is CD-03's to apply, not CD-04's. |
 | 2026-11-21 | §8, §2.7 | A run with any rule-set check left without a finding (a step not built yet, such as §7.3) ends flagged with the pipeline-error reason and is never approved. The requester's API response says "under review" only for a flagged request that went through the pipeline; requests flagged before Sprint 3 keep "Responded". |
 | 2026-11-21 | §6, §3.3 | Extraction built. The pipeline reads each PDF's text layer with pdf.js (`pdfjs-dist`), putting right-to-left lines back into reading order, and sends the model that text, never the file, so a scanned page can't be read (§2.1). Every quote is looked up in the same text, compared as the dataset README describes; a quote that isn't there gives not found. A DOCX, a PDF that can't be opened, one with no text layer, and one with more than 150,000 characters of text (too large for one call) give ambiguous for all its fields, with no model call. In a document with an unreadable page, a field not found on the readable pages is ambiguous. Each document's extraction records when it was read (`extractedAt`); instructions version `extract-1`. The extraction tests read the dataset's PDFs. |
+| 2026-11-21 | §3.4, §7.1, §7.2 | **Rule set version 1.1 approved.** FL-10 judges only who the recipients are: a condition or purpose attached to a recipient category ("where a law requires disclosure") is not part of it; purpose fit is PC-01's. No result in the dataset changes; its expectations are now stamped 1.1. The evaluation showed the model failing FL-10 in C02, C04 and C10 on that condition, and reading the RoPA's silence about the requesting entity as a CD-01 disagreement in C03; the instructions for both are reworded, and the model must now answer every check under its ID, so it can't leave one out. |
 
 ## §15 Open questions
 
