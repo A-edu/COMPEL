@@ -2,6 +2,7 @@ import type { DocumentKind, Position } from '@prisma/client';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { consistencyStep } from './checks/consistency.step.js';
 import { fieldCheckStep } from './checks/field-check.step.js';
+import { purposeStep } from './checks/purpose.step.js';
 import { extractStep } from './extract.step.js';
 import type { ModelRequest, ModelResponse } from './model/model-client.js';
 
@@ -69,13 +70,11 @@ export interface PipelineStep {
 // run completes (pipeline-outcome.ts).
 //
 // The extraction (§6) goes first: every check reads what it saved.
-// TODO(§7.3): the purpose step ('purpose', saving `{ findings: [PC-01] }`,
-// see findings.ts) goes after the consistency check. Until it does, PC-01
-// has no finding and no request is auto-cleared.
 export const PIPELINE_STEPS: readonly PipelineStep[] = [
   extractStep,
   fieldCheckStep,
   consistencyStep,
+  purposeStep,
 ];
 
 // The probe (Sprint 3 spec §5.6 verification): off unless
