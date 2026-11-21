@@ -112,6 +112,7 @@ model DataSharingRequest {
   flagReasons      FlagReason[]
   decision         Decision?
   pipelineRuns     PipelineRun[]
+  findings         Finding[]
 }
 
 enum DocumentKind {
@@ -158,13 +159,21 @@ model ProviderResponse {
 // with at least one is flagged, so a flag is never a status of its own and
 // the requester's status cannot reveal one. `source` is a plain string so a
 // new source needs no migration.
+//
+// Sprint 3 spec §3.2: a reason raised by a pipeline finding points to it
+// through `findingId`; an objection or a pipeline error has none. Only
+// reasons with no `supersededAt` are active, and only active reasons count
+// towards a request being flagged (ACTIVE_REASON in flag-reasons.ts).
 model FlagReason {
-  id        String             @id @default(cuid())
-  requestId String
-  request   DataSharingRequest @relation(fields: [requestId], references: [id])
-  source    String
-  text      String
-  createdAt DateTime           @default(now())
+  id           String             @id @default(cuid())
+  requestId    String
+  request      DataSharingRequest @relation(fields: [requestId], references: [id])
+  source       String
+  text         String
+  findingId    String?            @unique
+  finding      Finding?           @relation(fields: [findingId], references: [id], onDelete: Restrict)
+  supersededAt DateTime?
+  createdAt    DateTime           @default(now())
 
   @@index([requestId])
 }
@@ -174,17 +183,33 @@ enum DecisionOutcome {
   REJECTED
 }
 
-// An officer's final decision on a flagged request (Sprint 2 spec §3.3). Decided
-// once: the unique requestId is what makes a second decision impossible, even
-// when two officers decide at the same moment.
+// Who made a decision (Sprint 3 spec §2.6, §3.5).
+enum DecisionMaker {
+  OFFICER
+  SYSTEM
+}
+
+// The final decision on a request (Sprint 2 spec §3.3, Sprint 3 spec §3.5).
+// Decided once: the unique requestId is what makes a second decision
+// impossible, even when two officers decide at the same moment.
+//
+// An officer's decision names the officer and holds a justification. A system
+// decision is an approval under the outcome rule, with the check report in
+// place of a justification. A database CHECK (migration
+// 20261121150000_findings_and_system_decisions) enforces both shapes, so the
+// system can never record a rejection. `report` is the full check report as
+// it stood when the decision was recorded (§9.3); null for an officer
+// decision on a request with no pipeline run.
 model Decision {
   id            String             @id @default(cuid())
   requestId     String             @unique
   request       DataSharingRequest @relation(fields: [requestId], references: [id])
   outcome       DecisionOutcome
-  justification String
-  decidedById   String
-  decidedBy     User               @relation(fields: [decidedById], references: [id])
+  madeBy        DecisionMaker      @default(OFFICER)
+  justification String?
+  decidedById   String?
+  decidedBy     User?              @relation(fields: [decidedById], references: [id], onDelete: Restrict)
+  report        Json?
   createdAt     DateTime           @default(now())
 }
 
@@ -224,8 +249,51 @@ model PipelineRun {
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
 
+  findings Finding[]
+
   @@index([requestId])
   @@index([state])
+}
+
+// A finding's result (Sprint 3 spec §3.2), as the check allows (§7).
+enum FindingResult {
+  PASSED
+  FAILED
+  NOT_FOUND
+  AMBIGUOUS
+  INCONSISTENT
+  COMPATIBLE
+  INCOMPATIBLE
+  INDETERMINATE
+}
+
+// The result of one check on one request (Sprint 3 spec §3.2). Written when
+// the run that produced it completes. The check's name, clause, rule-set
+// version and whether the requester may see it are copied from the rule set
+// at that time, so a later rule-set change never changes what a stored
+// finding said (§3.4). `evidence` lists the documents and extracted values it
+// rests on. A later run of the same check marks it superseded.
+model Finding {
+  id               String             @id @default(cuid())
+  requestId        String
+  request          DataSharingRequest @relation(fields: [requestId], references: [id])
+  runId            String
+  run              PipelineRun        @relation(fields: [runId], references: [id])
+  checkId          String
+  checkName        String
+  result           FindingResult
+  citation         String
+  ruleSetVersion   String
+  requesterVisible Boolean
+  explanation      String
+  evidence         Json
+  supersededAt     DateTime?
+  createdAt        DateTime           @default(now())
+
+  flagReason FlagReason?
+
+  @@index([requestId])
+  @@index([runId])
 }
 
 // The last sequence number issued per year for request references
