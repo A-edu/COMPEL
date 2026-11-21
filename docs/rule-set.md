@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Version** | 0.1 (draft) |
-| **Status** | Awaiting team approval. No check may rely on this version until it is approved and recorded in `specs/sprint-3.md` §14. |
+| **Version** | 1.0 |
+| **Status** | Approved |
 | **Drafted** | 2026-11-21 |
-| **Approved** | not yet |
+| **Approved** | 2026-11-21, by the team (`specs/sprint-3.md` §14) |
 
 The rule set is the single statement of which fields the pipeline extracts, which checks run on them, what passing means, and which PDPL article or Implementing Regulation clause each check cites (`specs/sprint-3.md` §3.4). Every finding records the version it used. When this file changes after approval, the version goes up and the change is logged in §14 of the current spec. Rule IDs (`F-…`, `FL-…`, `CD-…`, `PC-…`) never change meaning and are never reused.
 
@@ -17,9 +17,9 @@ The rule set is the single statement of which fields the pipeline extracts, whic
 | Implementing Regulation of the Law (2023) — "the Regulation" or "IR" | Art 16, Art 18, Art 20, Art 21, Art 33 | SDAIA's English Regulation PDF and the Istitlaa consultation page showing the current text | In force since 14 Sep 2024. |
 | SDAIA draft amendments to the Regulation | — | Istitlaa consultation, 6 Oct – 5 Nov 2026 | **Proposed, not in force.** Would delete IR Art 33(5), the list of what a record must contain. See §6, risk R1. |
 
-English translations are not authoritative; the Arabic text prevails. Before approval, someone on the team checks every citation in this file against the official Arabic text (spec §15, question 7).
+English translations are not authoritative; the Arabic text prevails. Checking every citation in this file against the official Arabic text is still open (spec §15, question 7).
 
-**Correction to the spec.** The spec cites "Implementing Regulation Article 33(3)" for the contents of a RoPA. In the current text, Art 33(3) only says the records must be accurate and up to date. The minimum contents are in **Art 33(5)**, items (a) to (h). This rule set cites 33(5) for contents and 33(3) for accuracy.
+**Correction to the spec (applied, D2).** The spec cited "Implementing Regulation Article 33(3)" for the contents of a RoPA. In the current text, Art 33(3) only says the records must be accurate and up to date. The minimum contents are in **Art 33(5)**, items (a) to (h). This rule set cites 33(5) for contents and 33(3) for accuracy.
 
 ## 2. Documents
 
@@ -94,7 +94,7 @@ Results: passed or inconsistent. An inconsistent finding names the documents and
 | CD-04 | F-R4 Requested categories against F-P4 Held categories | Every requested category is among the categories the RoPA records | A requested category does not appear in the RoPA | IR Art 33(3); IR Art 33(5)(d) | No (involves the RoPA) |
 | CD-05 | F-R5 Requester retention period across requester documents | All requester documents that state a period state the same one | Periods differ | Law Art 18 | Yes |
 
-**Missing from one document.** US-09 says information present in one document but missing from another is inconsistent. Supporting documents are optional and rarely restate everything, so this draft applies that rule only to the request form: a field stated in a supporting document but missing from the request form is inconsistent. A field the request form states that a supporting document doesn't mention is not inconsistent. See decision D4.
+**Missing from one document.** US-09 says information present in one document but missing from another is inconsistent. Supporting documents are optional and rarely restate everything, so this rule set applies that rule only to the request form: a field stated in a supporting document but missing from the request form is inconsistent. A field the request form states that a supporting document doesn't mention is not inconsistent. See decision D4.
 
 ### 4.3 Purpose compatibility (US-10, spec §7.3)
 
@@ -113,7 +113,7 @@ Incompatible does not mean unlawful. Law Art 10 lets a public entity process dat
 - A field extracted as not found gives not found on its field-level check. A field extracted as ambiguous gives ambiguous.
 - Every result other than passed or compatible raises a flag reason (spec §3.2). The outcome rule is unchanged (spec §2.4, §8): a request is auto-cleared only if every check above passed or was compatible and the provider endorsed it.
 
-## 6. Left out of version 0.1
+## 6. Left out of version 1.0
 
 | Item | Why it is left out |
 |---|---|
@@ -125,15 +125,15 @@ Incompatible does not mean unlawful. Law Art 10 lets a public entity process dat
 **Risks**
 
 - **R1 — Pending amendment.** If SDAIA adopts its draft, IR Art 33(5) is deleted. FL-06, FL-07, FL-09, FL-10, FL-11 and FL-12 still stand on Law Art 31. FL-08 and CD-04 cite only IR Art 33(5)(d) for the RoPA's data categories, so they would need a new citation or would be dropped. Re-check before the final demo.
-- **R2 — Translations.** Article and paragraph numbers were read from English texts. The team confirms them against the Arabic before approval.
+- **R2 — Translations.** Article and paragraph numbers were read from English texts. They still need confirming against the Arabic.
 
-## 7. Decisions the team must make before approving
+## 7. Decisions taken at approval (2026-11-21)
 
-| # | Decision | This draft proposes |
+| # | Question | Decided |
 |---|---|---|
 | D1 | Spec §2.10 says the rule set is drafted from Law Art 31 and IR Art 33(3). The checks above need more provisions: Law Art 10, 11, 15 and 18, and IR Art 16, 18, 20 and 21. Allow them? | Yes. Without them there is no clause for the requester's fields or for purpose compatibility. |
 | D2 | Correct "IR Art 33(3)" to "IR Art 33(5)" in spec §2.10, §3.4 and §5.3, and in the project overview. | Yes. |
 | D3 | F-P3 (collection legal basis) is needed for PC-01 but has no field-level check. Spec §7.1 says every field the rule set names is checked. | Allow "extract-only" fields used by another check, and add one line to §7.1. |
 | D4 | How strict is "missing from another document" (§4.2)? | Apply it only against the request form, as described in §4.2. |
 | D5 | Field-level checks return "ambiguous" for an ambiguous field. Spec §7.1 lists only passed, failed and not found. | Allow ambiguous, already in §3.2's result list. Adjust §7.1's wording. |
-| D6 | Version numbering. | This draft is 0.1. The approved version becomes 1.0. |
+| D6 | Version numbering. | The draft was 0.1; the approved version is 1.0. |

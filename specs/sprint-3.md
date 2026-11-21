@@ -10,9 +10,9 @@ What Sprint 3 must achieve, and why. Standing rules (access rules, auth invarian
 
 ## Progress
 
-- [ ] §5.1 Shared decisions recorded
+- [x] §5.1 Shared decisions recorded
 - [ ] §5.2 Standing rules reconciled
-- [ ] §5.3 Rule set drafted and approved
+- [x] §5.3 Rule set drafted and approved
 - [ ] §5.4 Labelled synthetic dataset
 - [ ] §5.5 Evaluation run
 - [ ] §5.6 Model access and test stand-in
@@ -62,7 +62,7 @@ All seven stories are committed. They are listed in dependency order, so a slip 
 7. **What the requester sees.** A request that was not auto-cleared shows the requester "Under review" until an officer decides it, the label the provider already sees for a flagged request. The requester still never learns why: not the position, the RoPA entry, the flag reasons or the findings on the RoPA. Because checks now flag requests too, a flag no longer implies an objection. This supersedes Sprint 2 §2.5 and the requester's "Responded" label for flagged requests in Sprint 2 §3.1.
 8. **Evidence.** Every extracted value carries the exact text it came from, and the system confirms that text appears in the document. A value that can't be confirmed is not found. "Not found" is a correct answer; the extractor never fills in a missing field. Missing information never leads to auto-clearing.
 9. **Traceability.** A stored extraction records which model and which version of the extraction instructions produced it. Every finding cites a clause and records which rule-set version it used.
-10. **One rule set.** The mapping of fields and checks to PDPL clauses is a single, versioned rule set, drafted from PDPL Article 31 and Implementing Regulation Article 33(3). The team reviews and approves it before any check relies on it (§5.3).
+10. **One rule set.** The mapping of fields and checks to PDPL clauses is a single, versioned rule set, drafted from PDPL Article 31 and Implementing Regulation Article 33(5), and from the other provisions its checks need (version 1.0 also cites PDPL Articles 10, 11, 15 and 18 and Implementing Regulation Articles 16, 18, 20 and 21). The team reviews and approves it before any check relies on it (§5.3).
 11. **Case view.** The extracted-fields panel deferred in Sprint 2 (§2.4) is now in scope. The officer sees the extracted fields with the text they came from, the findings and the clause citations.
 12. **Report.** The officer sees the full report on the case view, and the provider sees the full report on its request page. The requester sees a reduced copy, and only once the request has an outcome (§3.6). The full report is stored with the request's decision record, whoever made the decision. This completes US-13, which Sprint 2 §2.7 left waiting for US-12.
 13. **Corrections.** Only the provider can correct, and only its RoPA entry, while the request is flagged and undecided. The requester cannot correct; problems in its documents are for the officer to decide. The provider cannot change its position: Sprint 1 §2.7 stands, so a request the provider objected to always reaches an officer. The original is kept, only the affected checks run again, and the outcome rule applies again. Findings a re-run replaces are superseded (§3.2). A correction never supersedes an objection.
@@ -91,7 +91,7 @@ After release, a provider response never rests at Responded: it moves to Under a
 
 **Decided:** while a run is in progress, the request is under automated review and not flagged, even if it already carries an objection. It becomes flagged, or is approved, only when the run ends. So an officer can never decide a request mid-run.
 
-**Decided: not yet:** how the new stage is stored. Flagged stays worked out from flag reasons rather than stored (Sprint 2 §3.1).
+**Decided (2026-11-21):** the new stage is a stored status, `UNDER_AUTOMATED_REVIEW`, added to the request status enum. Submitting a provider response, or a correction, sets it; the end of the run moves the request to `PROVIDER_RESPONDED` (flagged, worked out from its active flag reasons) or `APPROVED` (a system decision). Flagged stays worked out from flag reasons rather than stored (Sprint 2 §3.1), and a request whose status is `UNDER_AUTOMATED_REVIEW` is never flagged. Each run is a stored `PipelineRun` record (request, trigger: response or correction, state, start and end time, model, rule-set version), so a run survives restarts and is never repeated or left open (§4.3).
 
 ### §3.2 Flag reasons and findings
 
@@ -105,7 +105,10 @@ A **finding** is the result of one check on one request. Every finding states th
 - **Superseded.** When a correction re-runs a check (§10), the earlier finding of that check, and the flag reason it raised, are marked superseded. They stay on the request as history and the case view shows them as superseded, but a superseded reason no longer counts towards the request being flagged. Only pipeline findings can be superseded; an objection never is.
 - A flag reason that arrives after a decision still does not reopen it (Sprint 2 §3.2).
 
-**Decided: not yet:** how findings and flag reasons are linked, and how superseded is recorded. Whatever is chosen, the queue, the case view and the decision flow must keep working for a request flagged only by an objection, exactly as in Sprint 2.
+**Decided (2026-11-21):**
+- Findings are stored as `Finding` records. A flag reason raised by a finding points to it through a nullable, unique `findingId`; a reason from an objection or a pipeline error has none. The pipeline's source identifier is `PIPELINE`.
+- Superseded is recorded as a nullable `supersededAt` time on both the finding and its flag reason. Only reasons with no `supersededAt` are active, and only active reasons count towards a request being flagged. Every query that counts or filters flag reasons uses one shared active-reason filter. An objection is never superseded, and existing reasons stay active, so a request flagged only by an objection works exactly as in Sprint 2.
+- A pipeline-error reason is superseded when a later run of the same request finishes, so a correction can clear a request whose earlier run failed.
 
 ### §3.3 Extraction record
 
@@ -118,17 +121,17 @@ The extraction is the one stored reading of a request's documents. Every later c
 
 The extraction also records the model and the version of the extraction instructions that produced it, and when it ran. A correction adds a new extraction for the corrected document; the original's stays.
 
-**Decided: not yet:** the field list beyond purpose, legal basis, data categories and retention period. It comes from the rule set (§3.4).
+**Decided (2026-11-21):** the field list is the one in the approved rule set (`docs/rule-set.md` §3): six requester fields and eight provider fields. Purpose and legal basis are each split into the requester's (why the data is wanted) and the provider's (why it was collected).
 
 ### §3.4 Rule set
 
-The rule set is the single, versioned statement of which fields are extracted, which checks run on them, what passing means, and which PDPL article or Implementing Regulation clause each check cites. It is drafted from PDPL Article 31 and Implementing Regulation Article 33(3).
+The rule set is the single, versioned statement of which fields are extracted, which checks run on them, what passing means, and which PDPL article or Implementing Regulation clause each check cites. It is drafted from PDPL Article 31 and Implementing Regulation Article 33(5), plus the other provisions its checks need (§2.10). It lives in `docs/rule-set.md`.
 
 **Decided:**
 - There is one rule set, with a version. Every finding records the version it used, so a later change never changes what a stored finding said.
 - No check relies on a version until the team has approved it. The approval and its date are recorded in §14.
 
-**Status: draft 0.1 written in `docs/rule-set.md`. Awaiting team approval.** (§5.3)
+**Status: version 1.0 approved by the team on 2026-11-21** (§14). (§5.3)
 
 ### §3.5 Decision records
 
@@ -197,7 +200,7 @@ Everything shared between stories is decided once and recorded in this spec, in 
 
 ### §5.3 Rule set
 
-The rule set (§3.4) drafted from PDPL Article 31 and Implementing Regulation Article 33(3), for the team to review.
+The rule set (§3.4) drafted from PDPL Article 31 and Implementing Regulation Article 33(5), for the team to review.
 
 - **Done when:** the draft names every field to extract, every check with what passing means, and the clause each check cites; the team has approved it; its version and the approval date are recorded in §14; and the §3.4 status no longer says "awaiting approval".
 
@@ -249,7 +252,7 @@ Each check produces findings (§3.2), citing the rule-set clause and version.
 The point of the project: each field measured against the clause it answers to.
 
 **Done when:**
-- every field the rule set names is checked against its clause, and its result is passed, failed or not found
+- every field the rule set names is checked against its clause, and its result is passed, failed, not found, or ambiguous when the field was extracted as ambiguous; a field the rule set marks as extract-only (used by another check, such as the collection legal basis in §7.3) has no field-level check
 - a field extracted as ambiguous is never passed
 - every finding cites its clause and the rule-set version used
 - with the rule set's version changed, earlier findings still show the version they used
@@ -382,6 +385,12 @@ Run on the **published app**. Log in just before presenting, so the 15-minute id
 | 2026-11-21 | All | Sprint 3 spec created. Supersedes Sprint 2 §2.5, §2.6 and §3.3 for system decisions, the requester's label for flagged requests in Sprint 2 §3.1, and the Sprint 2 §10.2 rule that a flag sends the requester nothing (§2.6, §2.7, §2.15). |
 | 2026-11-21 | §2, §4.2, §4.3, §5.6, §11, §13, §15, §16 | Sprint 2 §9 and §10 are not built and come after Sprint 3, so §11 is deferred and Sprint 3 sends no request emails. The published app stays on Autoscale; runs must finish and recover there. |
 | 2026-11-21 | §3.4, §5.3 | Rule set draft 0.1 written in `docs/rule-set.md`, not yet approved. Its §7 lists decisions D1–D6 for the team, including correcting the RoPA contents citation from IR Art 33(3) to IR Art 33(5). |
+| 2026-11-21 | §3.4, §5.3 | **Rule set version 1.0 approved by the team.** Decisions D1–D6 accepted as proposed. |
+| 2026-11-21 | §2.10, §3.4, §5.3, §15 | RoPA contents citation corrected from Implementing Regulation Article 33(3) to 33(5) (D2). The rule set may cite provisions beyond Article 31 and 33 (D1). |
+| 2026-11-21 | §7.1 | Field-level results may be ambiguous (D5), and extract-only fields have no field-level check (D3). |
+| 2026-11-21 | §3.1 | Under automated review stored as status `UNDER_AUTOMATED_REVIEW`; runs stored as `PipelineRun` records. |
+| 2026-11-21 | §3.2 | Findings stored as `Finding` records, linked from flag reasons by `findingId`; superseded recorded as `supersededAt`; only active reasons count towards flagged; a pipeline-error reason is superseded when a later run finishes. |
+| 2026-11-21 | §3.3 | Field list fixed by the rule set. |
 
 ## §15 Open questions
 
@@ -391,7 +400,7 @@ Run on the **published app**. Log in just before presenting, so the 15-minute id
 4. **Corrections and the requester's status.** During a re-run after a correction, should the requester see "Under automated review" (and get an email for it), or keep seeing "Under review" until the outcome? The first is accurate but tells the requester a correction happened.
 5. **How many corrections.** Can the provider correct as many times as it likes while the request stays flagged and undecided, or is there a limit?
 6. **Missing API key.** Should the published app refuse to start without a model API key, as it does without SMTP, or start and flag every run with a pipeline error?
-7. **Legal references.** The team should confirm PDPL Article 31 and Implementing Regulation Article 33(3) against the official text before drafting the rule set (§5.3).
+7. **Legal references.** Partly resolved 2026-11-21: the rule set was checked against the official English texts, which showed the RoPA contents are in Implementing Regulation Article 33(5), not 33(3). Still open: confirm every citation in `docs/rule-set.md` against the official Arabic text. SDAIA's October 2026 draft amendments would delete Article 33(5); re-check before the final demo (`docs/rule-set.md` §6, R1).
 
 ## §16 Out of scope
 
