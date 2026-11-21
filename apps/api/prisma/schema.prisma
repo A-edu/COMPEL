@@ -85,6 +85,9 @@ model AuthEvent {
 
 enum RequestStatus {
   AWAITING_PROVIDER_RESPONSE
+  // Sprint 3 spec §3.1: the provider responded (or corrected) and a pipeline
+  // run is in progress. Never flagged while in this status.
+  UNDER_AUTOMATED_REVIEW
   PROVIDER_RESPONDED
   APPROVED
   REJECTED
@@ -108,6 +111,7 @@ model DataSharingRequest {
   providerResponse ProviderResponse?
   flagReasons      FlagReason[]
   decision         Decision?
+  pipelineRuns     PipelineRun[]
 }
 
 enum DocumentKind {
@@ -182,6 +186,46 @@ model Decision {
   decidedById   String
   decidedBy     User               @relation(fields: [decidedById], references: [id])
   createdAt     DateTime           @default(now())
+}
+
+enum PipelineRunTrigger {
+  RESPONSE
+  CORRECTION
+}
+
+enum PipelineRunState {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+// One automated review of a request (Sprint 3 spec §3.1, §4.3). Each step runs
+// in its own internal request: a step is claimed by moving the run from
+// QUEUED to RUNNING with a lease, so a step never runs twice, and a run whose
+// lease lapses is ended FAILED by the sweeper rather than repeated.
+model PipelineRun {
+  id             String             @id @default(cuid())
+  requestId      String
+  request        DataSharingRequest @relation(fields: [requestId], references: [id])
+  trigger        PipelineRunTrigger
+  state          PipelineRunState   @default(QUEUED)
+  // Step name -> model used, snapshotted when the run is created.
+  models         Json
+  ruleSetVersion String
+  // Index into the ordered step list of the step to run next.
+  nextStep       Int                @default(0)
+  // Results saved by each step, keyed by step name, so any instance can
+  // continue the run.
+  stepResults    Json               @default("{}")
+  leaseUntil     DateTime?
+  startedAt      DateTime?
+  endedAt        DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([requestId])
+  @@index([state])
 }
 
 // The last sequence number issued per year for request references
