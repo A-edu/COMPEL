@@ -139,6 +139,8 @@ STORAGE_PREFIX=demo
 UPLOAD_DIR=./uploads
 MAX_UPLOAD_MB=10
 API_PORT=3001
+ANTHROPIC_API_KEY (secret): Anthropic API key for the pipeline. Set separately in the workspace and the published app. Never commit it.
+PIPELINE_MODEL: model used by the pipeline; defaults to claude-haiku-5-5 when unset.
 ```
 
 ## Commands
