@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import type { ConfigService } from '@nestjs/config';
 import type { DocumentKind } from '@prisma/client';
 import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { AnthropicModelClient } from '../pipeline/model/anthropic-model-client.js';
 import { runStepsLocally } from '../pipeline/pipeline-local.js';
@@ -29,10 +29,17 @@ import {
 // results with each case's expected.json. Not part of npm test: it calls the
 // real model, so it needs ANTHROPIC_API_KEY and costs money. Reports go to
 // apps/api/eval/reports/ (gitignored).
+//
+// EVAL_DATASET runs another folder in the same format instead, relative to
+// the repository root: EVAL_DATASET=docs/demo/sprint-3 npm run eval scores
+// the demo documents (spec §13).
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const API_DIR = join(__dirname, '..', '..');
-const DATASET_DIR = join(API_DIR, 'eval', 'dataset');
+const REPO_DIR = join(API_DIR, '..', '..');
+const DATASET_DIR = process.env.EVAL_DATASET?.trim()
+  ? resolve(REPO_DIR, process.env.EVAL_DATASET.trim())
+  : join(API_DIR, 'eval', 'dataset');
 const REPORTS_DIR = join(API_DIR, 'eval', 'reports');
 
 interface DatasetIndex {
@@ -88,6 +95,7 @@ async function runCase(
 
 function summaryText(report: {
   startedAt: string;
+  dataset: string;
   models: Record<string, string>;
   extractionInstructionsVersion: string;
   ruleSetVersion: string;
@@ -98,6 +106,7 @@ function summaryText(report: {
   const { summary } = report;
   const lines = [
     `COMPEL evaluation, ${report.startedAt}`,
+    `Dataset: ${report.dataset}`,
     `Rule set ${report.ruleSetVersion}; extraction instructions ${report.extractionInstructionsVersion}`,
     `Steps: ${report.steps.length ? report.steps.join(', ') : '(none yet)'}`,
     `Models: ${
@@ -175,6 +184,7 @@ async function main(): Promise<void> {
   const report = {
     startedAt: startedAt.toISOString(),
     finishedAt: new Date().toISOString(),
+    dataset: relative(REPO_DIR, DATASET_DIR),
     ruleSetVersion: RULE_SET_VERSION,
     datasetRuleSetVersion: index.rule_set_version,
     extractionInstructionsVersion: EXTRACTION_INSTRUCTIONS_VERSION,
