@@ -31,16 +31,25 @@ Use these terms exactly, in code and UI.
 - **RoPA entry**: the providing entity's Record of Processing Activities document for a request.
 - **Position**: the providing entity's endorsement of, or objection to, a request.
 - **Flag reason**: why a request needs an officer's decision. A request with at least one is flagged.
-- **Decision**: an officer's final approval or rejection of a flagged request, with a written justification.
+- **Decision**: the final outcome of a request. Either an officer's approval or rejection of a flagged request, with a written justification, or a system decision: an approval only, recorded under the outcome rule, with the check report in place of a justification.
+- **Pipeline run**: one automated review of a request, started by the provider's response or by a correction.
+- **Extraction**: the stored reading of one document: for each rule-set field, the value found with the exact text it came from, or not found, or ambiguous.
+- **Finding**: the result of one check on one request, citing the PDPL clause and the rule-set version it used.
+- **Rule set**: the single, versioned list of fields, checks, what passing means and the clause each check cites (`docs/rule-set.md`).
+- **Check report**: the readable list of every check, its result and its clause, in a full view and a reduced view for the requester.
+- **Correction**: a new RoPA entry the provider submits on a flagged, undecided request; the original is kept and the affected checks run again.
 
 ## Access rules (enforce on every query)
 
 1. A DPO can see a request only if their entity is its requesting or providing entity. Otherwise respond **404 Not Found**, never 403, so the request's existence is not revealed.
-2. Only the providing entity's DPO can respond to a request (RoPA entry and position). A party to the request who is not the provider gets 403.
-3. The requesting entity sees a request's status, but **not** the provider's RoPA document, position or flag reasons, and it can't tell a flagged request from a responded one. It sees the outcome once a decision is recorded, but not the justification.
+2. Only the providing entity's DPO can respond to a request (RoPA entry and position), or correct its RoPA entry while the request is flagged and undecided. A party to the request who is not the provider gets 403.
+3. The requesting entity sees a request's status, but **not** the provider's RoPA document, its corrections, the position, the flag reasons, the extracted fields or findings that involve the RoPA, the purpose comparison or the summary of why a request was not auto-cleared: not on a screen, in a download, in an API response or in an email.
+   - While a pipeline run is in progress it sees "Under automated review". A request the pipeline did not auto-clear shows it "Under review" until a decision is recorded, so it can't tell why. A request the provider responded to before Sprint 3 keeps the label it had ("Responded").
+   - Once a decision is recorded it sees the outcome and, if the request had a pipeline run, the reduced check report (current spec §3.6), but never a justification.
 4. A DPO cannot create a request whose providing entity is their own entity.
-5. All request queries go through one scoping helper in the API. For a DPO it filters by the current user's `entityId`; for a compliance officer it limits results to pending, flagged and decided requests. Never query requests directly from a controller, and never trust an entity ID or role sent by the client for authorization.
-6. Only compliance officers can reach the review console or record decisions. An officer has no DPO access, even to their own entity's requests.
+5. All request queries go through one scoping helper in the API. For a DPO it filters by the current user's `entityId`; for a compliance officer it limits results to pending, under automated review, flagged and decided requests. Never query requests directly from a controller, and never trust an entity ID or role sent by the client for authorization.
+6. Only compliance officers can reach the review console. Only compliance officers record decisions on flagged requests, and only they can reject. An officer can open a request under automated review but cannot decide it. An officer has no DPO access, even to their own entity's requests.
+7. The system records only approvals, and only under the outcome rule: every check passed and the provider endorsed the request. Nothing a client sends can make the system record a decision.
 
 ## Architecture
 
@@ -140,7 +149,11 @@ UPLOAD_DIR=./uploads
 MAX_UPLOAD_MB=10
 API_PORT=3001
 ANTHROPIC_API_KEY (secret): Anthropic API key for the pipeline. Set separately in the workspace and the published app. Never commit it.
-PIPELINE_MODEL: model used by the pipeline; defaults to claude-haiku-5-5 when unset.
+PIPELINE_MODEL: default model for every pipeline step; claude-haiku-5-5 when unset.
+PIPELINE_MODEL_EXTRACT: model for field extraction; PIPELINE_MODEL when unset.
+PIPELINE_MODEL_FIELD_CHECK: model for field-level checks; PIPELINE_MODEL when unset.
+PIPELINE_MODEL_CONSISTENCY: model for cross-document checks; PIPELINE_MODEL when unset.
+PIPELINE_MODEL_PURPOSE: model for purpose compatibility; PIPELINE_MODEL when unset.
 ```
 
 ## Commands
