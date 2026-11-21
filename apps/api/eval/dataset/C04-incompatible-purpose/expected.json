@@ -1,0 +1,124 @@
+{
+  "case": "C04",
+  "slug": "incompatible-purpose",
+  "covers": "Incompatible purpose: health-supervision data requested for a tax audit",
+  "rule_set_version": "1.0",
+  "title": "Private clinic visit records for VAT audits",
+  "position": "ENDORSED",
+  "objection": null,
+  "documents": [
+    {
+      "file": "request-form.pdf",
+      "kind": "REQUEST_FORM",
+      "language": "en",
+      "pages": 1,
+      "scanned_pages": [],
+      "fields": {
+        "F-R1": {
+          "state": "found",
+          "quote": "To identify patients' visits to private clinics and the fees they paid, to check whether the clinics declared that revenue in their VAT returns."
+        },
+        "F-R2": {
+          "state": "found",
+          "quote": "PDPL Article 15(3): disclosure requested by a public entity to implement another law, namely the VAT Law."
+        },
+        "F-R3": {
+          "state": "found",
+          "quote": "Collecting the VAT due on taxable supplies by private health facilities, a function given to the Authority by the VAT Law."
+        },
+        "F-R4": {
+          "state": "found",
+          "quote": "Patient name, national ID number, facility name, date of visit, fee charged for the visit.",
+          "items": [
+            "Patient name",
+            "national ID number",
+            "facility name",
+            "date of visit",
+            "fee charged for the visit"
+          ]
+        },
+        "F-R5": {
+          "state": "found",
+          "quote": "Kept for five years after the related tax audit is closed, then destroyed."
+        },
+        "F-R6": {
+          "state": "found",
+          "quote": "Requested by the Zakat, Tax and Customs Authority from the Ministry of Health."
+        }
+      }
+    },
+    {
+      "file": "ropa.pdf",
+      "kind": "ROPA",
+      "language": "en",
+      "pages": 1,
+      "scanned_pages": [],
+      "fields": {
+        "F-P1": {
+          "state": "found",
+          "quote": "Ministry of Health, Data Management Office, privacy@moh.example"
+        },
+        "F-P2": {
+          "state": "found",
+          "quote": "Licensing and supervising private health facilities and monitoring the quality of care they provide to patients."
+        },
+        "F-P3": {
+          "state": "found",
+          "quote": "Processing required to implement the Private Health Institutions Law."
+        },
+        "F-P4": {
+          "state": "found",
+          "quote": "Patient name, national ID number, facility name, date of visit, diagnosis, fee charged for the visit.",
+          "items": [
+            "Patient name",
+            "national ID number",
+            "facility name",
+            "date of visit",
+            "diagnosis",
+            "fee charged for the visit"
+          ]
+        },
+        "F-P5": {
+          "state": "found",
+          "quote": "Patients treated at licensed private health facilities."
+        },
+        "F-P6": {
+          "state": "found",
+          "quote": "Government entities where a law requires disclosure."
+        },
+        "F-P7": {
+          "state": "found",
+          "quote": "No transfer or disclosure outside the Kingdom."
+        },
+        "F-P8": {
+          "state": "found",
+          "quote": "Visit records are kept for ten years after the patient's last visit."
+        }
+      }
+    }
+  ],
+  "checks": {
+    "FL-01": "passed",
+    "FL-02": "passed",
+    "FL-03": "passed",
+    "FL-04": "passed",
+    "FL-05": "passed",
+    "FL-06": "passed",
+    "FL-07": "passed",
+    "FL-08": "passed",
+    "FL-09": "passed",
+    "FL-10": "passed",
+    "FL-11": "passed",
+    "FL-12": "passed",
+    "CD-01": "passed",
+    "CD-02": "passed",
+    "CD-03": "passed",
+    "CD-04": "passed",
+    "CD-05": "passed",
+    "PC-01": "incompatible"
+  },
+  "outcome": "FLAGGED",
+  "flag_reasons": [
+    "PC-01"
+  ]
+}

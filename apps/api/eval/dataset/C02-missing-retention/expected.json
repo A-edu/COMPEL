@@ -1,0 +1,122 @@
+{
+  "case": "C02",
+  "slug": "missing-retention",
+  "covers": "Missing field: the request form never states a retention period",
+  "rule_set_version": "1.0",
+  "title": "Supplier tax compliance verification",
+  "position": "ENDORSED",
+  "objection": null,
+  "documents": [
+    {
+      "file": "request-form.pdf",
+      "kind": "REQUEST_FORM",
+      "language": "en",
+      "pages": 1,
+      "scanned_pages": [],
+      "fields": {
+        "F-R1": {
+          "state": "found",
+          "quote": "To confirm, before awarding a supply contract, that the supplier is registered for VAT and in good tax standing."
+        },
+        "F-R2": {
+          "state": "found",
+          "quote": "PDPL Article 15(3): disclosure requested by a public entity to implement another law, namely the Government Tenders and Procurement Law."
+        },
+        "F-R3": {
+          "state": "found",
+          "quote": "Contracting only with suppliers that meet their tax obligations, as required by the Government Tenders and Procurement Law."
+        },
+        "F-R4": {
+          "state": "found",
+          "quote": "Establishment owner name, owner's national ID number, VAT registration number, VAT registration status.",
+          "items": [
+            "Establishment owner name",
+            "owner's national ID number",
+            "VAT registration number",
+            "VAT registration status"
+          ]
+        },
+        "F-R5": {
+          "state": "not_found"
+        },
+        "F-R6": {
+          "state": "found",
+          "quote": "Requested by the Ministry of Health from the Zakat, Tax and Customs Authority."
+        }
+      }
+    },
+    {
+      "file": "ropa.pdf",
+      "kind": "ROPA",
+      "language": "en",
+      "pages": 1,
+      "scanned_pages": [],
+      "fields": {
+        "F-P1": {
+          "state": "found",
+          "quote": "Zakat, Tax and Customs Authority, Data Management Office, privacy@zatca.example"
+        },
+        "F-P2": {
+          "state": "found",
+          "quote": "Registering taxpayers for VAT and verifying their returns and payments, and enabling contracting government entities to check the VAT registration status of their suppliers."
+        },
+        "F-P3": {
+          "state": "found",
+          "quote": "Processing required to implement the VAT Law."
+        },
+        "F-P4": {
+          "state": "found",
+          "quote": "Establishment owner name, owner's national ID number, VAT registration number, VAT registration status, tax returns, payments.",
+          "items": [
+            "Establishment owner name",
+            "owner's national ID number",
+            "VAT registration number",
+            "VAT registration status",
+            "tax returns",
+            "payments"
+          ]
+        },
+        "F-P5": {
+          "state": "found",
+          "quote": "Individuals and sole-proprietorship owners registered for VAT."
+        },
+        "F-P6": {
+          "state": "found",
+          "quote": "Government entities that contract with suppliers, to check their tax status; other government entities where a law requires disclosure."
+        },
+        "F-P7": {
+          "state": "found",
+          "quote": "No transfer or disclosure outside the Kingdom."
+        },
+        "F-P8": {
+          "state": "found",
+          "quote": "Records are kept for ten years after the end of the tax year they relate to."
+        }
+      }
+    }
+  ],
+  "checks": {
+    "FL-01": "passed",
+    "FL-02": "passed",
+    "FL-03": "passed",
+    "FL-04": "passed",
+    "FL-05": "not_found",
+    "FL-06": "passed",
+    "FL-07": "passed",
+    "FL-08": "passed",
+    "FL-09": "passed",
+    "FL-10": "passed",
+    "FL-11": "passed",
+    "FL-12": "passed",
+    "CD-01": "passed",
+    "CD-02": "passed",
+    "CD-03": "passed",
+    "CD-04": "passed",
+    "CD-05": "passed",
+    "PC-01": "compatible"
+  },
+  "outcome": "FLAGGED",
+  "flag_reasons": [
+    "FL-05"
+  ]
+}

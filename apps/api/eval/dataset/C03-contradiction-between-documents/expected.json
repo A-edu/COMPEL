@@ -1,0 +1,160 @@
+{
+  "case": "C03",
+  "slug": "contradiction-between-documents",
+  "covers": "Contradiction between documents: the supporting memo asks for a data category the request form doesn't",
+  "rule_set_version": "1.0",
+  "title": "Employee wage records for contribution audits",
+  "position": "ENDORSED",
+  "objection": null,
+  "documents": [
+    {
+      "file": "request-form.pdf",
+      "kind": "REQUEST_FORM",
+      "language": "en",
+      "pages": 1,
+      "scanned_pages": [],
+      "fields": {
+        "F-R1": {
+          "state": "found",
+          "quote": "To check that the contributions employers pay are calculated on the wages they actually paid their employees."
+        },
+        "F-R2": {
+          "state": "found",
+          "quote": "PDPL Article 15(3): disclosure requested by a public entity to implement another law, namely the Social Insurance Law."
+        },
+        "F-R3": {
+          "state": "found",
+          "quote": "Collecting social insurance contributions on the correct wage base, a function given to the Organization by the Social Insurance Law."
+        },
+        "F-R4": {
+          "state": "found",
+          "quote": "Employee name, national ID number, employer establishment number, monthly wage paid.",
+          "items": [
+            "Employee name",
+            "national ID number",
+            "employer establishment number",
+            "monthly wage paid"
+          ]
+        },
+        "F-R5": {
+          "state": "found",
+          "quote": "Kept for five years after the related contribution audit is closed, then destroyed."
+        },
+        "F-R6": {
+          "state": "found",
+          "quote": "Requested by the General Organization for Social Insurance from the Ministry of Human Resources and Social Development."
+        }
+      }
+    },
+    {
+      "file": "supporting-audit-memo.pdf",
+      "kind": "SUPPORTING",
+      "language": "en",
+      "pages": 1,
+      "scanned_pages": [],
+      "fields": {
+        "F-R1": {
+          "state": "found",
+          "quote": "To check that the contributions employers pay are calculated on the wages they actually paid their employees."
+        },
+        "F-R2": {
+          "state": "not_found"
+        },
+        "F-R3": {
+          "state": "not_found"
+        },
+        "F-R4": {
+          "state": "found",
+          "quote": "Employee name, national ID number, employer establishment number, monthly wage paid, bank account number the wage was paid into.",
+          "items": [
+            "Employee name",
+            "national ID number",
+            "employer establishment number",
+            "monthly wage paid",
+            "bank account number the wage was paid into"
+          ]
+        },
+        "F-R5": {
+          "state": "not_found"
+        },
+        "F-R6": {
+          "state": "found",
+          "quote": "Requested by the General Organization for Social Insurance from the Ministry of Human Resources and Social Development."
+        }
+      }
+    },
+    {
+      "file": "ropa.pdf",
+      "kind": "ROPA",
+      "language": "en",
+      "pages": 1,
+      "scanned_pages": [],
+      "fields": {
+        "F-P1": {
+          "state": "found",
+          "quote": "Ministry of Human Resources and Social Development, Data Management Office, privacy@hrsd.example"
+        },
+        "F-P2": {
+          "state": "found",
+          "quote": "Monitoring private-sector wage payments under the wage protection programme to enforce timely and correct payment of wages, and confirming wages paid to the General Organization for Social Insurance for contribution audits."
+        },
+        "F-P3": {
+          "state": "found",
+          "quote": "Processing required to implement the Labour Law."
+        },
+        "F-P4": {
+          "state": "found",
+          "quote": "Employee name, national ID number, employer establishment number, monthly wage paid, bank account number the wage was paid into, payment date.",
+          "items": [
+            "Employee name",
+            "national ID number",
+            "employer establishment number",
+            "monthly wage paid",
+            "bank account number the wage was paid into",
+            "payment date"
+          ]
+        },
+        "F-P5": {
+          "state": "found",
+          "quote": "Private-sector employees whose wages are paid through the wage protection programme."
+        },
+        "F-P6": {
+          "state": "found",
+          "quote": "The General Organization for Social Insurance, for contribution audits; other government entities where a law requires disclosure."
+        },
+        "F-P7": {
+          "state": "found",
+          "quote": "No transfer or disclosure outside the Kingdom."
+        },
+        "F-P8": {
+          "state": "found",
+          "quote": "Wage payment records are kept for ten years after the payment date."
+        }
+      }
+    }
+  ],
+  "checks": {
+    "FL-01": "passed",
+    "FL-02": "passed",
+    "FL-03": "passed",
+    "FL-04": "passed",
+    "FL-05": "passed",
+    "FL-06": "passed",
+    "FL-07": "passed",
+    "FL-08": "passed",
+    "FL-09": "passed",
+    "FL-10": "passed",
+    "FL-11": "passed",
+    "FL-12": "passed",
+    "CD-01": "passed",
+    "CD-02": "passed",
+    "CD-03": "inconsistent",
+    "CD-04": "passed",
+    "CD-05": "passed",
+    "PC-01": "compatible"
+  },
+  "outcome": "FLAGGED",
+  "flag_reasons": [
+    "CD-03"
+  ]
+}
