@@ -25,6 +25,7 @@ import {
   removeEntities,
   type EntityFixture,
 } from './fixtures.js';
+import type { PipelineRunner } from '../src/pipeline/pipeline-runner.service.js';
 
 const ROPA_PDF = buildPlaceholderPdf(['SYNTHETIC — DEMO DATA', 'RoPA entry']);
 const OBJECTION = 'The legal basis for sharing is not stated.';
@@ -43,6 +44,8 @@ const ENTITIES_JSON = join(
 describe('Decision records (e2e)', () => {
   const prisma = new PrismaClient();
   let app: NestExpressApplication;
+  // Waits for the automated review a response starts (Sprint 3 spec §2.3).
+  let pipeline: PipelineRunner;
   let mail: MockMailTransport;
   let throttler: ResettableThrottlerStorage;
   let fixtures: Awaited<ReturnType<typeof createEntityFixtures>>;
@@ -93,6 +96,7 @@ describe('Decision records (e2e)', () => {
       title,
     });
     await respond(req.id).expect(201);
+    await pipeline.drain();
     return req;
   }
 
@@ -110,7 +114,7 @@ describe('Decision records (e2e)', () => {
       .status;
 
   beforeAll(async () => {
-    ({ app, mail, throttler } = await createTestApp());
+    ({ app, mail, throttler, pipeline } = await createTestApp());
     fixtures = await createEntityFixtures(prisma, 4);
     [sdaia, a, b, c] = fixtures.entities;
     officer = await createOfficer(prisma, sdaia);

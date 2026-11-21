@@ -27,7 +27,7 @@ export class RequestResponseController {
     @Param('id') id: string,
     @Body() body: RespondToRequestDto,
     @UploadedFiles() files: UploadedFields,
-  ): Promise<{ status: 'PROVIDER_RESPONDED' }> {
+  ): Promise<{ status: 'UNDER_AUTOMATED_REVIEW' }> {
     const ropaFile = files?.ropaDocument?.[0];
     if (!ropaFile) throw new BadRequestException(ROPA_REQUIRED);
     return this.responses.respond(user, id, body, ropaFile);

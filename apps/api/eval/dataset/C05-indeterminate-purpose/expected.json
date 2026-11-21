@@ -1,0 +1,120 @@
+{
+  "case": "C05",
+  "slug": "indeterminate-purpose",
+  "covers": "Indeterminate purpose: the RoPA entry never states the collection legal basis",
+  "rule_set_version": "1.0",
+  "title": "Occupational health records for labour inspections",
+  "position": "ENDORSED",
+  "objection": null,
+  "documents": [
+    {
+      "file": "request-form.pdf",
+      "kind": "REQUEST_FORM",
+      "language": "en",
+      "pages": 1,
+      "scanned_pages": [],
+      "fields": {
+        "F-R1": {
+          "state": "found",
+          "quote": "To check that employers in hazardous sectors arrange the periodic medical examinations their workers are required to have."
+        },
+        "F-R2": {
+          "state": "found",
+          "quote": "PDPL Article 15(3): disclosure requested by a public entity to implement another law, namely the Labour Law."
+        },
+        "F-R3": {
+          "state": "found",
+          "quote": "Protecting the health and safety of workers in hazardous sectors, a function given to the Ministry by the Labour Law."
+        },
+        "F-R4": {
+          "state": "found",
+          "quote": "Worker name, national ID number, employer establishment number, date of the last periodic medical examination.",
+          "items": [
+            "Worker name",
+            "national ID number",
+            "employer establishment number",
+            "date of the last periodic medical examination"
+          ]
+        },
+        "F-R5": {
+          "state": "found",
+          "quote": "Kept for two years after the related inspection is closed, then destroyed."
+        },
+        "F-R6": {
+          "state": "found",
+          "quote": "Requested by the Ministry of Human Resources and Social Development from the Ministry of Health."
+        }
+      }
+    },
+    {
+      "file": "ropa.pdf",
+      "kind": "ROPA",
+      "language": "en",
+      "pages": 1,
+      "scanned_pages": [],
+      "fields": {
+        "F-P1": {
+          "state": "found",
+          "quote": "Ministry of Health, Data Management Office, privacy@moh.example"
+        },
+        "F-P2": {
+          "state": "found",
+          "quote": "Recording the periodic occupational medical examinations of workers in hazardous sectors and their results, and reporting examination dates to labour inspection authorities."
+        },
+        "F-P3": {
+          "state": "not_found"
+        },
+        "F-P4": {
+          "state": "found",
+          "quote": "Worker name, national ID number, employer establishment number, date and result of each periodic medical examination.",
+          "items": [
+            "Worker name",
+            "national ID number",
+            "employer establishment number",
+            "date and result of each periodic medical examination"
+          ]
+        },
+        "F-P5": {
+          "state": "found",
+          "quote": "Workers in hazardous sectors who undergo periodic occupational medical examinations."
+        },
+        "F-P6": {
+          "state": "found",
+          "quote": "The Ministry of Human Resources and Social Development, for labour inspections; other government entities where a law requires disclosure."
+        },
+        "F-P7": {
+          "state": "found",
+          "quote": "No transfer or disclosure outside the Kingdom."
+        },
+        "F-P8": {
+          "state": "found",
+          "quote": "Examination records are kept for fifteen years after the worker's last examination."
+        }
+      }
+    }
+  ],
+  "checks": {
+    "FL-01": "passed",
+    "FL-02": "passed",
+    "FL-03": "passed",
+    "FL-04": "passed",
+    "FL-05": "passed",
+    "FL-06": "passed",
+    "FL-07": "passed",
+    "FL-08": "passed",
+    "FL-09": "passed",
+    "FL-10": "passed",
+    "FL-11": "passed",
+    "FL-12": "passed",
+    "CD-01": "passed",
+    "CD-02": "passed",
+    "CD-03": "passed",
+    "CD-04": "passed",
+    "CD-05": "passed",
+    "PC-01": "indeterminate"
+  },
+  "outcome": "FLAGGED",
+  "flag_reasons": [
+    "PC-01"
+  ]
+}

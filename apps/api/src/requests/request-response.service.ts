@@ -2,6 +2,7 @@ import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import type { SessionUser } from '../auth/session-user.js';
 import { DocumentStorage } from '../documents/document-storage.js';
+import { PipelineRunner } from '../pipeline/pipeline-runner.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { RespondToRequestDto } from './dto/respond-to-request.dto.js';
 import { FLAG_SOURCE_PROVIDER_OBJECTION } from './flag-reasons.js';
@@ -17,17 +18,20 @@ export class RequestResponseService {
     private readonly prisma: PrismaService,
     private readonly scope: RequestScope,
     private readonly documents: DocumentStorage,
+    private readonly pipeline: PipelineRunner,
   ) {}
 
   // The provider's one response (§2.7): the RoPA document, the response, the
-  // status change and any objection's flag reason are written in one
-  // transaction.
+  // status change, any objection's flag reason and the queued pipeline run
+  // are written in one transaction. The run is then triggered in the
+  // background, so the response returns straight away (Sprint 3 spec §2.3,
+  // §4.3).
   async respond(
     user: SessionUser,
     id: string,
     dto: RespondToRequestDto,
     ropaFile: Express.Multer.File,
-  ): Promise<{ status: 'PROVIDER_RESPONDED' }> {
+  ): Promise<{ status: 'UNDER_AUTOMATED_REVIEW' }> {
     const request = await this.scope.findPartyOrThrow(user, id, {
       select: {
         id: true,
@@ -48,8 +52,9 @@ export class RequestResponseService {
     const stored = await this.documents.save(ropaFile);
     const objection =
       dto.position === 'OBJECTED' ? (dto.objectionReason ?? null) : null;
+    let runId: string;
     try {
-      await this.prisma.$transaction(async (tx) => {
+      runId = await this.prisma.$transaction(async (tx) => {
         // Claims the request. Under concurrent responses Postgres makes the
         // second UPDATE wait for the first to commit, then re-checks the
         // status and matches nothing.
@@ -59,7 +64,7 @@ export class RequestResponseService {
             providingEntityId: user.entityId,
             status: 'AWAITING_PROVIDER_RESPONSE',
           }),
-          data: { status: 'PROVIDER_RESPONDED' },
+          data: { status: 'UNDER_AUTOMATED_REVIEW' },
         });
         if (count !== 1) throw new ConflictException(ALREADY_RESPONDED);
 
@@ -89,6 +94,7 @@ export class RequestResponseService {
             },
           });
         }
+        return this.pipeline.createRun(tx, request.id, 'RESPONSE');
       });
     } catch (error) {
       await this.discard(stored.storageKey);
@@ -102,7 +108,8 @@ export class RequestResponseService {
       throw error;
     }
 
-    return { status: 'PROVIDER_RESPONDED' };
+    await this.pipeline.dispatch(runId);
+    return { status: 'UNDER_AUTOMATED_REVIEW' };
   }
 
   // Removes the one file this response stored. A failure here is logged and

@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { DecisionOutcome, Prisma, RequestStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
-import type {
-  ReviewQueueQuery,
-  ReviewView,
-} from './dto/review-queue.query.js';
+import type { ReviewQueueQuery, ReviewView } from './dto/review-queue.query.js';
 import { DECIDED, FLAGGED, isFlagged } from './flag-reasons.js';
 import { RequestScope } from './request-scope.js';
 
@@ -48,13 +45,17 @@ const entitySelect = { select: { id: true, name: true, slug: true } } as const;
 // What each view holds. `queue` is every pending and flagged request; decided
 // requests have left it but stay reachable through their own view. A request
 // with a flag reason is flagged whatever its status (§3.1), so `pending` leaves
-// those out and no request appears in both.
+// those out and no request appears in both. A request under automated review
+// is never flagged, and sits with the pending ones until its run ends
+// (Sprint 3 spec §2.14).
 const VIEWS: Record<ReviewView, Prisma.DataSharingRequestWhereInput> = {
   queue: { status: { notIn: DECIDED } },
   flagged: FLAGGED,
   pending: {
-    status: 'AWAITING_PROVIDER_RESPONSE',
-    flagReasons: { none: {} },
+    OR: [
+      { status: 'AWAITING_PROVIDER_RESPONSE', flagReasons: { none: {} } },
+      { status: 'UNDER_AUTOMATED_REVIEW' },
+    ],
   },
   decided: { status: { in: DECIDED } },
 };
@@ -140,8 +141,7 @@ export class ReviewQueueService {
 function byDecision(items: ReviewQueueItem[]): ReviewQueueItem[] {
   const time = (item: ReviewQueueItem) => item.decidedAt?.getTime() ?? 0;
   return [...items].sort(
-    (x, y) =>
-      time(y) - time(x) || y.reference.localeCompare(x.reference),
+    (x, y) => time(y) - time(x) || y.reference.localeCompare(x.reference),
   );
 }
 

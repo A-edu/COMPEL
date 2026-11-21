@@ -154,6 +154,9 @@ PIPELINE_MODEL_EXTRACT: model for field extraction; PIPELINE_MODEL when unset.
 PIPELINE_MODEL_FIELD_CHECK: model for field-level checks; PIPELINE_MODEL when unset.
 PIPELINE_MODEL_CONSISTENCY: model for cross-document checks; PIPELINE_MODEL when unset.
 PIPELINE_MODEL_PURPOSE: model for purpose compatibility; PIPELINE_MODEL when unset.
+PIPELINE_INTERNAL_TOKEN (secret): long random token the app sends to its own internal endpoint to run each pipeline step. Required in the published app; without it every run ends flagged. Set separately in the workspace and the published app. Never commit it.
+PIPELINE_SELF_URL: base URL the app calls for each pipeline step. In production it defaults to the first REPLIT_DOMAINS entry; in the workspace, setting it sends steps through that URL instead of running them in-process.
+PIPELINE_PROBE_SECONDS: verification only. When set, each new run ends with a probe step that makes one tiny model call and keeps the run going this many seconds. Leave unset.
 ```
 
 ## Commands
@@ -169,6 +172,7 @@ All scripts below exist and are functional as of §5.4. `db:seed` requires a bui
 - `npm run db:deploy`: `prisma migrate deploy` (published app)
 - `npm run db:seed`
 - `npm run db:reset`: destructive, workspace only, see working rules
+- `npm run eval`: builds the API, then runs every case in `apps/api/eval/dataset` through the pipeline steps and the real model, and writes a report to `apps/api/eval/reports/` (gitignored). Needs `ANTHROPIC_API_KEY` and costs money, so it is not part of `npm test`.
 
 ## Testing
 

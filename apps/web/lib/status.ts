@@ -7,7 +7,10 @@ import type {
 // decides what each audience is told: `flagged` reaches a DPO only on the
 // provider's side, so the requester can never be shown "Under review".
 
-const DECIDED: Partial<Record<RequestStatus, StatusVariant>> = {
+// Shown to every audience whatever else is true (Sprint 3 spec §3.1): a
+// request under automated review is never flagged, and nobody can decide it.
+const FIXED: Partial<Record<RequestStatus, StatusVariant>> = {
+  UNDER_AUTOMATED_REVIEW: "automatedReview",
   APPROVED: "approved",
   REJECTED: "rejected",
 };
@@ -18,7 +21,7 @@ export function partyVariant(
   flagged?: boolean,
 ): StatusVariant {
   return (
-    DECIDED[status] ??
+    FIXED[status] ??
     (flagged
       ? "underReview"
       : status === "AWAITING_PROVIDER_RESPONSE"
@@ -33,7 +36,7 @@ export function officerVariant(
   flagged: boolean,
 ): StatusVariant {
   return (
-    DECIDED[status] ??
+    FIXED[status] ??
     (flagged
       ? "flagged"
       : status === "AWAITING_PROVIDER_RESPONSE"

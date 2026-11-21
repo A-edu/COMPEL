@@ -23,6 +23,9 @@ uploads/
 # test coverage
 coverage/
 
+# evaluation reports (npm run eval)
+apps/api/eval/reports/
+
 # misc
 .DS_Store
 *.log

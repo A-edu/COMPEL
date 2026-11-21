@@ -1,0 +1,103 @@
+{
+  "rule_set_version": "1.0",
+  "cases": [
+    {
+      "case": "C01",
+      "folder": "C01-clean-english",
+      "covers": "Clean case that should auto-clear (English)",
+      "position": "ENDORSED",
+      "outcome": "APPROVED",
+      "not_passing": []
+    },
+    {
+      "case": "C02",
+      "folder": "C02-missing-retention",
+      "covers": "Missing field: the request form never states a retention period",
+      "position": "ENDORSED",
+      "outcome": "FLAGGED",
+      "not_passing": [
+        "FL-05"
+      ]
+    },
+    {
+      "case": "C03",
+      "folder": "C03-contradiction-between-documents",
+      "covers": "Contradiction between documents: the supporting memo asks for a data category the request form doesn't",
+      "position": "ENDORSED",
+      "outcome": "FLAGGED",
+      "not_passing": [
+        "CD-03"
+      ]
+    },
+    {
+      "case": "C04",
+      "folder": "C04-incompatible-purpose",
+      "covers": "Incompatible purpose: health-supervision data requested for a tax audit",
+      "position": "ENDORSED",
+      "outcome": "FLAGGED",
+      "not_passing": [
+        "PC-01"
+      ]
+    },
+    {
+      "case": "C05",
+      "folder": "C05-indeterminate-purpose",
+      "covers": "Indeterminate purpose: the RoPA entry never states the collection legal basis",
+      "position": "ENDORSED",
+      "outcome": "FLAGGED",
+      "not_passing": [
+        "PC-01"
+      ]
+    },
+    {
+      "case": "C06",
+      "folder": "C06-clean-arabic",
+      "covers": "Arabic documents; clean case that should auto-clear (Arabic version of C01)",
+      "position": "ENDORSED",
+      "outcome": "APPROVED",
+      "not_passing": []
+    },
+    {
+      "case": "C07",
+      "folder": "C07-scanned-page",
+      "covers": "Scanned page: page 2 of the RoPA entry is an image with no text layer",
+      "position": "ENDORSED",
+      "outcome": "FLAGGED",
+      "not_passing": [
+        "FL-09",
+        "FL-10",
+        "FL-11",
+        "FL-12"
+      ]
+    },
+    {
+      "case": "C08",
+      "folder": "C08-provider-objection",
+      "covers": "Provider objection: every check passes, but the provider objected, so the request must still be flagged",
+      "position": "OBJECTED",
+      "outcome": "FLAGGED",
+      "not_passing": []
+    },
+    {
+      "case": "C09",
+      "folder": "C09-category-not-held",
+      "covers": "Contradiction between the request and the RoPA: a requested data category the provider doesn't hold",
+      "position": "ENDORSED",
+      "outcome": "FLAGGED",
+      "not_passing": [
+        "CD-04"
+      ]
+    },
+    {
+      "case": "C10",
+      "folder": "C10-vague-purpose-arabic",
+      "covers": "Arabic documents; request purpose stated only in general terms",
+      "position": "ENDORSED",
+      "outcome": "FLAGGED",
+      "not_passing": [
+        "FL-01",
+        "PC-01"
+      ]
+    }
+  ]
+}

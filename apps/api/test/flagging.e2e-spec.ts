@@ -18,6 +18,7 @@ import {
   createTestRequest,
   type EntityFixture,
 } from './fixtures.js';
+import type { PipelineRunner } from '../src/pipeline/pipeline-runner.service.js';
 
 const ROPA_PDF = buildPlaceholderPdf(['SYNTHETIC — DEMO DATA', 'RoPA entry']);
 const REASON = 'The legal basis for sharing is not stated.';
@@ -40,6 +41,8 @@ function withoutIdentity(body: Record<string, unknown>) {
 describe('Flagging (e2e)', () => {
   const prisma = new PrismaClient();
   let app: NestExpressApplication;
+  // Waits for the automated review a response starts (Sprint 3 spec §2.3).
+  let pipeline: PipelineRunner;
   let mail: MockMailTransport;
   let throttler: ResettableThrottlerStorage;
   let fixtures: Awaited<ReturnType<typeof createEntityFixtures>>;
@@ -124,7 +127,7 @@ describe('Flagging (e2e)', () => {
   }
 
   beforeAll(async () => {
-    ({ app, mail, throttler } = await createTestApp());
+    ({ app, mail, throttler, pipeline } = await createTestApp());
     fixtures = await createEntityFixtures(prisma, 4);
     const [sdaia] = fixtures.entities.slice(3);
     [a, b, c] = fixtures.entities;
@@ -151,6 +154,7 @@ describe('Flagging (e2e)', () => {
     it('flags an objection, with the objection as the reason', async () => {
       const { id } = await newRequest('Objected');
       await respond(id, 'OBJECTED', REASON).expect(201);
+      await pipeline.drain();
 
       expect(await reasons(id)).toEqual([
         expect.objectContaining({
@@ -164,18 +168,21 @@ describe('Flagging (e2e)', () => {
     it('does not flag an endorsement', async () => {
       const { id } = await newRequest('Endorsed');
       await respond(id, 'ENDORSED').expect(201);
+      await pipeline.drain();
       expect(await reasons(id)).toEqual([]);
     });
 
     it('ignores a reason sent with an endorsement', async () => {
       const { id } = await newRequest('Endorsed with a stray reason');
       await respond(id, 'ENDORSED', REASON).expect(201);
+      await pipeline.drain();
       expect(await reasons(id)).toEqual([]);
     });
 
     it('adds no second reason when a second response is refused', async () => {
       const { id } = await newRequest('Objected twice');
       await respond(id, 'OBJECTED', REASON).expect(201);
+      await pipeline.drain();
       await respond(id, 'OBJECTED', REASON).expect(409);
       expect(await reasons(id)).toHaveLength(1);
     });
@@ -189,7 +196,9 @@ describe('Flagging (e2e)', () => {
       objected = (await newRequest('Requester view: objected')).id;
       endorsed = (await newRequest('Requester view: endorsed')).id;
       await respond(objected, 'OBJECTED', REASON).expect(201);
+      await pipeline.drain();
       await respond(endorsed, 'ENDORSED').expect(201);
+      await pipeline.drain();
     });
 
     it('cannot tell an objection from an endorsement on the detail', async () => {
@@ -215,6 +224,7 @@ describe('Flagging (e2e)', () => {
     it('sees the outcome once decided, but still not the position', async () => {
       const { id } = await newRequest('Requester view: decided');
       await respond(id, 'OBJECTED', REASON).expect(201);
+      await pipeline.drain();
       await decide(id, 'REJECTED');
 
       const res = await get(`/requests/${id}`, cookies.a).expect(200);
@@ -228,6 +238,7 @@ describe('Flagging (e2e)', () => {
     it('sees its objection under review, on the detail and the list', async () => {
       const { id } = await newRequest('Provider view: objected');
       await respond(id, 'OBJECTED', REASON).expect(201);
+      await pipeline.drain();
 
       const detail = await get(`/requests/${id}`, cookies.b).expect(200);
       expect(detail.body).toMatchObject({ flagged: true });
@@ -239,6 +250,7 @@ describe('Flagging (e2e)', () => {
     it('sees no flag on an endorsement', async () => {
       const { id } = await newRequest('Provider view: endorsed');
       await respond(id, 'ENDORSED').expect(201);
+      await pipeline.drain();
 
       const detail = await get(`/requests/${id}`, cookies.b).expect(200);
       expect(detail.body).not.toHaveProperty('flagged');
@@ -250,6 +262,7 @@ describe('Flagging (e2e)', () => {
     it('sees the outcome instead of the flag once decided', async () => {
       const { id } = await newRequest('Provider view: decided');
       await respond(id, 'OBJECTED', REASON).expect(201);
+      await pipeline.drain();
       await decide(id, 'APPROVED');
 
       const detail = await get(`/requests/${id}`, cookies.b).expect(200);
@@ -261,6 +274,7 @@ describe('Flagging (e2e)', () => {
   it('treats a reason from any source the same way', async () => {
     const { id } = await newRequest('Made-up source');
     await respond(id, 'ENDORSED').expect(201);
+    await pipeline.drain();
     await prisma.flagReason.create({
       data: { requestId: id, source: 'MADE_UP_CHECK', text: 'A later check.' },
     });
@@ -276,6 +290,7 @@ describe('Flagging (e2e)', () => {
   it('shows another entity nothing about a flagged request', async () => {
     const { id } = await newRequest('Isolation: flagged');
     await respond(id, 'OBJECTED', REASON).expect(201);
+    await pipeline.drain();
 
     await get(`/requests/${id}`, cookies.c).expect(404);
     for (const direction of ['sent', 'received']) {
@@ -329,6 +344,7 @@ describe('Flagging (e2e)', () => {
     it('skips an objection already flagged when it was made', async () => {
       const { id } = await newRequest('Live objection');
       await respond(id, 'OBJECTED', REASON).expect(201);
+      await pipeline.drain();
       await backfill();
       expect(await reasons(id)).toHaveLength(1);
     });

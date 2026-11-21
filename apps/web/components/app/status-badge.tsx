@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 
 export type RequestStatus =
   | "AWAITING_PROVIDER_RESPONSE"
+  | "UNDER_AUTOMATED_REVIEW"
   | "PROVIDER_RESPONDED"
   | "APPROVED"
   | "REJECTED";
@@ -12,6 +13,7 @@ export type RequestStatus =
 // (lib/status.ts, Sprint 2 spec §3.1); the badge never decides who sees what.
 export type StatusVariant =
   | "awaiting"
+  | "automatedReview"
   | "responded"
   | "underReview"
   | "flagged"
@@ -23,6 +25,7 @@ export type StatusVariant =
 // carries the meaning.
 const VARIANTS: Record<StatusVariant, { label: string; dot?: string }> = {
   awaiting: { label: "Awaiting response", dot: "bg-[#f79009]" },
+  automatedReview: { label: "Under automated review", dot: "bg-[#f79009]" },
   responded: { label: "Responded", dot: "bg-[#10b981]" },
   underReview: { label: "Under review", dot: "bg-[#f79009]" },
   flagged: { label: "Flagged" },

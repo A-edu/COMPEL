@@ -1,0 +1,124 @@
+{
+  "case": "C09",
+  "slug": "category-not-held",
+  "covers": "Contradiction between the request and the RoPA: a requested data category the provider doesn't hold",
+  "rule_set_version": "1.0",
+  "title": "Registered wages for payroll declaration audits",
+  "position": "ENDORSED",
+  "objection": null,
+  "documents": [
+    {
+      "file": "request-form.pdf",
+      "kind": "REQUEST_FORM",
+      "language": "en",
+      "pages": 1,
+      "scanned_pages": [],
+      "fields": {
+        "F-R1": {
+          "state": "found",
+          "quote": "To check that the payroll costs employers declare in their tax returns match the wages they registered for social insurance."
+        },
+        "F-R2": {
+          "state": "found",
+          "quote": "PDPL Article 15(3): disclosure requested by a public entity to implement another law, namely the Income Tax Law."
+        },
+        "F-R3": {
+          "state": "found",
+          "quote": "Assessing the zakat and tax due on employers' correct taxable base, a function given to the Authority by the Income Tax Law."
+        },
+        "F-R4": {
+          "state": "found",
+          "quote": "Employee name, national ID number, employer establishment number, registered monthly wage, employee bank account number.",
+          "items": [
+            "Employee name",
+            "national ID number",
+            "employer establishment number",
+            "registered monthly wage",
+            "employee bank account number"
+          ]
+        },
+        "F-R5": {
+          "state": "found",
+          "quote": "Kept for five years after the related tax audit is closed, then destroyed."
+        },
+        "F-R6": {
+          "state": "found",
+          "quote": "Requested by the Zakat, Tax and Customs Authority from the General Organization for Social Insurance."
+        }
+      }
+    },
+    {
+      "file": "ropa.pdf",
+      "kind": "ROPA",
+      "language": "en",
+      "pages": 1,
+      "scanned_pages": [],
+      "fields": {
+        "F-P1": {
+          "state": "found",
+          "quote": "General Organization for Social Insurance, Data Management Office, privacy@gosi.example"
+        },
+        "F-P2": {
+          "state": "found",
+          "quote": "Registering private-sector employees and their wages to calculate and collect social insurance contributions and pay benefits, and providing registered wage information to government entities that verify employers' declarations under the law."
+        },
+        "F-P3": {
+          "state": "found",
+          "quote": "Processing required to implement the Social Insurance Law."
+        },
+        "F-P4": {
+          "state": "found",
+          "quote": "Employee name, national ID number, date of birth, employer establishment number, registered monthly wage, contribution history.",
+          "items": [
+            "Employee name",
+            "national ID number",
+            "date of birth",
+            "employer establishment number",
+            "registered monthly wage",
+            "contribution history"
+          ]
+        },
+        "F-P5": {
+          "state": "found",
+          "quote": "Private-sector employees registered for social insurance, and employers' authorised representatives."
+        },
+        "F-P6": {
+          "state": "found",
+          "quote": "Government entities that verify employers' declarations under the law, including the Zakat, Tax and Customs Authority; other government entities where a law requires disclosure."
+        },
+        "F-P7": {
+          "state": "found",
+          "quote": "No transfer or disclosure outside the Kingdom."
+        },
+        "F-P8": {
+          "state": "found",
+          "quote": "Contribution records are kept for the employee's insured life and ten years after the final benefit is paid."
+        }
+      }
+    }
+  ],
+  "checks": {
+    "FL-01": "passed",
+    "FL-02": "passed",
+    "FL-03": "passed",
+    "FL-04": "passed",
+    "FL-05": "passed",
+    "FL-06": "passed",
+    "FL-07": "passed",
+    "FL-08": "passed",
+    "FL-09": "passed",
+    "FL-10": "passed",
+    "FL-11": "passed",
+    "FL-12": "passed",
+    "CD-01": "passed",
+    "CD-02": "passed",
+    "CD-03": "passed",
+    "CD-04": "inconsistent",
+    "CD-05": "passed",
+    "PC-01": "compatible"
+  },
+  "outcome": "FLAGGED",
+  "flag_reasons": [
+    "CD-04"
+  ]
+}
