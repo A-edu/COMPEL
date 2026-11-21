@@ -13,15 +13,15 @@ What Sprint 2 must achieve, and why. Standing rules (access rules, auth invarian
 - [x] §5.1 Shared decisions recorded
 - [x] §5.2 Standing rules reconciled
 - [x] §5.3 Seed and existing data
-- [x] §5.4 Scheduled work on the published app
+- [ ] §5.4 Scheduled work on the published app
 - [x] §6 Compliance officer login
 - [x] §7 Review queue and case view
 - [x] §8.1 Final decision
 - [x] §8.2 Stored decision records
-- [x] §9 Pending requests and provider reminders
-- [x] §10.1 Provider notified of a new request
-- [x] §10.2 Requester notified of status changes
-- [x] §10.3 Provider notified of the final outcome
+- [ ] §9 Pending requests and provider reminders
+- [ ] §10.1 Provider notified of a new request
+- [ ] §10.2 Requester notified of status changes
+- [ ] §10.3 Provider notified of the final outcome
 - [x] §11 Access and isolation tests
 
 ---
@@ -285,6 +285,7 @@ Run on the **published app**. Log in just before presenting, so the 15-minute id
 | 2026-11-07 | §3.1, §5.3 | Flagged is worked out from flag reasons rather than stored as a status. Seed adds `officer@sdaia.example` and a flagged demo request from `gosi` to `hrsd`. |
 | 2026-11-07 | §4.1 | A role refusal is a 404 in both directions, and routes are closed to officers unless explicitly opened. |
 | 2026-11-07 | §3.3 | A justification is 10 to 1000 characters after trimming. A flagged request with no provider response can be decided. |
+| 2026-11-21 | Progress | §5.4, §9 and §10.1–§10.3 unticked: they were ticked without being built. No reminders or request emails are sent, and the published app is still on Autoscale. §9 and §10 will be built after Sprint 3 (Sprint 3 spec §11); the published app stays on Autoscale for Sprint 3. |
 
 ## §14 Out of scope
 
