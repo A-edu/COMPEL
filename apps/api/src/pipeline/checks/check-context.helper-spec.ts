@@ -88,11 +88,15 @@ export function answerWith(
     model: 'stand-in',
     text: '',
     json: {
-      results: askedChecks(request).map((checkId) => ({
-        checkId,
-        verdict: verdicts[checkId] ?? otherwise,
-        explanation: `Stand-in verdict for ${checkId}.`,
-      })),
+      results: Object.fromEntries(
+        askedChecks(request).map((checkId) => [
+          checkId,
+          {
+            verdict: verdicts[checkId] ?? otherwise,
+            explanation: `Stand-in verdict for ${checkId}.`,
+          },
+        ]),
+      ),
     },
   });
 }

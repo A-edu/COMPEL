@@ -33,7 +33,7 @@ import { judge, type JudgeItem } from './judge.js';
 // see in its reduced report (§3.6).
 export const CONSISTENCY_STEP = 'consistency';
 
-const INSTRUCTIONS = `You compare the same information across the documents of a data-sharing request between Saudi government entities: the requesting entity's request form and supporting documents, and the providing entity's Record of Processing Activities (RoPA) entry. Values may be in English or Arabic; the same thing said in two languages, or in different words with the same meaning, is consistent. For each check, answer "consistent" if the values agree as the check's question asks, or "inconsistent" if they do not, and say which values disagree.`;
+const INSTRUCTIONS = `You compare the same information across the documents of a data-sharing request between Saudi government entities: the requesting entity's request form and supporting documents, and the providing entity's Record of Processing Activities (RoPA) entry. Values may be in English or Arabic; the same thing said in two languages, or in different words with the same meaning, is consistent. For each check, answer "consistent" if the values agree as the check's question asks, or "inconsistent" if they do not, and say which values disagree. Something a document does not mention is a disagreement only where the check's question says so. The verdict must match the explanation: if the values agree, answer "consistent".`;
 
 type Decided = [FindingResult, string];
 
@@ -183,8 +183,11 @@ function planCheck(
 }
 
 const QUESTIONS: Record<string, string> = {
+  // The RoPA entry states only its controller. Asked whether "every
+  // document" named both parties, the model counted the requesting entity's
+  // absence from the RoPA as a disagreement (evaluation case C03).
   'CD-01':
-    'Does every document name the same requesting entity and the same providing entity (matching the registered parties, if given), and is the controller in the RoPA entry the providing entity?',
+    'The request form and any supporting documents each name two parties: the requesting entity (the one the request is made by) and the providing entity (the one it is made to). The RoPA entry names only its controller, with contact details. Work it out in order: 1) take the requesting and providing entity from each request document; 2) they must be the same in every request document, and match the registered parties if given; 3) the RoPA controller must be that providing entity; a controller that is the requesting entity, or any other entity, is inconsistent. The RoPA entry is not expected to name the requesting entity, and contact details or an office name after the controller do not matter.',
   'CD-02': 'Do all of these documents state the same purpose for the request?',
   'CD-03':
     'Do all of these documents list the same requested data categories? Every category in one list must be in the other.',
