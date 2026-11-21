@@ -2,7 +2,7 @@
   "case": "C03",
   "slug": "contradiction-between-documents",
   "covers": "Contradiction between documents: the supporting memo asks for a data category the request form doesn't",
-  "rule_set_version": "1.0",
+  "rule_set_version": "1.1",
   "title": "Employee wage records for contribution audits",
   "position": "ENDORSED",
   "objection": null,

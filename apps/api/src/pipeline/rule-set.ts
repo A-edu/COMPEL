@@ -3,7 +3,7 @@
 // requester may see. When docs/rule-set.md changes, this file changes with it
 // and RULE_SET_VERSION goes up.
 
-export const RULE_SET_VERSION = '1.0';
+export const RULE_SET_VERSION = '1.1';
 
 // docs/rule-set.md §3.
 export const REQUESTER_FIELDS = [
@@ -56,7 +56,8 @@ export const FIELD_CAPTURE: Record<FieldId, string> = {
   'F-R4': 'The types of personal data asked for',
   'F-R5':
     'How long the requester will keep the data, or the event that ends retention',
-  'F-R6': 'The requesting entity and providing entity, as named in the document',
+  'F-R6':
+    'The requesting entity and providing entity, as named in the document',
   'F-P1': "The controller's name and how to contact it",
   'F-P2': 'The purpose the data was collected and processed for',
   'F-P3': 'The legal basis the data was collected on',

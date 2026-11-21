@@ -159,7 +159,7 @@ describe('POST /requests/:id/response (e2e)', () => {
       expect.objectContaining({
         trigger: 'RESPONSE',
         state: 'QUEUED',
-        ruleSetVersion: '1.0',
+        ruleSetVersion: '1.1',
       }),
     ]);
     expect(dispatched).toEqual([runs[0].id]);

@@ -221,11 +221,33 @@ describe('Field-level compliance check (§7.1)', () => {
     expect(promptText(model.calls[1])).toContain('Ministry of Testing');
   });
 
+  it('tells the model the recipients check is about who, not the conditions attached to a category', async () => {
+    const { model } = await run(documents());
+
+    expect(promptText(model.calls[1])).toContain('not when or why');
+  });
+
+  it('asks for one answer under each check’s ID, all required, so a structured answer cannot leave one out', async () => {
+    const { model } = await run(documents());
+
+    for (const call of model.calls) {
+      const results = (
+        call.schema as {
+          properties: {
+            results: { properties: object; required: string[] };
+          };
+        }
+      ).properties.results;
+      expect(results.required).toEqual(askedChecks(call));
+      expect(Object.keys(results.properties)).toEqual(askedChecks(call));
+    }
+  });
+
   it('ends the run with a pipeline error when the model leaves a check out', async () => {
     const model = new StandInModelClient().script(FIELD_CHECK_STEP, () => ({
       model: 'stand-in',
       text: '',
-      json: { results: [] },
+      json: { results: {} },
     }));
 
     await expect(

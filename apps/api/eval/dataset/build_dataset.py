@@ -11,7 +11,7 @@ Needs: Python 3.10+, Google Chrome (headless, for HTML -> PDF), pdftoppm and
 pdftotext (poppler), and the Python packages Pillow, img2pdf and pypdf. It is a
 one-off authoring tool, not part of the app or its tests.
 
-Expectations are written against rule set 1.0 (docs/rule-set.md).
+Expectations are written against rule set 1.1 (docs/rule-set.md).
 """
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ from PIL import Image, ImageFilter
 from pypdf import PdfReader, PdfWriter
 
 HERE = Path(__file__).resolve().parent
-RULE_SET_VERSION = "1.0"
+RULE_SET_VERSION = "1.1"
 MARK_EN = "SYNTHETIC — DEMO DATA"
 MARK_AR = "بيانات اصطناعية — للعرض فقط"
 
