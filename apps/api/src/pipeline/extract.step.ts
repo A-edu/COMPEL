@@ -65,6 +65,11 @@ For each field answer with one of these states:
 - "not_found": the document does not state it. Never guess, infer or fill it in from general knowledge, from the field's label alone, or from another field.
 - "ambiguous": the document states it more than once in ways that conflict.
 
+A field is stated only by a statement about that field itself: the text under the field's own label, or a sentence whose subject is that field. It is never stated by:
+- the document's title, heading or subtitle;
+- a statement about another field that happens to mention it. Recipients are not stated by a purpose that names other entities. Data categories are not stated by a title or a purpose that mentions some data. A retention period is not stated by a purpose that mentions an audit or a contract ending.
+If no statement in the document is about the field, it is "not_found", even when another passage hints at an answer.
+
 For a found field:
 - "value": what the document states for the field, in the document's own words and language. Usually this is the whole statement that follows the field's label.
 - "quote": the exact text of the document that states it, copied character for character from the document text, including punctuation. Do not translate, paraphrase, correct, shorten with ellipses, or join text from different places. Prefer the whole sentence. Arabic stays in Arabic, as written.

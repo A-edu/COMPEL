@@ -38,4 +38,4 @@ export const ADVANCE_HEARTBEAT_MS = 10_000;
 // stored extraction and every evaluation report records it (spec §2.9,
 // §3.3, §5.5). Raise it whenever the instructions in extract.step.ts (the
 // prompt, the answer schema or how answers are confirmed) change.
-export const EXTRACTION_INSTRUCTIONS_VERSION = 'extract-1';
+export const EXTRACTION_INSTRUCTIONS_VERSION = 'extract-2';
