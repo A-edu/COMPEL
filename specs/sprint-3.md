@@ -18,13 +18,13 @@ What Sprint 3 must achieve, and why. Standing rules (access rules, auth invarian
 - [ ] §5.6 Model access and test stand-in
 - [x] §5.7 Existing data and seed
 - [ ] §6 Automated field extraction
-- [ ] §7.1 Field-level compliance check
+- [x] §7.1 Field-level compliance check
 - [ ] §7.2 Cross-document consistency check
 - [ ] §7.3 Purpose compatibility
 - [ ] §8 Auto-clear or flag
 - [ ] §9.1 Check report
 - [ ] §9.2 Case view: extracted fields and findings
-- [ ] §9.3 Stored check reports
+- [x] §9.3 Stored check reports
 - [ ] §10 Correction on a flagged request
 - [ ] §12 Access and isolation tests
 
@@ -123,6 +123,8 @@ The extraction also records the model and the version of the extraction instruct
 
 **Decided (2026-11-21):** the field list is the one in the approved rule set (`docs/rule-set.md` §3): six requester fields and eight provider fields. Purpose and legal basis are each split into the requester's (why the data is wanted) and the provider's (why it was collected).
 
+**Decided (2026-11-21):** the extraction step (`extract`) saves, per document, each field as found (value, quote, and items for data categories), not found or ambiguous, with the model and instructions version (`apps/api/src/pipeline/extraction.ts`). Requester documents carry the requester fields, the RoPA entry the provider fields. The checks read it through one reader, which treats a field left out, or a found value with no quote, as not found.
+
 ### §3.4 Rule set
 
 The rule set is the single, versioned statement of which fields are extracted, which checks run on them, what passing means, and which PDPL article or Implementing Regulation clause each check cites. It is drafted from PDPL Article 31 and Implementing Regulation Article 33(5), plus the other provisions its checks need (§2.10). It lives in `docs/rule-set.md`.
@@ -138,6 +140,8 @@ The rule set is the single, versioned statement of which fields are extracted, w
 Sprint 2 §3.3 stands for officer decisions. A system decision (§2.6) is a decision record that identifies the request, states the outcome (approved, always), the time, that the system made it, and holds the check report in place of a justification. It belongs to the request and lasts as long as it does, like any other decision record.
 
 **Decided:** one decision per request, for either kind; a system decision can no more be changed or removed than an officer's. Requests decided before this sprint have no check report, and their records stay as they are.
+
+**Decided (2026-11-21):** a decision records who made it (`madeBy`: officer or system) and the full check report as it stood when it was recorded (`report`, §9.3); an officer decision on a request with no pipeline run has none. A database constraint allows a system decision only as an approval with a report and no officer or justification, and an officer decision only with both, so the system cannot record a rejection. Existing decisions are officer decisions.
 
 ### §3.6 Check report
 
@@ -394,6 +398,9 @@ Run on the **published app**. Log in just before presenting, so the 15-minute id
 | 2026-11-21 | §5.2 | `AGENTS.md` wording approved by the team: access rules 2, 3, 5 and 6 updated, rule 7 added, Sprint 3 terminology added, per-step model settings listed. Requests flagged before Sprint 3 keep showing the requester "Responded" (§5.7). |
 | 2026-11-21 | §5.4 | Labelled synthetic dataset added in `apps/api/eval/dataset/`: ten cases against rule set 1.0, generated with their expectations by `build_dataset.py`. Its README lists three points rule set 1.0 leaves open for §7.1–§7.2 (a field in several requester documents, a cross-document check on an ambiguous value, a field no requester document states). |
 | 2026-11-21 | §15 | Open question 6 (missing API key) resolved: the app starts with one warning, and every run ends flagged with the generic pipeline-error reason. |
+| 2026-11-21 | §3.3, §3.5 | Extraction contract recorded; decisions record who made them and the stored report, guarded by a database constraint. |
+| 2026-11-21 | §7.1, §7.2 | The dataset README's open points settled. (1) A field-level check gives one finding per request: ambiguous if any document gives the field as ambiguous, not found if none states it, otherwise failed if any stated value fails. (2) **Team decision:** an ambiguous value that takes part in a cross-document comparison gives inconsistent, since it cannot be confirmed to agree; no new result is added, so rule set 1.0 stands. (3) A field no requester document states passes its cross-document check; the field-level check flags it. D4's missing-from-the-request-form rule is CD-03's to apply, not CD-04's. |
+| 2026-11-21 | §8, §2.7 | A run with any rule-set check left without a finding (a step not built yet, such as §7.3) ends flagged with the pipeline-error reason and is never approved. The requester's API response says "under review" only for a flagged request that went through the pipeline; requests flagged before Sprint 3 keep "Responded". |
 
 ## §15 Open questions
 

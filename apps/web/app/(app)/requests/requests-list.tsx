@@ -30,6 +30,8 @@ interface RequestListItem {
   status: RequestStatus;
   createdAt: string;
   flagged?: true;
+  // Sent rows only (Sprint 3 spec §2.7).
+  underReview?: true;
   counterpartEntity: { id: string; name: string };
 }
 
@@ -316,7 +318,7 @@ function RequestRow({
         )}
       </span>
       <StatusBadge
-        variant={partyVariant(r.status, r.flagged)}
+        variant={partyVariant(r.status, r.flagged ?? r.underReview)}
         className="justify-self-start"
       />
       <ChevronRight

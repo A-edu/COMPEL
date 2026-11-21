@@ -1,5 +1,10 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import type { DecisionOutcome, RequestStatus } from '@prisma/client';
+import type {
+  DecisionMaker,
+  DecisionOutcome,
+  RequestStatus,
+} from '@prisma/client';
+import type { CheckReport } from '../pipeline/check-report.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
   STORAGE_SERVICE,
@@ -23,15 +28,23 @@ export interface FlagReasonView {
   // Present only on a reason that arrived after the decision, so it is never
   // read as one of the reasons that led to it (Sprint 2 spec §3.2, §8.2).
   raisedAfterDecision?: true;
+  // Present only on a reason a later pipeline run replaced. It stays as
+  // history but no longer counts towards the flag (Sprint 3 spec §3.2).
+  superseded?: true;
 }
 
-// The stored decision (Sprint 2 spec §3.3). The justification is for officers
-// only, so this is loaded on officer routes alone.
+// The stored decision (Sprint 2 spec §3.3, Sprint 3 spec §3.5). The
+// justification is for officers only, so this is loaded on officer routes
+// alone. A system decision has no officer and no justification; its report
+// takes their place. `report` is the full check report stored with the
+// decision (§9.3), null when the request had no pipeline run.
 export interface DecisionView {
   outcome: DecisionOutcome;
-  justification: string;
+  madeBy: DecisionMaker;
+  justification: string | null;
   createdAt: Date;
-  decidedBy: { email: string };
+  decidedBy: { email: string } | null;
+  report: CheckReport | null;
 }
 
 // Everything that exists so far on a case (Sprint 2 spec §7). Flag reasons are
@@ -96,26 +109,43 @@ export class ReviewCaseService {
         },
         flagReasons: {
           orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
-          select: { id: true, source: true, text: true, createdAt: true },
+          select: {
+            id: true,
+            source: true,
+            text: true,
+            createdAt: true,
+            supersededAt: true,
+          },
         },
         decision: {
           select: {
             outcome: true,
+            madeBy: true,
             justification: true,
             createdAt: true,
             decidedBy: { select: { email: true } },
+            report: true,
           },
         },
       },
     });
     const { decision } = request;
+    const active = request.flagReasons.filter((r) => r.supersededAt === null);
     return {
       ...request,
-      flagged: isFlagged(request.status, request.flagReasons.length),
-      flagReasons: request.flagReasons.map((reason) =>
-        decision && reason.createdAt > decision.createdAt
-          ? { ...reason, raisedAfterDecision: true as const }
-          : reason,
+      decision: decision && {
+        ...decision,
+        report: decision.report as unknown as CheckReport | null,
+      },
+      flagged: isFlagged(request.status, active.length),
+      flagReasons: request.flagReasons.map(
+        ({ supersededAt, ...reason }): FlagReasonView => ({
+          ...reason,
+          ...(decision && reason.createdAt > decision.createdAt
+            ? { raisedAfterDecision: true as const }
+            : {}),
+          ...(supersededAt ? { superseded: true as const } : {}),
+        }),
       ),
     };
   }

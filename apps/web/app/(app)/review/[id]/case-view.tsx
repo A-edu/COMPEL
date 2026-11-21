@@ -247,8 +247,10 @@ function recordOf(request: ReviewCase): RecordEvent[] {
       key: "decision",
       title: decision.outcome === "APPROVED" ? "Approved" : "Rejected",
       // TODO(§10): add "both entities emailed" once the outcome emails exist.
-      detail: (
+      detail: decision.decidedBy ? (
         <span className="font-mono text-xs">{decision.decidedBy.email}</span>
+      ) : (
+        "By the system"
       ),
       time: decision.createdAt,
       tone: decision.outcome === "APPROVED" ? "green" : "red",

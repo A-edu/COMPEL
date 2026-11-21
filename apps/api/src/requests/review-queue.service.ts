@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { DecisionOutcome, Prisma, RequestStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { ReviewQueueQuery, ReviewView } from './dto/review-queue.query.js';
-import { DECIDED, FLAGGED, isFlagged } from './flag-reasons.js';
+import { ACTIVE_REASON, DECIDED, FLAGGED, isFlagged } from './flag-reasons.js';
 import { RequestScope } from './request-scope.js';
 
 export interface QueueEntity {
@@ -53,7 +53,10 @@ const VIEWS: Record<ReviewView, Prisma.DataSharingRequestWhereInput> = {
   flagged: FLAGGED,
   pending: {
     OR: [
-      { status: 'AWAITING_PROVIDER_RESPONSE', flagReasons: { none: {} } },
+      {
+        status: 'AWAITING_PROVIDER_RESPONSE',
+        flagReasons: { none: ACTIVE_REASON },
+      },
       { status: 'UNDER_AUTOMATED_REVIEW' },
     ],
   },
@@ -90,6 +93,7 @@ export class ReviewQueueService {
           requestingEntity: entitySelect,
           providingEntity: entitySelect,
           flagReasons: {
+            where: ACTIVE_REASON,
             orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
             select: { source: true, createdAt: true },
           },

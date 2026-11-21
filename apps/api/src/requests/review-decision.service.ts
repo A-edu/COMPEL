@@ -1,9 +1,10 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { Prisma, type DecisionOutcome } from '@prisma/client';
 import type { SessionUser } from '../auth/session-user.js';
+import { buildFullReport } from '../pipeline/check-report.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { RecordDecisionDto } from './dto/record-decision.dto.js';
-import { DECIDED, FLAGGED, isFlagged } from './flag-reasons.js';
+import { ACTIVE_REASON, DECIDED, FLAGGED, isFlagged } from './flag-reasons.js';
 import { RequestScope } from './request-scope.js';
 
 export const ALREADY_DECIDED = 'This request has already been decided.';
@@ -27,7 +28,7 @@ export class ReviewDecisionService {
       select: {
         id: true,
         status: true,
-        flagReasons: { select: { id: true }, take: 1 },
+        flagReasons: { where: ACTIVE_REASON, select: { id: true }, take: 1 },
       },
     });
     if (DECIDED.includes(request.status)) {
@@ -47,12 +48,19 @@ export class ReviewDecisionService {
         });
         if (count !== 1) throw new ConflictException(ALREADY_DECIDED);
 
+        // The full check report as it stands now is stored with the
+        // decision (Sprint 3 spec §9.3); none for a request with no run.
+        const report = await buildFullReport(tx, request.id, dto.outcome);
         await tx.decision.create({
           data: {
             requestId: request.id,
             outcome: dto.outcome,
+            madeBy: 'OFFICER',
             justification: dto.justification,
             decidedById: user.userId,
+            report: report
+              ? (report as unknown as Prisma.InputJsonValue)
+              : Prisma.DbNull,
           },
         });
       });

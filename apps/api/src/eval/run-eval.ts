@@ -74,7 +74,7 @@ async function runCase(
       },
       model,
     );
-    return readPipelineResult(results);
+    return readPipelineResult(results, expected.position);
   } catch (error) {
     // A pipeline error flags the request (spec §2.3).
     return {

@@ -53,11 +53,11 @@ Each case folder holds its PDFs and an `expected.json`. `index.json` lists every
 
 ## Points rule set 1.0 leaves open
 
-The cases are built so that none of these changes an expected result, but the §6–§7 builders will meet them:
+The cases are built so that none of these changes an expected result. Points 1–3 were settled on 2026-11-21 (spec §14):
 
-1. **A field in several requester documents.** Rule set 1.0 doesn't say whether a field-level check runs on each document's value or on one value per request. In every case here, all stated values pass, so either reading gives the same result.
-2. **A cross-document check on an ambiguous value.** CD checks define only passed and inconsistent. No case feeds them an ambiguous value: C07's unreadable page holds only fields that no CD check uses.
-3. **A field no requester document states.** C02's CD-05 is expected to pass, because there is no second value to disagree with. FL-05 already flags the missing retention period.
+1. **A field in several requester documents.** Rule set 1.0 doesn't say whether a field-level check runs on each document's value or on one value per request. In every case here, all stated values pass, so either reading gives the same result. *Settled:* one finding per request, failed if any stated value fails, ambiguous if any document gives the field as ambiguous.
+2. **A cross-document check on an ambiguous value.** CD checks define only passed and inconsistent. No case feeds them an ambiguous value: C07's unreadable page holds only fields that no CD check uses. *Settled:* an ambiguous value in a comparison gives inconsistent.
+3. **A field no requester document states.** C02's CD-05 is expected to pass, because there is no second value to disagree with. FL-05 already flags the missing retention period. *Settled as described.*
 4. **Purpose compatibility and Law Art 10.** C04 is incompatible under PC-01. An officer may still approve it if a Law Art 10 exception applies. That's the officer's judgement, which is why the system only flags it.
 
 ## Regenerating

@@ -14,6 +14,7 @@ import {
   createTestRequest,
   type EntityFixture,
 } from './fixtures.js';
+import { recordSprint2Response } from './pipeline-helpers.js';
 import type { PipelineRunner } from '../src/pipeline/pipeline-runner.service.js';
 
 const ROPA_PDF = buildPlaceholderPdf(['SYNTHETIC — DEMO DATA', 'RoPA entry']);
@@ -86,6 +87,15 @@ describe('Final decision (e2e)', () => {
     await respond(req.id, 'OBJECTED', OBJECTION);
     return req;
   }
+
+  // An endorsement as Sprint 2 recorded it: Responded with nothing flagged.
+  // A new endorsement never rests there after Sprint 3 (§3.1, §5.7).
+  const endorsedBeforeSprint3 = (requestId: string) =>
+    recordSprint2Response(prisma, {
+      requestId,
+      providerUserId: b.dpo.id,
+      position: 'ENDORSED',
+    });
 
   const addReason = (requestId: string, text = 'Retention is missing.') =>
     prisma.flagReason.create({
@@ -293,7 +303,7 @@ describe('Final decision (e2e)', () => {
 
     it('gives the same 404 for an endorsed request and an unknown ID', async () => {
       const req = await newRequest('Endorsed');
-      await respond(req.id, 'ENDORSED');
+      await endorsedBeforeSprint3(req.id);
 
       const closed = await decide(req.id, valid).expect(404);
       const unknown = await decide(UNKNOWN_ID, valid).expect(404);
@@ -340,7 +350,7 @@ describe('Final decision (e2e)', () => {
   describe('a reason from another source', () => {
     it('decides an endorsed request flagged only by that source', async () => {
       const req = await newRequest('Other source, endorsed');
-      await respond(req.id, 'ENDORSED');
+      await endorsedBeforeSprint3(req.id);
       await addReason(req.id);
 
       await decide(req.id, {

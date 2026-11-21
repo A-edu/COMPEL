@@ -172,8 +172,19 @@ describe('Decision records (e2e)', () => {
         'createdAt',
         'decidedBy',
         'justification',
+        'madeBy',
         'outcome',
+        'report',
       ]);
+      // An officer's decision, with the check report as it stood when the
+      // officer decided (Sprint 3 spec §3.5, §9.3).
+      expect(res.body.decision).toMatchObject({
+        madeBy: 'OFFICER',
+        report: {
+          outcome: 'APPROVED',
+          summary: expect.stringContaining('objected'),
+        },
+      });
       expect(res.body.flagReasons).toEqual([
         {
           id: expect.any(String),

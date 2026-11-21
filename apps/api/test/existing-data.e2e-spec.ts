@@ -205,12 +205,15 @@ describe('Migrating Sprint 2 data (e2e)', () => {
           },
         });
         if (response.objection) {
+          // The current client would read back columns the Sprint 2 schema
+          // does not have yet, so only the ID is selected.
           await db.flagReason.create({
             data: {
               requestId: req.id,
               source: 'PROVIDER_OBJECTION',
               text: response.objection,
             },
+            select: { id: true },
           });
         }
       }
@@ -220,14 +223,12 @@ describe('Migrating Sprint 2 data (e2e)', () => {
     await make(2, 'PROVIDER_RESPONDED', {});
     await make(3, 'PROVIDER_RESPONDED', { objection: 'No legal basis.' });
     const decided = await make(4, 'REJECTED', { objection: 'No retention.' });
-    await db.decision.create({
-      data: {
-        requestId: decided.id,
-        outcome: 'REJECTED',
-        justification: 'Rejected in Sprint 2 for missing retention.',
-        decidedById: officer.id,
-      },
-    });
+    // Raw SQL: the current client would also write Sprint 3's columns, which
+    // a Sprint 2 schema does not have.
+    await db.$executeRaw`
+      INSERT INTO "Decision" ("id", "requestId", "outcome", "justification", "decidedById")
+      VALUES (${`decision-${schema}`}, ${decided.id}, 'REJECTED',
+              'Rejected in Sprint 2 for missing retention.', ${officer.id})`;
     const before = await snapshot(db);
     expect(before).toHaveLength(4);
 
@@ -235,6 +236,17 @@ describe('Migrating Sprint 2 data (e2e)', () => {
 
     await expect(snapshot(db)).resolves.toEqual(before);
     await expect(db.pipelineRun.count()).resolves.toBe(0);
+    // A Sprint 2 decision is an officer's, with no check report (§3.5), and
+    // every existing reason stays active (§3.2).
+    await expect(
+      db.decision.findUniqueOrThrow({
+        where: { requestId: decided.id },
+        select: { madeBy: true, report: true },
+      }),
+    ).resolves.toEqual({ madeBy: 'OFFICER', report: null });
+    await expect(
+      db.flagReason.count({ where: { supersededAt: { not: null } } }),
+    ).resolves.toBe(0);
   });
 });
 

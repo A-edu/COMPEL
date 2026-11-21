@@ -30,7 +30,8 @@ describe('RequestScope', () => {
         { status: 'AWAITING_PROVIDER_RESPONSE' },
         { status: 'UNDER_AUTOMATED_REVIEW' },
         { status: { in: ['APPROVED', 'REJECTED'] } },
-        { flagReasons: { some: {} } },
+        // Only active reasons count (Sprint 3 spec §3.2).
+        { flagReasons: { some: { supersededAt: null } } },
       ],
     };
 

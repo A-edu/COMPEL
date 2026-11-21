@@ -18,6 +18,7 @@ import {
   PIPELINE_STEP_SOURCE,
   type PipelineStep,
 } from '../src/pipeline/pipeline-steps.js';
+import { standInChecks } from './pipeline-helpers.js';
 
 // Records messages instead of sending them.
 export class MockMailTransport implements MailTransport {
@@ -85,12 +86,13 @@ export async function createTestApp(
     .useValue(throttler)
     .overrideProvider(MODEL_CLIENT)
     .useValue(model);
-  if (options.steps) {
-    const steps = options.steps;
-    builder = builder
-      .overrideProvider(PIPELINE_STEP_SOURCE)
-      .useValue(() => steps);
-  }
+  // Unless a test brings its own steps, every check passes (a stand-in with
+  // no extraction and no model): an endorsement is approved by the system,
+  // and an objection is flagged by the objection alone.
+  const steps = options.steps ?? standInChecks();
+  builder = builder
+    .overrideProvider(PIPELINE_STEP_SOURCE)
+    .useValue(() => steps);
   const moduleRef = await builder.compile();
 
   const app = moduleRef.createNestApplication<NestExpressApplication>();

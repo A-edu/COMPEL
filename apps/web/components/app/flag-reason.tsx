@@ -5,6 +5,7 @@ import { formatDateTime } from "@/lib/format";
 // nothing breaks.
 const SOURCE_LABEL: Record<string, string> = {
   PROVIDER_OBJECTION: "Provider objection",
+  PIPELINE: "Automated review",
 };
 
 export function flagSourceLabel(source: string): string {
@@ -17,6 +18,8 @@ export interface FlagReasonItem {
   text: string;
   createdAt: string;
   raisedAfterDecision?: true;
+  // Replaced by a later pipeline run; history only (Sprint 3 spec §3.2).
+  superseded?: true;
 }
 
 // One reason a request was flagged: where it came from, when it was raised,
@@ -34,6 +37,7 @@ export function FlagReason({ reason }: { reason: FlagReasonItem }) {
             {formatDateTime(reason.createdAt)}
           </time>
           {reason.raisedAfterDecision && " · after the decision"}
+          {reason.superseded && " · superseded"}
         </span>
       </div>
       <blockquote className="rounded-lg bg-sunken px-4 py-3 text-[15px] leading-6 break-words whitespace-pre-line text-ink-2">

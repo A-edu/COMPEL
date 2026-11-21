@@ -196,11 +196,13 @@ describe('POST /requests/:id/response (e2e)', () => {
       objectionReason: null,
     });
 
-    // Once the run ends, the request leaves automated review.
+    // Once the run ends, the request leaves automated review: every check
+    // of the test pipeline passes, so the endorsement is approved by the
+    // system (Sprint 3 spec §8).
     vi.restoreAllMocks();
     await expect(pipeline.advance(runs[0].id)).resolves.toBe('ran');
     await pipeline.drain();
-    expect((await responseState(req.id)).status).toBe('PROVIDER_RESPONDED');
+    expect((await responseState(req.id)).status).toBe('APPROVED');
   });
 
   it('stores an objection with its reason, trimmed', async () => {
@@ -349,7 +351,13 @@ describe('POST /requests/:id/response (e2e)', () => {
     expect(results.map((r) => r.status).sort()).toEqual([201, 409]);
     await pipeline.drain();
     const state = await responseState(req.id);
-    expect(state.status).toBe('PROVIDER_RESPONDED');
+    // Every check passes: an accepted endorsement is approved by the system,
+    // an accepted objection stays flagged (Sprint 3 spec §8).
+    expect(state.status).toBe(
+      state.response?.position === 'ENDORSED'
+        ? 'APPROVED'
+        : 'PROVIDER_RESPONDED',
+    );
     // Only the accepted response started a run.
     await expect(
       prisma.pipelineRun.count({ where: { requestId: req.id } }),
