@@ -6,7 +6,7 @@ import {
 import { Prisma } from '@prisma/client';
 import type { SessionUser } from '../auth/session-user.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { DECIDED } from './flag-reasons.js';
+import { ACTIVE_REASON, DECIDED } from './flag-reasons.js';
 
 export const REQUEST_NOT_FOUND = 'Request not found.';
 export const PROVIDER_ONLY =
@@ -95,7 +95,7 @@ export class RequestScope {
             { status: 'AWAITING_PROVIDER_RESPONSE' },
             { status: 'UNDER_AUTOMATED_REVIEW' },
             { status: { in: DECIDED } },
-            { flagReasons: { some: {} } },
+            { flagReasons: { some: ACTIVE_REASON } },
           ],
         },
         extra ?? {},

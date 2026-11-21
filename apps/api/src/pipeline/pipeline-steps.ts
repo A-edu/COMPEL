@@ -1,5 +1,7 @@
 import type { DocumentKind, Position } from '@prisma/client';
 import { setTimeout as sleep } from 'node:timers/promises';
+import { consistencyStep } from './checks/consistency.step.js';
+import { fieldCheckStep } from './checks/field-check.step.js';
 import type { ModelRequest, ModelResponse } from './model/model-client.js';
 
 // The contract between the run engine and the steps §6–§8 add.
@@ -62,9 +64,19 @@ export interface PipelineStep {
   run(ctx: PipelineContext): Promise<StepOutcome>;
 }
 
-// The steps, in order. TODO(§6–§8): extraction (§6), the checks (§7.1–§7.3)
-// and the outcome (§8) go here.
-export const PIPELINE_STEPS: readonly PipelineStep[] = [];
+// The steps, in order. The outcome (§8) is not a step: it is applied when the
+// run completes (pipeline-outcome.ts).
+//
+// TODO(§6): the extraction step ('extract', saving an ExtractionResult, see
+// extraction.ts) goes first. Until it does, the checks find no extraction and
+// every run ends flagged with a pipeline error.
+// TODO(§7.3): the purpose step ('purpose', saving `{ findings: [PC-01] }`,
+// see findings.ts) goes after the consistency check. Until it does, PC-01
+// has no finding and no request is auto-cleared.
+export const PIPELINE_STEPS: readonly PipelineStep[] = [
+  fieldCheckStep,
+  consistencyStep,
+];
 
 // The probe (Sprint 3 spec §5.6 verification): off unless
 // PIPELINE_PROBE_SECONDS is set. It makes one tiny real model call, then keeps

@@ -38,4 +38,7 @@ export interface RequestDetail {
   providerResponse?: ProviderResponse | null;
   // Present only for the provider, while the request is flagged.
   flagged?: true;
+  // Present only for the requester, while a request the pipeline did not
+  // auto-clear waits for an officer (Sprint 3 spec §2.7).
+  underReview?: true;
 }

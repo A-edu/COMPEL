@@ -11,6 +11,7 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import type { Readable } from 'node:stream';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { DECIDED } from '../requests/flag-reasons.js';
+import { PipelineError } from './pipeline-error.js';
 import {
   STORAGE_SERVICE,
   type StorageService,
@@ -38,13 +39,7 @@ import {
   RUN_CAP_MS,
 } from './pipeline.constants.js';
 
-// A failure whose message is safe to log.
-export class PipelineError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'PipelineError';
-  }
-}
+export { PipelineError };
 
 interface StepEntry {
   step: string;
@@ -178,7 +173,12 @@ export class PipelineRunner implements OnModuleInit, OnModuleDestroy {
         where: { id: runId },
         include: {
           request: {
-            include: { documents: true, providerResponse: true },
+            include: {
+              documents: true,
+              providerResponse: true,
+              requestingEntity: { select: { name: true } },
+              providingEntity: { select: { name: true } },
+            },
           },
         },
       });
@@ -311,14 +311,21 @@ export class PipelineRunner implements OnModuleInit, OnModuleDestroy {
         where: { id: runId },
         select: { requestId: true },
       });
-      await completeReview(tx, requestId, results);
+      await completeReview(tx, runId, requestId, results);
     });
   }
 
   private context(
     run: Prisma.PipelineRunGetPayload<{
       include: {
-        request: { include: { documents: true; providerResponse: true } };
+        request: {
+          include: {
+            documents: true;
+            providerResponse: true;
+            requestingEntity: { select: { name: true } };
+            providingEntity: { select: { name: true } };
+          };
+        };
       };
     }>,
     entry: StepEntry,
@@ -333,6 +340,8 @@ export class PipelineRunner implements OnModuleInit, OnModuleDestroy {
         reference: run.request.reference,
         position: response.position,
         objectionReason: response.objectionReason,
+        requestingEntity: run.request.requestingEntity.name,
+        providingEntity: run.request.providingEntity.name,
       },
       documents: run.request.documents.map((doc) => ({
         id: doc.id,

@@ -46,7 +46,7 @@ export function RequestDetailView({
         reference={request.reference}
         status={partyVariant(
           request.status,
-          isProvider ? request.flagged : undefined,
+          isProvider ? request.flagged : request.underReview,
         )}
       />
       <CaseLayout

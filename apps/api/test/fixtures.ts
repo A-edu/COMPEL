@@ -76,10 +76,14 @@ export async function removeEntities(prisma: PrismaClient, entities: Entity[]) {
   await prisma.decision.deleteMany({
     where: { requestId: { in: requestIds } },
   });
-  await prisma.pipelineRun.deleteMany({
+  // Flag reasons point to findings, and findings to runs.
+  await prisma.flagReason.deleteMany({
     where: { requestId: { in: requestIds } },
   });
-  await prisma.flagReason.deleteMany({
+  await prisma.finding.deleteMany({
+    where: { requestId: { in: requestIds } },
+  });
+  await prisma.pipelineRun.deleteMany({
     where: { requestId: { in: requestIds } },
   });
   await prisma.providerResponse.deleteMany({

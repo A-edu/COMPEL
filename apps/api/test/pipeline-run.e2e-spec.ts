@@ -205,8 +205,13 @@ describe('Pipeline runs (e2e)', () => {
       model: 'claude-haiku-5-5',
     });
 
+    // These steps check nothing, so no check of the rule set has a finding
+    // and the outcome rule (§8) cannot clear the request: it leaves
+    // automated review flagged with the pipeline-error reason.
     await expect(statusOf(req.id)).resolves.toBe('PROVIDER_RESPONDED');
-    await expect(reasonsOf(req.id)).resolves.toEqual([]);
+    await expect(reasonsOf(req.id)).resolves.toEqual([
+      { source: 'PIPELINE', text: PIPELINE_ERROR_TEXT },
+    ]);
   });
 
   it('runs a step that asks for more again, each time in a new advance', async () => {

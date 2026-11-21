@@ -19,6 +19,7 @@ import {
   type EntityFixture,
 } from './fixtures.js';
 import type { PipelineRunner } from '../src/pipeline/pipeline-runner.service.js';
+import { standInChecks, useSteps } from './pipeline-helpers.js';
 
 const ROPA_PDF = buildPlaceholderPdf(['SYNTHETIC — DEMO DATA', 'RoPA entry']);
 const REASON = 'The legal basis for sharing is not stated.';
@@ -43,6 +44,8 @@ describe('Flagging (e2e)', () => {
   let app: NestExpressApplication;
   // Waits for the automated review a response starts (Sprint 3 spec §2.3).
   let pipeline: PipelineRunner;
+  // Every check passes unless a test says otherwise.
+  const steps = standInChecks();
   let mail: MockMailTransport;
   let throttler: ResettableThrottlerStorage;
   let fixtures: Awaited<ReturnType<typeof createEntityFixtures>>;
@@ -127,7 +130,7 @@ describe('Flagging (e2e)', () => {
   }
 
   beforeAll(async () => {
-    ({ app, mail, throttler, pipeline } = await createTestApp());
+    ({ app, mail, throttler, pipeline } = await createTestApp({ steps }));
     fixtures = await createEntityFixtures(prisma, 4);
     const [sdaia] = fixtures.entities.slice(3);
     [a, b, c] = fixtures.entities;
@@ -192,13 +195,18 @@ describe('Flagging (e2e)', () => {
     let objected: string;
     let endorsed: string;
 
+    // Sprint 3 spec §2.7: a check flags the endorsed request, so both end
+    // flagged, one by the objection and one by the check, and the requester
+    // sees the same "Under review" on both.
     beforeAll(async () => {
       objected = (await newRequest('Requester view: objected')).id;
       endorsed = (await newRequest('Requester view: endorsed')).id;
+      useSteps(steps, standInChecks({ 'FL-05': 'NOT_FOUND' }));
       await respond(objected, 'OBJECTED', REASON).expect(201);
       await pipeline.drain();
       await respond(endorsed, 'ENDORSED').expect(201);
       await pipeline.drain();
+      useSteps(steps, standInChecks());
     });
 
     it('cannot tell an objection from an endorsement on the detail', async () => {
@@ -206,6 +214,10 @@ describe('Flagging (e2e)', () => {
       const plain = await get(`/requests/${endorsed}`, cookies.a).expect(200);
 
       expect(flagged.body).not.toHaveProperty('flagged');
+      expect(flagged.body).toMatchObject({
+        status: 'PROVIDER_RESPONDED',
+        underReview: true,
+      });
       expect(flagged.text).not.toContain(REASON);
       expect(withoutIdentity(flagged.body as Record<string, unknown>)).toEqual(
         withoutIdentity(plain.body as Record<string, unknown>),
@@ -271,10 +283,10 @@ describe('Flagging (e2e)', () => {
     });
   });
 
+  // On a request endorsed before Sprint 3: a new endorsement ends approved by
+  // the system, and a reason after a decision reopens nothing.
   it('treats a reason from any source the same way', async () => {
-    const { id } = await newRequest('Made-up source');
-    await respond(id, 'ENDORSED').expect(201);
-    await pipeline.drain();
+    const { id } = await sprint1Response('Made-up source', 'ENDORSED');
     await prisma.flagReason.create({
       data: { requestId: id, source: 'MADE_UP_CHECK', text: 'A later check.' },
     });

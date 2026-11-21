@@ -7,7 +7,7 @@ import {
   STORAGE_SERVICE,
   type StorageService,
 } from '../storage/storage.interface.js';
-import { isFlagged } from './flag-reasons.js';
+import { ACTIVE_REASON, isFlagged } from './flag-reasons.js';
 import { RequestScope, type RequestRole } from './request-scope.js';
 
 export const DOCUMENT_NOT_FOUND = 'Document not found.';
@@ -38,7 +38,9 @@ export interface ProviderResponseView {
 
 // §4 detail. `providerResponse` and `flagged` are present only for the
 // provider; for the requester the keys do not exist at all (§2.2, Sprint 2
-// spec §3.1).
+// spec §3.1). `underReview` is present only for the requester, on a request
+// the pipeline did not auto-clear and nobody has decided yet (Sprint 3 spec
+// §2.7, §3.1); it says nothing about why.
 export interface RequestDetail {
   id: string;
   reference: string;
@@ -51,6 +53,7 @@ export interface RequestDetail {
   documents: RequestDocumentView[];
   providerResponse?: ProviderResponseView | null;
   flagged?: true;
+  underReview?: true;
 }
 
 export interface DocumentDownload {
@@ -113,9 +116,13 @@ export class RequestDetailService {
     if (myRole === 'PROVIDER') {
       detail.providerResponse = await this.providerResponse(request.id);
       const reasons = await this.prisma.flagReason.count({
-        where: { requestId: request.id },
+        where: { requestId: request.id, ...ACTIVE_REASON },
       });
       if (isFlagged(request.status, reasons)) detail.flagged = true;
+    } else if (
+      await requesterSeesUnderReview(this.prisma, request.id, request.status)
+    ) {
+      detail.underReview = true;
     }
     return detail;
   }
@@ -174,4 +181,22 @@ export class RequestDetailService {
     });
     return response ?? null;
   }
+}
+
+// Whether the requester sees "Under review" (Sprint 3 spec §2.7, §3.1): the
+// request went through the pipeline, was not auto-cleared and is undecided,
+// so it is flagged. A request flagged before Sprint 3 has no run and keeps
+// showing "Responded" (§5.7). The requester gets only this yes or no, never
+// the reasons.
+export async function requesterSeesUnderReview(
+  prisma: PrismaService,
+  requestId: string,
+  status: RequestStatus,
+): Promise<boolean> {
+  if (status !== 'PROVIDER_RESPONDED') return false;
+  const [reasons, runs] = await Promise.all([
+    prisma.flagReason.count({ where: { requestId, ...ACTIVE_REASON } }),
+    prisma.pipelineRun.count({ where: { requestId } }),
+  ]);
+  return runs > 0 && isFlagged(status, reasons);
 }

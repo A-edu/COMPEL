@@ -15,6 +15,7 @@ import {
   createTestRequest,
   type EntityFixture,
 } from './fixtures.js';
+import { recordSprint2Response } from './pipeline-helpers.js';
 import type { PipelineRunner } from '../src/pipeline/pipeline-runner.service.js';
 
 const ROPA_PDF = buildPlaceholderPdf(['SYNTHETIC — DEMO DATA', 'RoPA entry']);
@@ -72,6 +73,17 @@ describe('Review console (e2e)', () => {
     await pipeline.drain();
     return res;
   }
+
+  // An endorsement as Sprint 2 recorded it: Responded with nothing flagged,
+  // which officers cannot reach. After Sprint 3's release a new endorsement
+  // never rests there (it is approved or flagged), so these come only from
+  // before it (Sprint 3 spec §3.1, §5.7).
+  const endorsedBeforeSprint3 = (requestId: string) =>
+    recordSprint2Response(prisma, {
+      requestId,
+      providerUserId: b.dpo.id,
+      position: 'ENDORSED',
+    });
 
   const addReason = (requestId: string, source: string, text: string) =>
     prisma.flagReason.create({ data: { requestId, source, text } });
@@ -194,7 +206,7 @@ describe('Review console (e2e)', () => {
 
     it('never widens to a responded request, whatever view is asked for', async () => {
       const { request: endorsed } = await newRequest('Endorsed');
-      await respond(endorsed.id, 'ENDORSED');
+      await endorsedBeforeSprint3(endorsed.id);
 
       for (const view of ['queue', 'flagged', 'pending', 'decided']) {
         await expect(ids(`?view=${view}`)).resolves.not.toContain(endorsed.id);
@@ -239,7 +251,7 @@ describe('Review console (e2e)', () => {
 
     it('shows a request flagged only by another source, with no objection', async () => {
       const { request: req } = await newRequest('Other source');
-      await respond(req.id, 'ENDORSED');
+      await endorsedBeforeSprint3(req.id);
       await addReason(req.id, MADE_UP_SOURCE, 'Retention period is missing.');
 
       const row = (await rows('?view=flagged')).find((r) => r.id === req.id);
@@ -358,7 +370,7 @@ describe('Review console (e2e)', () => {
 
     it('is the same 404 for an endorsed request and an unknown ID', async () => {
       const { request: endorsed } = await newRequest('Endorsed');
-      await respond(endorsed.id, 'ENDORSED');
+      await endorsedBeforeSprint3(endorsed.id);
 
       const closed = await get(
         `/review/requests/${endorsed.id}`,
@@ -411,7 +423,7 @@ describe('Review console (e2e)', () => {
 
     it('is the same 404 on a closed request as on an unknown one', async () => {
       const { request: endorsed, requestForm } = await newRequest('Endorsed');
-      await respond(endorsed.id, 'ENDORSED');
+      await endorsedBeforeSprint3(endorsed.id);
 
       const closed = await get(
         `/review/requests/${endorsed.id}/documents/${requestForm.id}`,
