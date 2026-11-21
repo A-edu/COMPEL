@@ -369,16 +369,16 @@ Sprint 3 is done only when these pass, using entities A, B and C with a request 
 
 ## §13 Sprint review demo script
 
-Run on the **published app**. Log in just before presenting, so the 15-minute idle timeout doesn't log anyone out mid-demo. Every email arrives in the team mailbox, so request one login code at a time and use the newest. The documents come from the labelled dataset (§5.4).
+Run on the **published app**. Log in just before presenting, so the 15-minute idle timeout doesn't log anyone out mid-demo. Every email arrives in the team mailbox, so request one login code at a time and use the newest. The documents are the demo documents in `docs/demo/sprint-3/` (cases D1–D3), built in the labelled dataset's layout (§5.4) for `moh` → `gosi`, because no dataset case has `moh` as the requester.
 
-1. Three browser sessions: `moh`, another entity (the provider) and a compliance officer.
-2. As `moh`, submit the dataset's clean case to the provider.
+1. Three browser sessions: `moh`, `gosi` (the provider) and a compliance officer.
+2. As `moh`, submit the clean demo case (D1) to the provider.
 3. As the provider, upload its RoPA entry and endorse. Show "Under automated review" on both entities' screens and in the officer's queue.
 4. Show the request approved by the system, and `moh`'s reduced report.
-5. As `moh`, submit the dataset's incompatible-purpose case; as the provider, endorse it.
+5. As `moh`, submit the incompatible-purpose demo case (D2); as the provider, upload its RoPA entry and endorse it.
 6. As `moh`, show "Under review", with no sign of why.
 7. As the officer, open the case: the extracted fields with their source text, the findings with their clauses, and both purposes side by side.
-8. As the provider, correct the RoPA entry. Show the superseded findings and the re-run result.
+8. As the provider, correct the RoPA entry with D3's `ropa-corrected.pdf`. Show the superseded findings and the re-run result: the retention check now passes, the purpose stays incompatible.
 9. As the officer, decide the case with a justification, and show the stored decision with its report.
 10. Run the evaluation command and show its report.
 
@@ -403,6 +403,7 @@ Run on the **published app**. Log in just before presenting, so the 15-minute id
 | 2026-11-21 | §8, §2.7 | A run with any rule-set check left without a finding (a step not built yet, such as §7.3) ends flagged with the pipeline-error reason and is never approved. The requester's API response says "under review" only for a flagged request that went through the pipeline; requests flagged before Sprint 3 keep "Responded". |
 | 2026-11-21 | §6, §3.3 | Extraction built. The pipeline reads each PDF's text layer with pdf.js (`pdfjs-dist`), putting right-to-left lines back into reading order, and sends the model that text, never the file, so a scanned page can't be read (§2.1). Every quote is looked up in the same text, compared as the dataset README describes; a quote that isn't there gives not found. A DOCX, a PDF that can't be opened, one with no text layer, and one with more than 150,000 characters of text (too large for one call) give ambiguous for all its fields, with no model call. In a document with an unreadable page, a field not found on the readable pages is ambiguous. Each document's extraction records when it was read (`extractedAt`); instructions version `extract-1`. The extraction tests read the dataset's PDFs. |
 | 2026-11-21 | §7.3 | Purpose compatibility built as the `purpose` step (PC-01). A request purpose, collection purpose or collection legal basis that is not found or ambiguous gives indeterminate in code, with no model call. Otherwise one model call on the extracted values judges compatible, incompatible or indeterminate (a purpose too general to compare) by rule set §4.3, and leaves Law Art 10 exceptions to the officer. An incompatible or indeterminate finding's explanation, and so its flag reason, sets the request purpose, collection purpose and legal basis side by side with their quotes. With every check now built, a clean, endorsed request can be auto-cleared. |
+| 2026-11-21 | §13 | The demo uses new demo documents in `docs/demo/sprint-3/` instead of the labelled dataset: no dataset case has `moh` as the requester, and documents naming other parties fail CD-01. D1 (clean, auto-cleared), D2 (incompatible purpose, with a RoPA entry missing its retention period) and D3 (D2's corrected RoPA entry: retention fixed, purpose still incompatible), all `moh` → `gosi`. `EVAL_DATASET` lets `npm run eval` score them. |
 
 ## §15 Open questions
 
