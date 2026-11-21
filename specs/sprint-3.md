@@ -369,16 +369,16 @@ Sprint 3 is done only when these pass, using entities A, B and C with a request 
 
 ## §13 Sprint review demo script
 
-Run on the **published app**. Log in just before presenting, so the 15-minute idle timeout doesn't log anyone out mid-demo. Every email arrives in the team mailbox, so request one login code at a time and use the newest. The documents come from the labelled dataset (§5.4).
+Run on the **published app**. Log in just before presenting, so the 15-minute idle timeout doesn't log anyone out mid-demo. Every email arrives in the team mailbox, so request one login code at a time and use the newest. The documents are the demo documents in `docs/demo/sprint-3/` (cases D1–D3), built in the labelled dataset's layout (§5.4) for `moh` → `gosi`, because no dataset case has `moh` as the requester.
 
-1. Three browser sessions: `moh`, another entity (the provider) and a compliance officer.
-2. As `moh`, submit the dataset's clean case to the provider.
+1. Three browser sessions: `moh`, `gosi` (the provider) and a compliance officer.
+2. As `moh`, submit the clean demo case (D1) to the provider.
 3. As the provider, upload its RoPA entry and endorse. Show "Under automated review" on both entities' screens and in the officer's queue.
 4. Show the request approved by the system, and `moh`'s reduced report.
-5. As `moh`, submit the dataset's incompatible-purpose case; as the provider, endorse it.
+5. As `moh`, submit the incompatible-purpose demo case (D2); as the provider, upload its RoPA entry and endorse it.
 6. As `moh`, show "Under review", with no sign of why.
 7. As the officer, open the case: the extracted fields with their source text, the findings with their clauses, and both purposes side by side.
-8. As the provider, correct the RoPA entry. Show the superseded findings and the re-run result.
+8. As the provider, correct the RoPA entry with D3's `ropa-corrected.pdf`. Show the superseded findings and the re-run result: the retention check now passes, the purpose stays incompatible.
 9. As the officer, decide the case with a justification, and show the stored decision with its report.
 10. Run the evaluation command and show its report.
 
@@ -406,6 +406,7 @@ Run on the **published app**. Log in just before presenting, so the 15-minute id
 | 2026-11-21 | §3.4, §7.1, §7.2 | **Rule set version 1.1 approved.** FL-10 judges only who the recipients are: a condition or purpose attached to a recipient category ("where a law requires disclosure") is not part of it; purpose fit is PC-01's. No result in the dataset changes; its expectations are now stamped 1.1. The evaluation showed the model failing FL-10 in C02, C04 and C10 on that condition, and reading the RoPA's silence about the requesting entity as a CD-01 disagreement in C03; the instructions for both are reworded, and the model must now answer every check under its ID, so it can't leave one out. |
 | 2026-11-21 | §7.2, §8 | §7.2 done: in the evaluation on rule set 1.1 (all steps on Haiku) the contradiction case C03 is flagged by CD-03, which quotes the requested categories from both documents. §8 stays open: C06 is approved by the system, but C01 is flagged because extraction reads data categories into its cover letter, which states none, so CD-03 finds a mismatch. |
 | 2026-11-21 | §6 | Extraction instructions `extract-2`: a field is stated only by a statement about that field (its own label, or a sentence whose subject it is), never by the title or a passing mention in another field. Fixes the over-reading found in the evaluation: C01's cover letter reported data categories from its title, and C07's recipients came from page 1's purpose text instead of being ambiguous. In three runs of C01, C03 and C07 on rule set 1.1, every field and check matched and C01 was approved by the system. |
+| 2026-11-21 | §13 | The demo uses new demo documents in `docs/demo/sprint-3/` instead of the labelled dataset: no dataset case has `moh` as the requester, and documents naming other parties fail CD-01. D1 (clean, auto-cleared), D2 (incompatible purpose, with a RoPA entry missing its retention period) and D3 (D2's corrected RoPA entry: retention fixed, purpose still incompatible), all `moh` → `gosi`. `EVAL_DATASET` lets `npm run eval` score them. |
 
 ## §15 Open questions
 

@@ -1,4 +1,4 @@
-import { readdir } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { buildPlaceholderPdf } from '../seed/placeholder-pdf.js';
 import { datasetCase, datasetFile } from './extract.helper-spec.js';
 import {
@@ -40,6 +40,34 @@ describe('readPdfText', () => {
     }
     expect(missing).toEqual([]);
     expect(quotes).toBeGreaterThan(100);
+  });
+
+  it('reads every demo document (spec §13) so that each of its quotes can be located', async () => {
+    const demo = new URL('../../../../docs/demo/sprint-3/', import.meta.url);
+    const index = JSON.parse(
+      await readFile(new URL('index.json', demo), 'utf8'),
+    ) as { cases: { folder: string }[] };
+    expect(index.cases.length).toBeGreaterThanOrEqual(3);
+
+    const missing: string[] = [];
+    for (const { folder } of index.cases) {
+      const expected = JSON.parse(
+        await readFile(new URL(`${folder}/expected.json`, demo), 'utf8'),
+      ) as Awaited<ReturnType<typeof datasetCase>>;
+      for (const doc of expected.documents) {
+        const pages = await readPdfText(
+          await readFile(new URL(`${folder}/${doc.file}`, demo)),
+        );
+        expect(pages.every((page) => page.readable)).toBe(true);
+        const text = norm(pages.map((page) => page.text).join('\n'));
+        for (const [field, want] of Object.entries(doc.fields)) {
+          if (want.state === 'found' && !quoteAppearsIn(want.quote!, text)) {
+            missing.push(`${folder}/${doc.file} ${field}`);
+          }
+        }
+      }
+    }
+    expect(missing).toEqual([]);
   });
 
   it('keeps Arabic in reading order, as written', async () => {

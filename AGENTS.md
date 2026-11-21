@@ -172,7 +172,7 @@ All scripts below exist and are functional as of §5.4. `db:seed` requires a bui
 - `npm run db:deploy`: `prisma migrate deploy` (published app)
 - `npm run db:seed`
 - `npm run db:reset`: destructive, workspace only, see working rules
-- `npm run eval`: builds the API, then runs every case in `apps/api/eval/dataset` through the pipeline steps and the real model, and writes a report to `apps/api/eval/reports/` (gitignored). Needs `ANTHROPIC_API_KEY` and costs money, so it is not part of `npm test`.
+- `npm run eval`: builds the API, then runs every case in `apps/api/eval/dataset` through the pipeline steps and the real model, and writes a report to `apps/api/eval/reports/` (gitignored). Needs `ANTHROPIC_API_KEY` and costs money, so it is not part of `npm test`. `EVAL_DATASET=docs/demo/sprint-3 npm run eval` scores the demo documents instead (a folder in the same format, relative to the repository root).
 
 ## Testing
 
