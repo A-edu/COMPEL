@@ -128,7 +128,7 @@ The rule set is the single, versioned statement of which fields are extracted, w
 - There is one rule set, with a version. Every finding records the version it used, so a later change never changes what a stored finding said.
 - No check relies on a version until the team has approved it. The approval and its date are recorded in §14.
 
-**Status: draft not yet written. Awaiting team approval.** (§5.3)
+**Status: draft 0.1 written in `docs/rule-set.md`. Awaiting team approval.** (§5.3)
 
 ### §3.5 Decision records
 
@@ -381,6 +381,7 @@ Run on the **published app**. Log in just before presenting, so the 15-minute id
 |---|---|---|
 | 2026-11-21 | All | Sprint 3 spec created. Supersedes Sprint 2 §2.5, §2.6 and §3.3 for system decisions, the requester's label for flagged requests in Sprint 2 §3.1, and the Sprint 2 §10.2 rule that a flag sends the requester nothing (§2.6, §2.7, §2.15). |
 | 2026-11-21 | §2, §4.2, §4.3, §5.6, §11, §13, §15, §16 | Sprint 2 §9 and §10 are not built and come after Sprint 3, so §11 is deferred and Sprint 3 sends no request emails. The published app stays on Autoscale; runs must finish and recover there. |
+| 2026-11-21 | §3.4, §5.3 | Rule set draft 0.1 written in `docs/rule-set.md`, not yet approved. Its §7 lists decisions D1–D6 for the team, including correcting the RoPA contents citation from IR Art 33(3) to IR Art 33(5). |
 
 ## §15 Open questions
 
