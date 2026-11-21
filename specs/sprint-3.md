@@ -16,7 +16,7 @@ What Sprint 3 must achieve, and why. Standing rules (access rules, auth invarian
 - [x] §5.4 Labelled synthetic dataset
 - [ ] §5.5 Evaluation run
 - [ ] §5.6 Model access and test stand-in
-- [ ] §5.7 Existing data and seed
+- [x] §5.7 Existing data and seed
 - [ ] §6 Automated field extraction
 - [ ] §7.1 Field-level compliance check
 - [ ] §7.2 Cross-document consistency check
@@ -393,6 +393,7 @@ Run on the **published app**. Log in just before presenting, so the 15-minute id
 | 2026-11-21 | §3.3 | Field list fixed by the rule set. |
 | 2026-11-21 | §5.2 | `AGENTS.md` wording approved by the team: access rules 2, 3, 5 and 6 updated, rule 7 added, Sprint 3 terminology added, per-step model settings listed. Requests flagged before Sprint 3 keep showing the requester "Responded" (§5.7). |
 | 2026-11-21 | §5.4 | Labelled synthetic dataset added in `apps/api/eval/dataset/`: ten cases against rule set 1.0, generated with their expectations by `build_dataset.py`. Its README lists three points rule set 1.0 leaves open for §7.1–§7.2 (a field in several requester documents, a cross-document check on an ambiguous value, a field no requester document states). |
+| 2026-11-21 | §15 | Open question 6 (missing API key) resolved: the app starts with one warning, and every run ends flagged with the generic pipeline-error reason. |
 
 ## §15 Open questions
 
@@ -401,7 +402,7 @@ Run on the **published app**. Log in just before presenting, so the 15-minute id
 3. **Design reference.** `docs/design/sprint-2.md` covers neither the new stage, the extracted-fields panel, the report views nor the correction screen. Who produces the Sprint 3 design reference, and is it needed before §9 and §10?
 4. **Corrections and the requester's status.** During a re-run after a correction, should the requester see "Under automated review" (and get an email for it), or keep seeing "Under review" until the outcome? The first is accurate but tells the requester a correction happened.
 5. **How many corrections.** Can the provider correct as many times as it likes while the request stays flagged and undecided, or is there a limit?
-6. **Missing API key.** Should the published app refuse to start without a model API key, as it does without SMTP, or start and flag every run with a pipeline error?
+6. **Resolved 2026-11-21.** Missing API key: the app starts, logs one warning, and every run ends flagged with a pipeline-error reason worded "The automated review could not be completed.", which never mentions the key (§3.2). A missing `PIPELINE_INTERNAL_TOKEN` in the published app has the same effect.
 7. **Legal references.** Partly resolved 2026-11-21: the rule set was checked against the official English texts, which showed the RoPA contents are in Implementing Regulation Article 33(5), not 33(3). Still open: confirm every citation in `docs/rule-set.md` against the official Arabic text. SDAIA's October 2026 draft amendments would delete Article 33(5); re-check before the final demo (`docs/rule-set.md` §6, R1).
 
 ## §16 Out of scope
