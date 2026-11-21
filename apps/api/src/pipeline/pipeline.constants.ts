@@ -33,3 +33,8 @@ export const SWEEP_INTERVAL_MS = 60_000;
 export const INTERNAL_TOKEN_HEADER = 'x-pipeline-token';
 export const ADVANCE_ACCEPT_TIMEOUT_MS = 15_000;
 export const ADVANCE_HEARTBEAT_MS = 10_000;
+
+// The version of the extraction instructions (prompt and schema). Every
+// stored extraction and every evaluation report records it (spec §2.9,
+// §3.3, §5.5). TODO(§6): raise it whenever the instructions change.
+export const EXTRACTION_INSTRUCTIONS_VERSION = 'none';

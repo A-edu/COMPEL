@@ -22,7 +22,8 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "node dist/seed/seed.js",
-    "db:reset": "prisma migrate reset"
+    "db:reset": "prisma migrate reset",
+    "eval": "nest build && node dist/eval/run-eval.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "1.12.0",
