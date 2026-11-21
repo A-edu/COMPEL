@@ -28,12 +28,13 @@ describe('RequestScope', () => {
     const officerFilter = {
       OR: [
         { status: 'AWAITING_PROVIDER_RESPONSE' },
+        { status: 'UNDER_AUTOMATED_REVIEW' },
         { status: { in: ['APPROVED', 'REJECTED'] } },
         { flagReasons: { some: {} } },
       ],
     };
 
-    it('limits officers to pending, flagged and decided requests', () => {
+    it('limits officers to pending, under automated review, flagged and decided requests', () => {
       expect(scope.officerWhere()).toEqual({ AND: [officerFilter, {}] });
     });
 

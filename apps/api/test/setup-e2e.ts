@@ -30,5 +30,17 @@ export default function setup() {
 
   // e2e tests must never touch Replit App Storage (AGENTS.md -> Testing).
   process.env.STORAGE_DRIVER = 'local';
+
+  // ...nor the real model (Sprint 3 spec §4.3, §5.6): no key, and pipeline
+  // steps run in-process rather than through the app's public URL. A test
+  // that needs the internal token sets its own.
+  for (const name of [
+    'ANTHROPIC_API_KEY',
+    'PIPELINE_SELF_URL',
+    'PIPELINE_INTERNAL_TOKEN',
+    'PIPELINE_PROBE_SECONDS',
+  ]) {
+    delete process.env[name];
+  }
   process.env.UPLOAD_DIR = join(tmpdir(), 'compel-e2e-uploads');
 }

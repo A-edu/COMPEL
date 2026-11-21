@@ -15,6 +15,7 @@ import {
   createTestRequest,
   type EntityFixture,
 } from './fixtures.js';
+import type { PipelineRunner } from '../src/pipeline/pipeline-runner.service.js';
 
 // The review queue's read-only additions for the design (officer routes only):
 // slugs, waiting times, flag sources, outcomes, the entity filter, both sorts,
@@ -68,6 +69,8 @@ function keysOf(value: unknown): string[] {
 describe('Review queue: fields, entity filter, sorts and counts (e2e)', () => {
   const prisma = new PrismaClient();
   let app: NestExpressApplication;
+  // Waits for the automated review a response starts (Sprint 3 spec §2.3).
+  let pipeline: PipelineRunner;
   let mail: MockMailTransport;
   let throttler: ResettableThrottlerStorage;
   let fixtures: Awaited<ReturnType<typeof createEntityFixtures>>;
@@ -121,9 +124,10 @@ describe('Review queue: fields, entity filter, sorts and counts (e2e)', () => {
       .send({ outcome, justification: 'Reviewed against the PDPL.' })
       .expect(201);
 
-  // b's DPO objects to a request from a.
-  const object = (id: string) =>
-    request(app.getHttpServer())
+  // b's DPO objects to a request from a, then the automated review it starts
+  // ends.
+  const object = async (id: string) => {
+    const res = await request(app.getHttpServer())
       .post(`/api/requests/${id}/response`)
       .set('Cookie', cookies.b)
       .field('position', 'OBJECTED')
@@ -133,6 +137,9 @@ describe('Review queue: fields, entity filter, sorts and counts (e2e)', () => {
         contentType: 'application/pdf',
       })
       .expect(201);
+    await pipeline.drain();
+    return res;
+  };
 
   // A pair of entities no other test uses, so filtering by one of them gives
   // exact results.
@@ -147,7 +154,7 @@ describe('Review queue: fields, entity filter, sorts and counts (e2e)', () => {
   }
 
   beforeAll(async () => {
-    ({ app, mail, throttler } = await createTestApp());
+    ({ app, mail, throttler, pipeline } = await createTestApp());
     fixtures = await createEntityFixtures(prisma, 15);
     all = fixtures.entities;
     [sdaia, a, b] = all;

@@ -52,9 +52,9 @@ export async function createEntityFixtures(
   return { entities, cleanup };
 }
 
-// Removes these entities and everything between them: decisions, flag reasons,
-// provider responses, documents (and their files, one at a time), requests,
-// users, sessions, OTPs and auth events.
+// Removes these entities and everything between them: decisions, pipeline
+// runs, flag reasons, provider responses, documents (and their files, one at
+// a time), requests, users, sessions, OTPs and auth events.
 export async function removeEntities(prisma: PrismaClient, entities: Entity[]) {
   const entityIds = entities.map((e) => e.id);
   const users = await prisma.user.findMany({
@@ -74,6 +74,9 @@ export async function removeEntities(prisma: PrismaClient, entities: Entity[]) {
   const requestIds = requests.map((r) => r.id);
 
   await prisma.decision.deleteMany({
+    where: { requestId: { in: requestIds } },
+  });
+  await prisma.pipelineRun.deleteMany({
     where: { requestId: { in: requestIds } },
   });
   await prisma.flagReason.deleteMany({

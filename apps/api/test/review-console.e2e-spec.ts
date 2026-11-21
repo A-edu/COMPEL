@@ -15,6 +15,7 @@ import {
   createTestRequest,
   type EntityFixture,
 } from './fixtures.js';
+import type { PipelineRunner } from '../src/pipeline/pipeline-runner.service.js';
 
 const ROPA_PDF = buildPlaceholderPdf(['SYNTHETIC — DEMO DATA', 'RoPA entry']);
 const OBJECTION = 'The legal basis for sharing is not stated.';
@@ -33,6 +34,8 @@ interface Row {
 describe('Review console (e2e)', () => {
   const prisma = new PrismaClient();
   let app: NestExpressApplication;
+  // Waits for the automated review a response starts (Sprint 3 spec §2.3).
+  let pipeline: PipelineRunner;
   let mail: MockMailTransport;
   let throttler: ResettableThrottlerStorage;
   let fixtures: Awaited<ReturnType<typeof createEntityFixtures>>;
@@ -49,18 +52,25 @@ describe('Review console (e2e)', () => {
   const newRequest = (title: string, from = a, to = b) =>
     createTestRequest(prisma, { from, to, title });
 
-  function respond(id: string, position: string, objectionReason?: string) {
+  // Responds, then waits for the automated review it starts to end.
+  async function respond(
+    id: string,
+    position: string,
+    objectionReason?: string,
+  ) {
     const req = request(app.getHttpServer())
       .post(`/api/requests/${id}/response`)
       .set('Cookie', cookies.b)
       .field('position', position);
     if (objectionReason) req.field('objectionReason', objectionReason);
-    return req
+    const res = await req
       .attach('ropaDocument', ROPA_PDF, {
         filename: 'ropa-entry.pdf',
         contentType: 'application/pdf',
       })
       .expect(201);
+    await pipeline.drain();
+    return res;
   }
 
   const addReason = (requestId: string, source: string, text: string) =>
@@ -83,7 +93,7 @@ describe('Review console (e2e)', () => {
   const ids = async (query = '') => (await rows(query)).map((r) => r.id);
 
   beforeAll(async () => {
-    ({ app, mail, throttler } = await createTestApp());
+    ({ app, mail, throttler, pipeline } = await createTestApp());
     fixtures = await createEntityFixtures(prisma, 4);
     [sdaia, a, b, c] = fixtures.entities;
     officer = await createOfficer(prisma, sdaia);

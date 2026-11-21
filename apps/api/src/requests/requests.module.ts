@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { DocumentsModule } from '../documents/documents.module.js';
+import { PipelineModule } from '../pipeline/pipeline.module.js';
 import { StorageModule } from '../storage/storage.module.js';
 import { RequestDetailController } from './request-detail.controller.js';
 import { RequestDetailService } from './request-detail.service.js';
@@ -21,7 +22,7 @@ import { ReviewQueueService } from './review-queue.service.js';
 @Module({
   // StorageModule.register() is memoized, so this is the app's one driver;
   // downloads read files through it.
-  imports: [DocumentsModule, StorageModule.register()],
+  imports: [DocumentsModule, StorageModule.register(), PipelineModule],
   controllers: [
     RequestsListController,
     RequestSubmissionController,

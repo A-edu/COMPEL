@@ -81,9 +81,10 @@ export class RequestScope {
     return request as Prisma.DataSharingRequestGetPayload<A>;
   }
 
-  // Requests officers can reach: pending, flagged and decided. A request the
-  // provider responded to with nothing flagged matches none of these. The
-  // filter is ANDed with `extra`, so `extra` can never widen it.
+  // Requests officers can reach: pending, under automated review, flagged and
+  // decided (Access rule 5). A request the provider responded to with nothing
+  // flagged matches none of these. The filter is ANDed with `extra`, so
+  // `extra` can never widen it.
   officerWhere(
     extra?: Prisma.DataSharingRequestWhereInput,
   ): Prisma.DataSharingRequestWhereInput {
@@ -92,6 +93,7 @@ export class RequestScope {
         {
           OR: [
             { status: 'AWAITING_PROVIDER_RESPONSE' },
+            { status: 'UNDER_AUTOMATED_REVIEW' },
             { status: { in: DECIDED } },
             { flagReasons: { some: {} } },
           ],

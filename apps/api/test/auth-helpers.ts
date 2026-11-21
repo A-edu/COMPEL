@@ -11,6 +11,13 @@ import {
   type MailMessage,
   type MailTransport,
 } from '../src/mail/mail.transport.js';
+import { MODEL_CLIENT } from '../src/pipeline/model/model-client.js';
+import { StandInModelClient } from '../src/pipeline/model/stand-in-model-client.js';
+import { PipelineRunner } from '../src/pipeline/pipeline-runner.service.js';
+import {
+  PIPELINE_STEP_SOURCE,
+  type PipelineStep,
+} from '../src/pipeline/pipeline-steps.js';
 
 // Records messages instead of sending them.
 export class MockMailTransport implements MailTransport {
@@ -55,24 +62,41 @@ export class ResettableThrottlerStorage implements ThrottlerStorage {
   }
 }
 
-export async function createTestApp(): Promise<{
+// The whole app with mail recorded, a resettable throttler and a stand-in
+// model, so no test sends an email or reaches the real model. `pipeline`
+// gives tests drain(), which waits for the automated review a provider
+// response starts (Sprint 3 spec §2.3). `steps` replaces the pipeline's steps.
+export async function createTestApp(
+  options: { steps?: PipelineStep[]; model?: StandInModelClient } = {},
+): Promise<{
   app: NestExpressApplication;
   mail: MockMailTransport;
   throttler: ResettableThrottlerStorage;
+  model: StandInModelClient;
+  pipeline: PipelineRunner;
 }> {
   const mail = new MockMailTransport();
   const throttler = new ResettableThrottlerStorage();
-  const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
+  const model = options.model ?? new StandInModelClient();
+  let builder = Test.createTestingModule({ imports: [AppModule] })
     .overrideProvider(MAIL_TRANSPORT)
     .useValue(mail)
     .overrideProvider(ThrottlerStorage)
     .useValue(throttler)
-    .compile();
+    .overrideProvider(MODEL_CLIENT)
+    .useValue(model);
+  if (options.steps) {
+    const steps = options.steps;
+    builder = builder
+      .overrideProvider(PIPELINE_STEP_SOURCE)
+      .useValue(() => steps);
+  }
+  const moduleRef = await builder.compile();
 
   const app = moduleRef.createNestApplication<NestExpressApplication>();
   configureApp(app);
   await app.init();
-  return { app, mail, throttler };
+  return { app, mail, throttler, model, pipeline: app.get(PipelineRunner) };
 }
 
 // One entity with an active and an inactive DPO, removed again by cleanup().

@@ -20,6 +20,7 @@ import {
   createTestRequest,
   type EntityFixture,
 } from './fixtures.js';
+import type { PipelineRunner } from '../src/pipeline/pipeline-runner.service.js';
 
 const ROPA_PDF = buildPlaceholderPdf(['SYNTHETIC — DEMO DATA', 'RoPA entry']);
 const REASON = 'The legal basis for sharing is not stated.';
@@ -37,6 +38,8 @@ describe('POST /requests/:id/response (e2e)', () => {
     get: (name: string) => process.env[name],
   } as unknown as ConfigService);
   let app: NestExpressApplication;
+  // Waits for the automated review a response starts (Sprint 3 spec §2.3).
+  let pipeline: PipelineRunner;
   let mail: MockMailTransport;
   let throttler: ResettableThrottlerStorage;
   let fixtures: Awaited<ReturnType<typeof createEntityFixtures>>;
@@ -112,7 +115,7 @@ describe('POST /requests/:id/response (e2e)', () => {
   }
 
   beforeAll(async () => {
-    ({ app, mail, throttler } = await createTestApp());
+    ({ app, mail, throttler, pipeline } = await createTestApp());
     fixtures = await createEntityFixtures(prisma, 3);
     [a, b, c] = fixtures.entities;
     for (const [key, fixture] of [
@@ -135,14 +138,31 @@ describe('POST /requests/:id/response (e2e)', () => {
     vi.restoreAllMocks();
   });
 
-  it('stores the RoPA document and position and sets PROVIDER_RESPONDED, in one go', async () => {
+  it('stores the RoPA document and position, sets UNDER_AUTOMATED_REVIEW and queues a run, in one go', async () => {
     const req = await newRequest();
+    // Holds the run back, so the state straight after the response is seen.
+    const dispatched: string[] = [];
+    vi.spyOn(pipeline, 'dispatch').mockImplementation((runId: string) => {
+      dispatched.push(runId);
+      return Promise.resolve();
+    });
 
     const res = await respond(req.id, cookies.b).expect(201);
-    expect(res.body).toEqual({ status: 'PROVIDER_RESPONDED' });
+    expect(res.body).toEqual({ status: 'UNDER_AUTOMATED_REVIEW' });
 
     const state = await responseState(req.id);
-    expect(state.status).toBe('PROVIDER_RESPONDED');
+    expect(state.status).toBe('UNDER_AUTOMATED_REVIEW');
+    const runs = await prisma.pipelineRun.findMany({
+      where: { requestId: req.id },
+    });
+    expect(runs).toEqual([
+      expect.objectContaining({
+        trigger: 'RESPONSE',
+        state: 'QUEUED',
+        ruleSetVersion: '1.0',
+      }),
+    ]);
+    expect(dispatched).toEqual([runs[0].id]);
     expect(state.ropaDocuments).toHaveLength(1);
     const [ropa] = state.ropaDocuments;
     expect(ropa).toMatchObject({
@@ -169,12 +189,18 @@ describe('POST /requests/:id/response (e2e)', () => {
       .get(`/api/requests/${req.id}`)
       .set('Cookie', cookies.b)
       .expect(200);
-    expect(detail.body.status).toBe('PROVIDER_RESPONDED');
+    expect(detail.body.status).toBe('UNDER_AUTOMATED_REVIEW');
     expect(detail.body.providerResponse).toMatchObject({
       ropaDocument: { id: ropa.id, originalName: 'ropa-entry.pdf' },
       position: 'ENDORSED',
       objectionReason: null,
     });
+
+    // Once the run ends, the request leaves automated review.
+    vi.restoreAllMocks();
+    await expect(pipeline.advance(runs[0].id)).resolves.toBe('ran');
+    await pipeline.drain();
+    expect((await responseState(req.id)).status).toBe('PROVIDER_RESPONDED');
   });
 
   it('stores an objection with its reason, trimmed', async () => {
@@ -292,6 +318,7 @@ describe('POST /requests/:id/response (e2e)', () => {
   it('returns 409 for a second response and keeps the first', async () => {
     const req = await newRequest();
     await respond(req.id, cookies.b).expect(201);
+    await pipeline.drain();
     const first = await responseState(req.id);
     const before = await storedFiles();
 
@@ -320,8 +347,13 @@ describe('POST /requests/:id/response (e2e)', () => {
     ]);
 
     expect(results.map((r) => r.status).sort()).toEqual([201, 409]);
+    await pipeline.drain();
     const state = await responseState(req.id);
     expect(state.status).toBe('PROVIDER_RESPONDED');
+    // Only the accepted response started a run.
+    await expect(
+      prisma.pipelineRun.count({ where: { requestId: req.id } }),
+    ).resolves.toBe(1);
     expect(state.ropaDocuments).toHaveLength(1);
     expect(state.response?.ropaDocumentId).toBe(state.ropaDocuments[0].id);
     // The loser's upload is removed again: exactly one new file remains.
@@ -370,6 +402,7 @@ describe('POST /requests/:id/response (e2e)', () => {
   it('refuses inside the transaction when the early status check is passed', async () => {
     const req = await newRequest();
     await respond(req.id, cookies.b).expect(201);
+    await pipeline.drain();
     const first = await responseState(req.id);
     const before = await storedFiles();
 
@@ -435,6 +468,7 @@ describe('POST /requests/:id/response (e2e)', () => {
         position: 'OBJECTED',
         objectionReason: REASON,
       }).expect(201);
+      await pipeline.drain();
       ropaId = (await responseState(requestId)).ropaDocuments[0].id;
     });
 
