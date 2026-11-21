@@ -25,6 +25,8 @@ export interface DocumentExtraction {
   // Requester documents carry F-R1–F-R6, the RoPA entry F-P1–F-P8. A field
   // left out is read as not found.
   fields: Partial<Record<FieldId, ExtractedField>>;
+  // When this document was read (ISO 8601), §3.3.
+  extractedAt?: string;
 }
 
 export interface ExtractionResult {

@@ -45,6 +45,34 @@ export const FIELD_NAMES: Record<FieldId, string> = {
   'F-P8': 'Retention period',
 };
 
+// docs/rule-set.md §3, "What to capture": what the extraction (§6) reads for
+// each field.
+export const FIELD_CAPTURE: Record<FieldId, string> = {
+  'F-R1': 'What the requester will use the data for',
+  'F-R2':
+    "The ground relied on for the disclosure (e.g. a public entity's request for a public interest, or another law)",
+  'F-R3':
+    'The public interest the request serves, and the law or decision that gives the requester that function',
+  'F-R4': 'The types of personal data asked for',
+  'F-R5':
+    'How long the requester will keep the data, or the event that ends retention',
+  'F-R6': 'The requesting entity and providing entity, as named in the document',
+  'F-P1': "The controller's name and how to contact it",
+  'F-P2': 'The purpose the data was collected and processed for',
+  'F-P3': 'The legal basis the data was collected on',
+  'F-P4': 'The categories of personal data held',
+  'F-P5': 'The categories of people the data is about',
+  'F-P6':
+    'The entities, or categories of entities, the data has been or will be disclosed to',
+  'F-P7':
+    'Whether the data is or will be transferred or disclosed outside the Kingdom, and if so its basis and recipients',
+  'F-P8': 'How long the data is kept, per category where given',
+};
+
+// Fields whose value is a list (data categories); found values also carry
+// `items`, used by CD-03 and CD-04 (extraction.ts, the dataset README).
+export const LIST_FIELDS: readonly FieldId[] = ['F-R4', 'F-P4'];
+
 export function isRequesterField(field: FieldId): field is RequesterFieldId {
   return (REQUESTER_FIELDS as readonly string[]).includes(field);
 }

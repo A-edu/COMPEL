@@ -2,6 +2,8 @@
 // §5.4, §5.5), following the conventions in apps/api/eval/dataset/README.md.
 // Pure functions: run-eval.ts feeds them, and score.spec.ts tests them.
 
+import { MIN_QUOTE_LENGTH, norm } from '../pipeline/quote-text.js';
+
 export type FieldState = 'found' | 'not_found' | 'ambiguous';
 
 export interface ExpectedField {
@@ -44,21 +46,9 @@ export interface ActualCase {
   error?: string;
 }
 
-// The README's norm(): NFKC, no bidi controls or tatweel, a hyphen at a line
-// break joined, whitespace collapsed. Mirrors build_dataset.py.
-const BIDI_AND_TATWEEL = /[‎‏‪-‮⁦-⁩ـ]/g;
-
-export function norm(text: string): string {
-  return text
-    .normalize('NFKC')
-    .replace(BIDI_AND_TATWEEL, '')
-    .replace(/-\n\s*/g, '-')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-// A quote shorter than this supports nothing.
-const MIN_QUOTE_LENGTH = 4;
+// The README's norm() and the shortest quote that supports anything are
+// shared with the extraction step (src/pipeline/quote-text.ts).
+export { norm };
 
 // Quotes are compared strictly, both ways after norm(): the extractor's quote
 // may be part of the expected sentence, or the sentence plus its label.

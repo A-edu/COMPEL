@@ -17,7 +17,7 @@ What Sprint 3 must achieve, and why. Standing rules (access rules, auth invarian
 - [ ] §5.5 Evaluation run
 - [ ] §5.6 Model access and test stand-in
 - [x] §5.7 Existing data and seed
-- [ ] §6 Automated field extraction
+- [x] §6 Automated field extraction
 - [x] §7.1 Field-level compliance check
 - [ ] §7.2 Cross-document consistency check
 - [ ] §7.3 Purpose compatibility
@@ -401,6 +401,7 @@ Run on the **published app**. Log in just before presenting, so the 15-minute id
 | 2026-11-21 | §3.3, §3.5 | Extraction contract recorded; decisions record who made them and the stored report, guarded by a database constraint. |
 | 2026-11-21 | §7.1, §7.2 | The dataset README's open points settled. (1) A field-level check gives one finding per request: ambiguous if any document gives the field as ambiguous, not found if none states it, otherwise failed if any stated value fails. (2) **Team decision:** an ambiguous value that takes part in a cross-document comparison gives inconsistent, since it cannot be confirmed to agree; no new result is added, so rule set 1.0 stands. (3) A field no requester document states passes its cross-document check; the field-level check flags it. D4's missing-from-the-request-form rule is CD-03's to apply, not CD-04's. |
 | 2026-11-21 | §8, §2.7 | A run with any rule-set check left without a finding (a step not built yet, such as §7.3) ends flagged with the pipeline-error reason and is never approved. The requester's API response says "under review" only for a flagged request that went through the pipeline; requests flagged before Sprint 3 keep "Responded". |
+| 2026-11-21 | §6, §3.3 | Extraction built. The pipeline reads each PDF's text layer with pdf.js (`pdfjs-dist`), putting right-to-left lines back into reading order, and sends the model that text, never the file, so a scanned page can't be read (§2.1). Every quote is looked up in the same text, compared as the dataset README describes; a quote that isn't there gives not found. A DOCX, a PDF that can't be opened, one with no text layer, and one with more than 150,000 characters of text (too large for one call) give ambiguous for all its fields, with no model call. In a document with an unreadable page, a field not found on the readable pages is ambiguous. Each document's extraction records when it was read (`extractedAt`); instructions version `extract-1`. The extraction tests read the dataset's PDFs. |
 
 ## §15 Open questions
 
