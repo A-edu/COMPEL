@@ -35,6 +35,10 @@ export interface PipelineContext {
     reference: string;
     position: Position;
     objectionReason: string | null;
+    // The registered parties' names. Always set in the app; the evaluation
+    // has none, and the checks then rely on what the documents state.
+    requestingEntity?: string;
+    providingEntity?: string;
   };
   documents: PipelineDocument[];
   // Saved step results so far, keyed by step name.

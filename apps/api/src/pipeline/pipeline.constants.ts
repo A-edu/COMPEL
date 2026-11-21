@@ -1,7 +1,7 @@
 // Shared settings of the automated review (Sprint 3 spec §2, §3.1, §4.3).
 
 // The approved rule set every run records (docs/rule-set.md, spec §3.4).
-export const RULE_SET_VERSION = '1.0';
+export { RULE_SET_VERSION } from './rule-set.js';
 
 // The pipeline's flag source (spec §3.2).
 export const FLAG_SOURCE_PIPELINE = 'PIPELINE';
