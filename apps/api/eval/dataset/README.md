@@ -1,6 +1,6 @@
 # Labelled synthetic dataset (Sprint 3 §5.4)
 
-Ten cases to build and judge the pipeline against. Expectations follow **rule set 1.0** (`docs/rule-set.md`). The dataset is for development and the evaluation run (§5.5) only. It is **not seeded into the app** (§5.7), and the test suite doesn't read it.
+Ten cases to build and judge the pipeline against. Expectations follow **rule set 1.0** (`docs/rule-set.md`). The dataset is for development, the evaluation run (§5.5) and the extraction tests (§6), which read its PDFs and expectations with a stand-in model. It is **not seeded into the app** (§5.7).
 
 Every page of every document carries the mark **"SYNTHETIC — DEMO DATA"**. The documents name real Saudi government entities, as the seed does. They contain no real person's data, and their only email addresses are on the reserved `.example` domain.
 
