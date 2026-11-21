@@ -11,7 +11,7 @@ What Sprint 3 must achieve, and why. Standing rules (access rules, auth invarian
 ## Progress
 
 - [x] §5.1 Shared decisions recorded
-- [ ] §5.2 Standing rules reconciled
+- [x] §5.2 Standing rules reconciled
 - [x] §5.3 Rule set drafted and approved
 - [ ] §5.4 Labelled synthetic dataset
 - [ ] §5.5 Evaluation run
@@ -391,6 +391,7 @@ Run on the **published app**. Log in just before presenting, so the 15-minute id
 | 2026-11-21 | §3.1 | Under automated review stored as status `UNDER_AUTOMATED_REVIEW`; runs stored as `PipelineRun` records. |
 | 2026-11-21 | §3.2 | Findings stored as `Finding` records, linked from flag reasons by `findingId`; superseded recorded as `supersededAt`; only active reasons count towards flagged; a pipeline-error reason is superseded when a later run finishes. |
 | 2026-11-21 | §3.3 | Field list fixed by the rule set. |
+| 2026-11-21 | §5.2 | `AGENTS.md` wording approved by the team: access rules 2, 3, 5 and 6 updated, rule 7 added, Sprint 3 terminology added, per-step model settings listed. Requests flagged before Sprint 3 keep showing the requester "Responded" (§5.7). |
 
 ## §15 Open questions
 
