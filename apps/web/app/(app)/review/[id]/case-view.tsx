@@ -229,7 +229,7 @@ function recordOf(request: ReviewCase): RecordEvent[] {
       key: "responded",
       title: "Provider responded",
       time: request.providerResponse.createdAt,
-      tone: "green",
+      tone: "approved",
     });
   }
   for (const reason of request.flagReasons) {
@@ -238,7 +238,7 @@ function recordOf(request: ReviewCase): RecordEvent[] {
       title: "Flagged for a decision",
       detail: flagSourceLabel(reason.source),
       time: reason.createdAt,
-      tone: "flag",
+      tone: "alert",
     });
   }
   const { decision } = request;
@@ -253,7 +253,7 @@ function recordOf(request: ReviewCase): RecordEvent[] {
         "By the system"
       ),
       time: decision.createdAt,
-      tone: decision.outcome === "APPROVED" ? "green" : "red",
+      tone: decision.outcome === "APPROVED" ? "approved" : "alert",
     });
   }
   // Stable, so events with the same time keep the order above.

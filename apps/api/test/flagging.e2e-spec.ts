@@ -28,8 +28,10 @@ const BACKFILL_SQL = join(
   '../prisma/migrations/20261107020100_backfill_objection_flags/migration.sql',
 );
 
-// What differs between any two requests, whatever happened to them.
-const IDENTITY = ['id', 'reference', 'title', 'createdAt'];
+// What differs between any two requests, whatever happened to them. The
+// list's statusChangedAt is a time of the request's own, like createdAt: it
+// is checked against the request's run instead.
+const IDENTITY = ['id', 'reference', 'title', 'createdAt', 'statusChangedAt'];
 function withoutIdentity(body: Record<string, unknown>) {
   const rest = Object.entries(body).filter(([k]) => !IDENTITY.includes(k));
   return JSON.parse(
@@ -231,6 +233,19 @@ describe('Flagging (e2e)', () => {
       expect(flagged).not.toHaveProperty('flagged');
       expect(flagged).not.toHaveProperty('flagReasons');
       expect(withoutIdentity(flagged)).toEqual(withoutIdentity(plain));
+      // Both dates are the end of the request's own run, so the date can't
+      // tell an objection from an endorsement either.
+      for (const [row, id] of [
+        [flagged, objected],
+        [plain, endorsed],
+      ] as const) {
+        const run = await prisma.pipelineRun.findFirstOrThrow({
+          where: { requestId: id },
+          orderBy: { createdAt: 'desc' },
+        });
+        expect(run.endedAt).not.toBeNull();
+        expect(row.statusChangedAt).toBe(run.endedAt!.toISOString());
+      }
     });
 
     it('sees the outcome once decided, but still not the position', async () => {

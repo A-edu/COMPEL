@@ -106,16 +106,16 @@ Email OTP with server-side sessions. Endpoints and screens are in the sprint spe
 - **Colour exception:** red, amber and green only for status and errors, used small and only where they carry meaning.
 - **Components:** shadcn/ui first. Do not hand-build what shadcn provides.
 - **Motion:** animated backgrounds only on the login screen. Respect `prefers-reduced-motion` everywhere.
-- **Minimal inner screens:** every screen after login shows only what the user needs to act. No dates, counts, IDs or metadata unless the spec lists them. When in doubt, leave it out.
+- **Minimal inner screens:** every screen after login shows only what the user needs to act. No dates, counts, IDs or metadata unless the spec lists them. When in doubt, leave it out. The requests list's **Updated** date (`docs/design/sprint-2.md`) is a listed exception.
 
 **Inner screens** (every page inside `app/(app)/`). Build pages from the shared pieces in `components/app/`; don't restyle them per page.
 - **Canvas and surfaces:** the page is a warm off-white canvas; content sits on surfaces (shadcn `Card` with the `surface` preset): a hairline ring, a 1 px contact shadow and a 12 px radius. Neutrals are tinted, never pure `#fff` or `#000`. One surface per job: sections inside a surface are divided by hairlines and headings, never by cards inside cards.
 - **Width:** one container, `max-w-5xl` with `px-4 sm:px-6`, shared by the header and every page so their left and right edges line up.
-- **Page header:** `PageHeader` with a title (24 px semibold, tight tracking), an optional line beneath (a `Reference` or a muted sentence) and an optional actions slot on the right.
+- **Page header:** `PageHeader` with a title (28/34 semibold, tight tracking), an optional line beneath (a `Reference` or a muted sentence) and an optional actions slot on the right.
 - **Primary action:** black button, white text (`Button` default). Secondary: `outline`. Tertiary or cancel: `ghost`. One primary action per screen.
 - **Lists:** rows inside one card, separated by hairlines, the whole row a link with hover fill and an inset focus ring, and a muted chevron on the right.
 - **Forms:** one card in a centred column (`max-w-2xl mx-auto`, the page header inside it); fields stacked with 24 px gaps; a card footer separated by a hairline, with **Cancel** (ghost) then the primary button, right-aligned.
-- **Status and errors:** `StatusBadge` only for status (neutral white badge, colour only in its dot); red only for validation and error text. No other colour.
+- **Status and errors:** `StatusBadge` only for status: a neutral badge with a line glyph (`docs/design/sprint-2.md` → Status vocabulary); red only for validation and error text.
 - **States:** loading uses `Skeleton` shaped like the content it replaces. Empty and error states are text-led (a short heading, a sentence, an optional action), left-aligned inside the surface, with no icon tile.
 - **Motion:** at most a 150 ms fade on page content and standard hover and focus transitions; nothing under `prefers-reduced-motion`.
 - **Sprint 2 screens** follow `docs/design/sprint-2.md`. Where it differs from this section, it wins.

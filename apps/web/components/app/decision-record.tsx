@@ -2,6 +2,7 @@ import { Lock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { formatDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { StatusGlyph } from "./status-badge";
 import { surface } from "./surface";
 
 // A system decision (Sprint 3 spec §2.6, §3.5) is always an approval, has no
@@ -17,8 +18,8 @@ export interface DecisionRecordData {
 }
 
 const OUTCOME = {
-  APPROVED: { label: "Approved", dot: "bg-[#10b981]" },
-  REJECTED: { label: "Rejected", dot: "bg-[#f04438]" },
+  APPROVED: { label: "Approved", glyph: "approved" },
+  REJECTED: { label: "Rejected", glyph: "rejected" },
 } as const;
 
 // A stored decision, read-only (Sprint 2 spec §8.2): the outcome, when, the
@@ -41,7 +42,7 @@ export function DecisionRecord({
           Decision
         </h2>
         <p className="flex items-center gap-2 text-[22px] leading-7 font-semibold tracking-[-0.01em]">
-          <span aria-hidden className={cn("size-2 rounded-full", outcome.dot)} />
+          <StatusGlyph variant={outcome.glyph} className="size-4" />
           {outcome.label}
         </p>
       </div>

@@ -4,17 +4,21 @@ import type { SessionUser } from '../auth/session-user.js';
 import type { Direction } from './dto/list-requests.query.js';
 import { ACTIVE_REASON, isFlagged } from './flag-reasons.js';
 import { RequestScope } from './request-scope.js';
+import { statusChangedAt, visibleStage } from './status-changed-at.js';
 
 // One row of GET /requests (spec §4 -> List item). `flagged` is present only
 // on the provider's rows (Sprint 2 spec §3.1); `underReview` only on the
 // requester's, for a request the pipeline did not auto-clear and nobody has
-// decided (Sprint 3 spec §2.7, §3.1).
+// decided (Sprint 3 spec §2.7, §3.1). `statusChangedAt` is when the status
+// this caller sees last changed (the createdAt of a pending request), worked
+// out from the same rules (status-changed-at.ts).
 export interface RequestListItem {
   id: string;
   reference: string;
   title: string;
   status: RequestStatus;
   createdAt: Date;
+  statusChangedAt: Date;
   counterpartEntity: { id: string; name: string };
   flagged?: true;
   underReview?: true;
@@ -47,7 +51,15 @@ export class RequestsListService {
         requestingEntity: entitySelect,
         providingEntity: entitySelect,
         flagReasons: { where: ACTIVE_REASON, select: { id: true }, take: 1 },
-        pipelineRuns: { select: { id: true }, take: 1 },
+        // Only the times that mark a visible status change. Never updatedAt,
+        // which moves on internal writes.
+        providerResponse: { select: { createdAt: true } },
+        decision: { select: { createdAt: true } },
+        pipelineRuns: {
+          select: { createdAt: true, endedAt: true },
+          orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+          take: 1,
+        },
       },
     });
     return rows.map(
@@ -55,24 +67,34 @@ export class RequestsListService {
         requestingEntity,
         providingEntity,
         flagReasons,
+        providerResponse,
+        decision,
         pipelineRuns,
         ...row
       }) => {
         const flagged = isFlagged(row.status, flagReasons.length);
-        return {
-          ...row,
-          counterpartEntity:
-            direction === 'sent' ? providingEntity : requestingEntity,
-          ...(direction === 'received' && flagged
-            ? { flagged: true as const }
-            : {}),
-          // Same rule as requesterSeesUnderReview() in the detail.
-          ...(direction === 'sent' &&
+        const providerFlagged = direction === 'received' && flagged;
+        // Same rule as requesterSeesUnderReview() in the detail.
+        const underReview =
+          direction === 'sent' &&
           flagged &&
           row.status === 'PROVIDER_RESPONDED' &&
-          pipelineRuns.length > 0
-            ? { underReview: true as const }
-            : {}),
+          pipelineRuns.length > 0;
+        return {
+          ...row,
+          statusChangedAt: statusChangedAt(
+            visibleStage(row.status, providerFlagged || underReview),
+            {
+              createdAt: row.createdAt,
+              respondedAt: providerResponse?.createdAt ?? null,
+              decidedAt: decision?.createdAt ?? null,
+              latestRun: pipelineRuns[0] ?? null,
+            },
+          ),
+          counterpartEntity:
+            direction === 'sent' ? providingEntity : requestingEntity,
+          ...(providerFlagged ? { flagged: true as const } : {}),
+          ...(underReview ? { underReview: true as const } : {}),
         };
       },
     );

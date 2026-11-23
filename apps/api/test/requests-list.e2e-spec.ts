@@ -89,6 +89,7 @@ describe('GET /requests (e2e)', () => {
       title: 'A to C',
       status: 'AWAITING_PROVIDER_RESPONSE',
       createdAt: stored.createdAt.toISOString(),
+      statusChangedAt: stored.createdAt.toISOString(),
       counterpartEntity: { id: c.entity.id, name: c.entity.name },
     });
     expect(res.body[1].counterpartEntity).toEqual({

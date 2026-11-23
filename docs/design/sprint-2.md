@@ -8,7 +8,7 @@ How the review console and the Sprint 2 changes to entity screens look and behav
 2. **Quote people; never paraphrase them.** Objections and justifications appear verbatim, in full, at 15/24. No truncation on case views.
 3. **Show time only where it changes what someone does.** Waiting time, when a reason was raised, when a decision was recorded, and the record timeline. No other dates.
 4. **One surface per job.** A case is one dossier and one decision panel. No cards inside cards. No stat tiles: counts live in the filter.
-5. **Colour marks state, and nothing else.** Amber waits, red flags or rejects, green clears. Everything else is ink on paper.
+5. **Colour marks state, and nothing else.** Red flags or rejects, green approves, and only in a small glyph or dot. Everything else is ink on paper.
 6. **Confirm in place, not in a modal.** Recording a decision is two steps inside the panel.
 
 ## Paper and ink
@@ -22,10 +22,12 @@ How the review console and the Sprint 2 changes to entity screens look and behav
 | Ink | `#141413` | Text, primary button |
 | Ink 2 | `#3A3A37` | Body copy in long text |
 | Muted | `#6B6A65` | Labels and meta (5.2:1 on Surface) |
-| Amber | `#F79009` | Awaiting response; Under review |
-| Flag red | `#D92D20` | Flagged (officer only), as a flag glyph; validation text |
-| Red | `#F04438` | Rejected |
-| Green | `#10B981` | Responded; Approved |
+| Flag red | `#D92D20` | Validation and error text |
+| Status ink (`--status-ink`) | `#141413` | The ink parts of status glyphs |
+| Status pending (`--status-pending`) | `#8A8983` | The Awaiting response glyph; timeline dots for waiting events |
+| Status track (`--status-track`) | `#D6D5CF` | The unfilled ring of the Under automated review glyph |
+| Status approved (`--status-approved`) | `#0E9F6E` | The Approved glyph; timeline dots for responses and approvals |
+| Status alert (`--status-alert`) | `#D92D20` | The Rejected and Flagged glyphs; timeline dots for flags and rejections |
 
 ## Type
 
@@ -34,7 +36,7 @@ Geist throughout. Geist Mono only for request references, OTP digits and email a
 | Role | Spec |
 |---|---|
 | Case title | 28/34, 600, −0.02em |
-| List page title | 24/32, 600, −0.02em |
+| List page title | 28/34, 600, −0.02em |
 | Panel title | 17/24, 600, −0.01em |
 | Section heading | 14/20, 600 |
 | Quoted text | 15/24, 400 |
@@ -43,15 +45,30 @@ Geist throughout. Geist Mono only for request references, OTP digits and email a
 | Label | 12/16, 500, muted, sentence case |
 | Reference | Geist Mono 12/16, muted |
 
-## Status vocabulary (spec §3.1)
+## Status vocabulary (Sprint 3 spec §3.1)
 
 | Stage | Requester | Provider | Officer |
 |---|---|---|---|
 | Awaiting response | Awaiting response | Awaiting response | Awaiting response |
-| Responded, nothing flagged | Responded | Responded | not in the console |
-| Flagged | **Responded** | Under review | Flagged |
+| Under automated review | Under automated review | Under automated review | Under automated review |
+| Responded, before Sprint 3, nothing flagged | Responded | Responded | not in the console |
+| Flagged | Under review | Under review | Flagged |
 | Approved | Approved | Approved | Approved |
 | Rejected | Rejected | Rejected | Rejected |
+
+A request flagged before Sprint 3 (by an objection, with no pipeline run) keeps showing its requester **Responded**: the requester never learns why a request was not cleared. Officers see a decided request read-only, with who decided it: an officer or the system.
+
+`StatusBadge` is a neutral badge (white pill, hairline ring, ink label) carrying a 13 px line glyph where a dot used to be. The circle fills as a request moves forward. Colour appears only in the glyph, and only for Approved, Rejected and Flagged. Wherever a status is shown outside a badge (the requester's Outcome panel, the decision record, the provider's review strip), the same glyph stands in for the dot.
+
+| Variant | Label | Glyph |
+|---|---|---|
+| `awaiting` | Awaiting response | Dashed circle, pending grey |
+| `automatedReview` | Under automated review | Quarter arc in ink on a pale track |
+| `underReview` | Under review | Ring, half filled, ink |
+| `responded` | Responded | Ring, three-quarters filled, ink |
+| `approved` | Approved | Ring, fully filled, green |
+| `rejected` | Rejected | Ring crossed through, red |
+| `flagged` | Flagged | Outlined rounded square with "!", red |
 
 ## Screens
 
@@ -86,9 +103,15 @@ Right column, one of:
 - **Decided:** `DecisionRecord`, read-only, with the lock note "Final and permanent. The entities see "{outcome}"; only compliance officers see this record."
 - **Pending:** "Decision" / "The provider hasn't responded, so there is nothing to decide yet." / "If {provider} objects, this request moves to Flagged and a decision becomes possible here. If it endorses, the request leaves the queue."
 
-### DPO requests list (§9)
-- Received tab: the tab shows a count of requests awaiting your response. One surface with two groups: **Awaiting your response** (columns From · Waiting · Status) and **Responded**. The waiting time turns semibold at the reminder period.
-- Sent tab: **Waiting for a response** (To · Waiting · Status) and **Responded**.
+### DPO requests list
+- Each tab shows two groups as **two separate cards**, 24 px apart. Only the page title and the tabs sit on the canvas: no heading or count above the cards. Sent: **Waiting for a response**, then **Responded**. Received: **Awaiting your response**, then **Responded**.
+- Each card's **header is its first row** and shares the rows' grid: the group title (15/22, 600) with its count as a small pill (20 px tall, fully rounded, sunken, 12 px medium, muted), then the column labels in their own columns: **To** or **From**, **Waiting** or **Updated** (right-aligned), **Status**. A hairline sits under the header.
+- Both cards share one column structure: Request (title, reference beneath) · To or From · a date column · Status · chevron. The date column is **Waiting** in the first card (`WaitingTime`, semibold at the reminder period) and **Updated** in the second. Rows show values only (the entity name, "4 days", "Today" or "22 Nov", and the status badge), with no labels repeated inside them.
+- **Updated** is the date the status that user sees last changed, as "22 Nov", or "22 Nov 2025" outside the current year. It never reflects anything the status doesn't show.
+- First card: every waiting request, longest wait first. Second card: everything else, most recently updated first, showing the latest 5 with a full-width "Show all {n}" row at the bottom that expands the card in place and then reads "Show fewer". No extra page and no third tab row.
+- A card with nothing in it keeps its header, with the title and a "0" pill and no column labels, then shows a text-led empty state. Sent: "Nothing is waiting for a response." / "Requests you send stay here until the provider responds." Received: "Nothing is waiting for your response." / "New requests from other entities appear here until you respond." Responded: "No responses yet." / "Requests move here once the provider responds."
+- A tab with no requests at all keeps its single empty state as it is today.
+- The Received tab keeps its count of requests awaiting a response.
 
 ### Provider and requester screens: Record
 A party's Record shows only events whose data that party's API already returns. No new fields on party routes.
@@ -97,7 +120,7 @@ A party's Record shows only events whose data that party's API already returns. 
 Two columns. Left: From, Documents, Record ("Received from {requester}", "You responded", "Sent for review"). Right: a strip "A compliance officer is reviewing this request." / "You'll be emailed the outcome at your data office address. Nothing else is needed from you.", then **Your response** read-only (Position, Reason in full, RoPA entry).
 
 ### Requester: outcome
-Two columns. Left: To, Documents you submitted, Record ("You submitted the request", "{provider} responded", "Approved/Rejected by a compliance officer"). Never the position, the RoPA entry, a flag or the justification. Right: **Outcome** panel with the dot and "Approved"/"Rejected" (22/28), "A compliance officer {approved/rejected} this request." Add "on {date}" only if the party API already returns the decision date. On rejection: "This decision is final. To pursue the same data, submit a new request." and an outline **New request** button.
+Two columns. Left: To, Documents you submitted, Record ("You submitted the request", "{provider} responded", "Approved/Rejected by a compliance officer"). Never the position, the RoPA entry, a flag or the justification. Right: **Outcome** panel with the status glyph and "Approved"/"Rejected" (22/28), "A compliance officer {approved/rejected} this request." Add "on {date}" only if the party API already returns the decision date. On rejection: "This decision is final. To pursue the same data, submit a new request." and an outline **New request** button.
 
 ## Never
 - A position, RoPA entry, flag or justification on a requester's screen, before or after the outcome.
@@ -108,3 +131,4 @@ Two columns. Left: To, Documents you submitted, Record ("You submitted the reque
 - Icon tiles above headings or in empty states.
 - Truncated objection or justification text on a case view.
 - More than one primary button on a screen.
+- A coloured dot to show status.

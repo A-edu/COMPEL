@@ -303,7 +303,7 @@ export function AlreadyDecided({
           tabIndex={-1}
           className={cn(TITLE, "flex items-center gap-2 outline-none")}
         >
-          <span aria-hidden className="size-2 rounded-full bg-[#f04438]" />
+          <span aria-hidden className="size-2 rounded-full bg-status-alert" />
           Already decided
         </h2>
         <p className="text-sm text-muted-foreground">

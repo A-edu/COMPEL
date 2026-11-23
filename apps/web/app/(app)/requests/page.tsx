@@ -5,7 +5,8 @@ import { PageHeader } from "@/components/app/page-header";
 import { Button } from "@/components/ui/button";
 import { RequestsList, RequestsListSkeleton } from "./requests-list";
 
-// §8: Sent and Received tabs, one card of rows each.
+// §8: Sent and Received tabs, each with two cards of rows
+// (docs/design/sprint-2.md -> DPO requests list).
 export default function RequestsPage() {
   return (
     <div className="flex flex-col gap-4">

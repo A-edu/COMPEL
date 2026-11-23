@@ -13,7 +13,7 @@ Colours come from tokens in `app/globals.css` (`bg-canvas`, `bg-card`, `bg-sunke
 | `EmptyState` | `title`, optional `description` and `action`. Text-led, left-aligned, inside a surface. |
 | `ErrorState` | `message?` (the heading), `onRetry`. Inside a surface. |
 | `PageHeaderSkeleton`, `ListSkeleton`, `ListRowSkeleton`, `BlockSkeleton`, `CaseSkeleton` | Loading placeholders, shaped like the content. |
-| `StatusBadge` | `variant`: `awaiting`, `responded`, `underReview`, `flagged`, `approved`, `rejected`. Pick it with `partyVariant` or `officerVariant` from `lib/status.ts`. |
+| `StatusBadge` | `variant`: `awaiting`, `automatedReview`, `responded`, `underReview`, `flagged`, `approved`, `rejected`. Pick it with `partyVariant` or `officerVariant` from `lib/status.ts`. A neutral badge with a line glyph (`docs/design/sprint-2.md` → Status vocabulary). `StatusGlyph` is the glyph alone, for an outcome shown outside a badge. |
 | `Reference` | `value`: the request reference (Geist Mono). |
 | `CaseHeader` | A case's top: `back` (`{ href, label }`), `title`, `reference`, `status` (a badge variant), optional `meta`. |
 | `CaseLayout` | Two columns: `children` (the dossier) and `aside` (sticky right panel). |
@@ -22,7 +22,7 @@ Colours come from tokens in `app/globals.css` (`bg-canvas`, `bg-card`, `bg-sunke
 | `EntityTag` | `entity: { name, slug }`: the slug in upper case, full name in `title`. Tables and dossiers only, never the header. |
 | `FlagReason` | `reason`: source label, raised time and the text verbatim. `flagSourceLabel(source)` maps a source identifier to its label, or returns the identifier. |
 | `FileRow` | `requestId`, `document`, optional `basePath` (`/api/review/requests` for officers). Downloads the document. |
-| `RecordTimeline` | `events`: `{ key, title, detail?, time?, tone? }[]`, in order. Leave `time` out when the API proves an event but not when. |
+| `RecordTimeline` | `events`: `{ key, title, detail?, time?, tone? }[]`, in order. `tone`: `neutral`, `pending`, `approved` or `alert`. Leave `time` out when the API proves an event but not when. |
 | `DecisionRecord` | `decision`, `basedOn` (source labels). Read-only, officers only. |
 | `WaitingTime` | `since` (ISO), optional `threshold` (defaults to `REMINDER_DAYS`): "Today", "1 day", "n days", semibold from the threshold. |
 
