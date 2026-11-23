@@ -45,15 +45,18 @@ Geist throughout. Geist Mono only for request references, OTP digits and email a
 | Label | 12/16, 500, muted, sentence case |
 | Reference | Geist Mono 12/16, muted |
 
-## Status vocabulary (spec §3.1)
+## Status vocabulary (Sprint 3 spec §3.1)
 
 | Stage | Requester | Provider | Officer |
 |---|---|---|---|
 | Awaiting response | Awaiting response | Awaiting response | Awaiting response |
-| Responded, nothing flagged | Responded | Responded | not in the console |
-| Flagged | **Responded** | Under review | Flagged |
+| Under automated review | Under automated review | Under automated review | Under automated review |
+| Responded, before Sprint 3, nothing flagged | Responded | Responded | not in the console |
+| Flagged | Under review | Under review | Flagged |
 | Approved | Approved | Approved | Approved |
 | Rejected | Rejected | Rejected | Rejected |
+
+A request flagged before Sprint 3 (by an objection, with no pipeline run) keeps showing its requester **Responded**: the requester never learns why a request was not cleared. Officers see a decided request read-only, with who decided it: an officer or the system.
 
 `StatusBadge` is a neutral badge (white pill, hairline ring, ink label) carrying a 13 px line glyph where a dot used to be. The circle fills as a request moves forward. Colour appears only in the glyph, and only for Approved, Rejected and Flagged. Wherever a status is shown outside a badge (the requester's Outcome panel, the decision record, the provider's review strip), the same glyph stands in for the dot.
 
