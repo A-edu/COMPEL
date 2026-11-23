@@ -8,6 +8,7 @@ import {
   RecordTimeline,
   type RecordEvent,
 } from "@/components/app/record-timeline";
+import { StatusGlyph } from "@/components/app/status-badge";
 import { surface, surfaceFlush } from "@/components/app/surface";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -100,14 +101,14 @@ function outcomeEvent(status: RequestDetail["status"]): RecordEvent | null {
     return {
       key: "outcome",
       title: "Approved by a compliance officer",
-      tone: "green",
+      tone: "approved",
     };
   }
   if (status === "REJECTED") {
     return {
       key: "outcome",
       title: "Rejected by a compliance officer",
-      tone: "red",
+      tone: "alert",
     };
   }
   return null;
@@ -127,7 +128,7 @@ function requesterRecord(request: RequestDetail): RecordEvent[] {
     events.push({
       key: "responded",
       title: `${request.providingEntity.name} responded`,
-      tone: "green",
+      tone: "approved",
     });
   }
   const outcome = outcomeEvent(request.status);
@@ -148,11 +149,11 @@ function providerRecord(request: RequestDetail): RecordEvent[] {
       key: "responded",
       title: "You responded",
       time: request.providerResponse.createdAt,
-      tone: "green",
+      tone: "approved",
     });
   }
   if (request.flagged) {
-    events.push({ key: "review", title: "Sent for review", tone: "amber" });
+    events.push({ key: "review", title: "Sent for review", tone: "pending" });
   }
   const outcome = outcomeEvent(request.status);
   if (outcome) events.push(outcome);
@@ -181,12 +182,12 @@ function ProviderPanel({
       {request.flagged && (
         <Card className={cn(surface, "gap-1 px-5 py-4")}>
           <p className="flex items-center gap-2 text-sm font-medium">
-            <span aria-hidden className="size-1.5 rounded-full bg-[#f79009]" />
-            A compliance officer is reviewing this request.
+            <StatusGlyph variant="underReview" />A compliance officer is
+            reviewing this request.
           </p>
           {/* TODO(§10): lead with "You'll be emailed the outcome at your data
               office address." once the outcome emails exist. */}
-          <p className="pl-3.5 text-[13px] text-muted-foreground">
+          <p className="pl-[21px] text-[13px] text-muted-foreground">
             Nothing else is needed from you.
           </p>
         </Card>
@@ -212,12 +213,9 @@ function Outcome({ status }: { status: RequestDetail["status"] }) {
     <Card className={cn(surface, "gap-3 px-6 py-5")}>
       <h2 className="text-xs font-medium text-muted-foreground">Outcome</h2>
       <p className="flex items-center gap-2 text-[22px] leading-7 font-semibold tracking-[-0.01em]">
-        <span
-          aria-hidden
-          className={cn(
-            "size-2 rounded-full",
-            approved ? "bg-[#10b981]" : "bg-[#f04438]",
-          )}
+        <StatusGlyph
+          variant={approved ? "approved" : "rejected"}
+          className="size-4"
         />
         {approved ? "Approved" : "Rejected"}
       </p>

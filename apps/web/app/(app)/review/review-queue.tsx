@@ -339,7 +339,10 @@ function QueueTable({ view, items }: { view: View; items: QueueItem[] }) {
           <TableHead className={`${HEAD} text-right`}>
             {decided ? "Decided" : "Waiting"}
           </TableHead>
-          <TableHead className={`${HEAD} hidden sm:table-cell`}>Status</TableHead>
+          {/* Fits "Under automated review" on one line, whatever the view. */}
+          <TableHead className={`${HEAD} hidden min-w-[180px] sm:table-cell`}>
+            Status
+          </TableHead>
           <TableHead className="w-10 px-2">
             <span className="sr-only">Open</span>
           </TableHead>

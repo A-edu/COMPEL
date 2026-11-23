@@ -16,6 +16,11 @@
   --color-sunken: var(--sunken);
   --color-ink-2: var(--ink-2);
   --color-hairline: var(--hairline);
+  --color-status-ink: var(--status-ink);
+  --color-status-pending: var(--status-pending);
+  --color-status-track: var(--status-track);
+  --color-status-approved: var(--status-approved);
+  --color-status-alert: var(--status-alert);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -101,6 +106,13 @@
   --ink-2: #3a3a37;
   /* Dividers and surface rings: ink at 8%. */
   --hairline: rgb(20 20 19 / 0.08);
+  /* Status glyphs and record dots (docs/design/sprint-2.md -> Paper and
+     ink): colour only for Approved, Rejected and Flagged. */
+  --status-ink: #141413;
+  --status-pending: #8a8983;
+  --status-track: #d6d5cf;
+  --status-approved: #0e9f6e;
+  --status-alert: #d92d20;
 }
 
 .dark {

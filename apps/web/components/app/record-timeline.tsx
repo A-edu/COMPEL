@@ -1,8 +1,10 @@
 import { formatDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-// `flag` is flag red (a reason raised); `red` is rejection.
-export type RecordTone = "neutral" | "amber" | "flag" | "red" | "green";
+// Event dots in the status tokens (docs/design/sprint-2.md -> Paper and
+// ink): `pending` for waiting, `approved` for responses and approvals,
+// `alert` for flags and rejections.
+export type RecordTone = "neutral" | "pending" | "approved" | "alert";
 
 export interface RecordEvent {
   key: string;
@@ -16,10 +18,9 @@ export interface RecordEvent {
 
 const DOT: Record<RecordTone, string> = {
   neutral: "bg-muted-foreground/50",
-  amber: "bg-[#f79009]",
-  flag: "bg-[#d92d20]",
-  red: "bg-[#f04438]",
-  green: "bg-[#10b981]",
+  pending: "bg-status-pending",
+  approved: "bg-status-approved",
+  alert: "bg-status-alert",
 };
 
 // What happened to a request, in order: a dot, a title, an optional line
