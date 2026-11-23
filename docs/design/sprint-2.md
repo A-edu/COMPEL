@@ -112,6 +112,7 @@ Right column, one of:
 - A card with nothing in it keeps its header, with the title and a "0" pill and no column labels, then shows a text-led empty state. Sent: "Nothing is waiting for a response." / "Requests you send stay here until the provider responds." Received: "Nothing is waiting for your response." / "New requests from other entities appear here until you respond." Responded: "No responses yet." / "Requests move here once the provider responds."
 - A tab with no requests at all keeps its single empty state as it is today.
 - The Received tab keeps its count of requests awaiting a response.
+- **Known issue, undecided: narrow phones.** Below `md` the status badge stays beside the title. On phones under about 400 px, a long status ("Under automated review", about 180 px with its glyph) leaves the title only about 75 px. A proposed fix is to move the badge into the stacked block under the reference below `sm`, so the title gets the full width. It changes the narrow layout, so it needs the team's approval first. Check this whenever a change touches list rows, `StatusBadge` or status labels.
 
 ### Provider and requester screens: Record
 A party's Record shows only events whose data that party's API already returns. No new fields on party routes.

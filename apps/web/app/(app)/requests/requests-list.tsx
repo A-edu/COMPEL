@@ -417,6 +417,9 @@ function RowDate({
 // Values only: the title with the reference beneath it, the other entity,
 // the date and the status. Below md the entity and the date move under the
 // reference.
+// Known issue (docs/design/sprint-2.md -> DPO requests list): on phones
+// under about 400 px a long status badge squeezes the title. Not fixed yet;
+// the layout change needs approval.
 function RequestRow({
   request: r,
   counterpart,
